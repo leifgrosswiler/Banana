@@ -499,7 +499,7 @@ public class MainActivity extends Activity
     }
 
     public void buttonPressPooper(Gmail service) throws MessagingException {
-        MimeMessage message = createEmail("asoest@princeton.edu", "leif.grosswiler@gmail.com", "Poo poo", "pee pee");
+        MimeMessage message = createEmail("leifg@princeton.edu", "leif.grosswiler@gmail.com", "Poo poo", "pee pee");
         try {
             sendMessage(service, "me", message);
         } catch (Exception e) {
