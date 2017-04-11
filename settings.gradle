@@ -1,1 +1,1 @@
-include ':app'
+include ':app', 'Material', 'MaterialDesign', 'material.gradle', ':material.build.gradle'

@@ -32,4 +32,12 @@
         android:layout_below="@+id/checkOutList"
         android:text="New User" />
 
+    <Button
+        android:id="@+id/gmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:text="Gmail" />
+
 </RelativeLayout>
