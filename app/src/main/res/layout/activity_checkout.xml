@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/checkOutTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text='"Pick Your Items"'
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+    <ListView
+        android:id="@+id/checkOutList"
+        android:layout_width="fill_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="9dp"
+        android:choiceMode="multipleChoice"
+        android:layout_below="@+id/checkOutTitle"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/checkOutfinish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/checkOutList"
+        android:text="New User" />
+
+</RelativeLayout>

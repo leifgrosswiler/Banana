@@ -10,15 +10,26 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Gmail API Android Quickstart"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="Gmail API Android Quickstart" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="Gmail API Android Quickstart">
         </activity>
+        <activity android:name=".EditReceipt">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
 
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
+        <activity android:name=".EditSpecifics" />
+        <activity android:name=".AddOrder" />
+        <activity
+            android:name=".Checkout"
+            android:parentActivityName="com.banana.banana.EditReceipt" />
+        <activity
+            android:name=".SelectItems"
+            android:parentActivityName="com.banana.banana.Checkout" />
     </application>
+
 </manifest>
