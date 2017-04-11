@@ -18,6 +18,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -77,6 +78,7 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         LinearLayout activityLayout = new LinearLayout(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -89,8 +91,7 @@ public class MainActivity extends Activity
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        mCallApiButton = new Button(this);
-        mCallApiButton.setText(BUTTON_TEXT);
+        mCallApiButton = (Button)findViewById(R.id.callApi);
         mCallApiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,7 +101,7 @@ public class MainActivity extends Activity
                 mCallApiButton.setEnabled(true);
             }
         });
-        activityLayout.addView(mCallApiButton);
+        //activityLayout.addView(mCallApiButton);
 
         mOutputText = new TextView(this);
         mOutputText.setLayoutParams(tlp);
@@ -113,8 +114,6 @@ public class MainActivity extends Activity
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Calling Gmail API ...");
-
-        setContentView(activityLayout);
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
@@ -498,7 +497,7 @@ public class MainActivity extends Activity
     }
 
     public void buttonPressPooper(Gmail service) throws MessagingException {
-        MimeMessage message = createEmail("andrewjayz@yahoo.com", "andrewjzhou@gmail.com", "Poo poo", "pee pee");
+        MimeMessage message = createEmail(((EditText)findViewById(R.id.inputEmail)).getText().toString(), mCredential.getSelectedAccountName(), "Poo poo", "pee pee");
         try {
             sendMessage(service, "me", message);
         }
