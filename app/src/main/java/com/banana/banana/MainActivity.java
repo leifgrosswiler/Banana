@@ -1,21 +1,5 @@
 package com.banana.banana;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.ExponentialBackOff;
-
-import com.google.api.services.gmail.GmailScopes;
-
-import com.google.api.services.gmail.model.*;
-
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -37,22 +21,37 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.*;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-import java.util.*;
-import java.lang.String;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.Base64;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.GmailScopes;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-import javax.mail.Message;
-import javax.mail.internet.*;
-import javax.mail.*;
-import android.util.*;
-import com.google.api.client.util.Base64;
-import com.google.api.services.gmail.*;
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.List;
 
 public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
@@ -499,10 +498,14 @@ public class MainActivity extends Activity
     }
 
     public void buttonPressPooper(Gmail service) throws MessagingException {
-        MimeMessage message = createEmail("leifg@princeton.edu", "leif.grosswiler@gmail.com", "Poo poo", "pee pee");
+        MimeMessage message = createEmail("andrewjayz@yahoo.com", "andrewjzhou@gmail.com", "Poo poo", "pee pee");
         try {
             sendMessage(service, "me", message);
-        } catch (Exception e) {
+        }
+        catch (UserRecoverableAuthIOException e) {
+            startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+        }
+        catch (Exception e) {
             System.out.println("YA DONE FUCKED UP NAO");
         }
     }

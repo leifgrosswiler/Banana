@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Banana</string>
+    <string name="edit_name">Edit Receipt</string>
+    <string name="button_done">Done</string>
+    <string name="add_item">Add</string>
+    <string name="title_activity_add_item">AddOrder</string>
+    <string name="new_item">Item:</string>
+    <string name="new_price">Price:</string>
 </resources>
