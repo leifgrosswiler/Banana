@@ -33,6 +33,16 @@ public class Checkout extends AppCompatActivity {
         EditReceiptListAdapter adapter = new EditReceiptListAdapter(dataModels, getApplicationContext());
         listView.setAdapter(adapter);
 
+        // GMAIL BUTTON
+        Button gmail = (Button) findViewById(R.id.gmail);
+        gmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentGmail = new Intent(Checkout.this, MainActivity.class);
+                startActivity(intentGmail);
+            }
+        });
+
         // DONE BUTTON
         Button done = (Button) findViewById(R.id.checkOutfinish);
         done.setOnClickListener(new View.OnClickListener() {
