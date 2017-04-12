@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import android.app.Application;
 
 public class SelectItems extends AppCompatActivity {
 
@@ -25,7 +26,6 @@ public class SelectItems extends AppCompatActivity {
     ListView listView;
     ArrayList<Order> dataModels;
 
-    HashMap<String, List<String> > split = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,15 +75,9 @@ public class SelectItems extends AppCompatActivity {
                     }
                 }
 
-                split.put(name, emailAndItems);
-
-                for (String person : split.keySet()) {
-                    System.out.println(person + " " + split.get(person));
-                }
-                System.out.print(split.size());
+                ((MyList) getApplication()).addPair(name, emailAndItems);
 
                 Intent resultIntent = new Intent();
-
                 resultIntent.putExtra(SELECTED_ID, checked);
                 resultIntent.putExtra(NAME_ID, name);
                 setResult(Activity.RESULT_OK,resultIntent);
