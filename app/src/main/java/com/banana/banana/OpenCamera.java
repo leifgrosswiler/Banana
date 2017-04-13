@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -43,14 +45,14 @@ public class OpenCamera extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
-    private Uri file;
-    private Uri cropFile;
     private String recognizedText = "";
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
     private static File photoFile;
-    private static Uri photoURI;
+    private static File cropFile;
+    private static Uri croppedUri;
+    private Uri photoURI;
 
     public static final String DATA_PATH = Environment
             .getExternalStorageDirectory().toString() + "/SimpleAndroidOCR/";
@@ -144,6 +146,7 @@ public class OpenCamera extends AppCompatActivity {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
+                Log.v(TAG, "Could not create first file for camera");
                 return;
             }
             // Continue only if the File was successfully created
@@ -161,17 +164,10 @@ public class OpenCamera extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.v(TAG, "in result handler");
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Log.v(TAG, "getting photo");
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-
-            try {
-                InputStream ims = new FileInputStream(mFile);
-                ImageView rawView = (ImageView) findViewById(R.id.imageview);
-                rawView.setImageBitmap(BitmapFactory.decodeStream(ims));
-            } catch (FileNotFoundException e) {
-                return;
-            }
+            ImageView rawView = (ImageView) findViewById(R.id.imageview);
+            rawView.setImageURI(imageUri);
             Log.v(TAG, "entering crop");
             performCrop(mFile);
         }
@@ -181,68 +177,63 @@ public class OpenCamera extends AppCompatActivity {
             System.out.println("processing crop result");
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-
-            try {
-                InputStream ims = new FileInputStream(mFile);
-                ImageView croppedView = (ImageView) findViewById(R.id.cropview);
-                //croppedView.setImageBitmap(BitmapFactory.decodeStream(ims));
-            } catch (FileNotFoundException e) {
-                System.out.println("File not found in crop post-processing");
-                return;
-            }
-            //onPhotoTaken();
+            ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+            croppedView.setImageURI(croppedUri);
+            onPhotoTaken();
         }
     }
 
     private void performCrop(File imageFile) {
         Log.v(TAG, "at top of crop");
-        // take care of exceptions
-        //Uri oldURI = FileProvider.getUriForFile(MainActivity.this,
-        //      BuildConfig.APPLICATION_ID + ".provider",
-        //    imageFile);
-        Uri croppedUri;
-        Uri photoURI2 = FileProvider.getUriForFile(OpenCamera.this,
-                BuildConfig.APPLICATION_ID + ".provider",
-                photoFile);
 
-
+        cropFile = null;
         try {
-            InputStream ims = new FileInputStream(photoURI.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.cropview);
-            croppedView.setImageBitmap(BitmapFactory.decodeStream(ims));
-        } catch (FileNotFoundException e) {
-            Log.v(TAG, "didn't find file");
+            cropFile = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the File
             return;
         }
 
-        Log.v(TAG, "a little bit down");
+        croppedUri = FileProvider.getUriForFile(OpenCamera.this,
+                BuildConfig.APPLICATION_ID + ".provider", cropFile);
+
+        Log.v(TAG, photoURI.toString());
+        Log.v(TAG, mCurrentPhotoPath);
+        Log.v(TAG, photoFile.getPath());
+        Log.v(TAG, imageFile.getPath());
+        Uri tempUri = FileProvider.getUriForFile(OpenCamera.this,
+                BuildConfig.APPLICATION_ID + ".provider", cropFile);
+        Log.v(TAG, tempUri.toString());
+        //InputStream ims = new FileInputStream(mCurrentPhotoPath);
+        ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+        croppedView.setImageURI(photoURI);
 
         try {
-            // call the standard crop action intent (the user device may not
-            // support it)
-            try {
-                croppedUri = FileProvider.getUriForFile(OpenCamera.this,
-                        BuildConfig.APPLICATION_ID + ".provider",
-                        createImageFile());
-            } catch (IOException ex) {
-                return;
-            }
-
             Log.v(TAG, "in crop");
 
             try {
                 Intent cropIntent = new Intent("com.android.camera.action.CROP");
                 // indicate image type and Uri
                 cropIntent.setDataAndType(photoURI, "image/*");
-                // set crop properties
+                cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                //cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, croppedUri);
                 cropIntent.putExtra("crop", "true");
-                // set output and format
                 cropIntent.putExtra("output", croppedUri);
                 cropIntent.putExtra("outputFormat", "PNG");
-                // retrieve data on return
                 //cropIntent.putExtra("return-data", true);
-                // start the activity - we handle returning in onActivityResult
                 System.out.println("about to call crop");
+
+
+                List<ResolveInfo> resInfoList = OpenCamera.this.getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    OpenCamera.this.grantUriPermission(packageName, croppedUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
+
+                cropIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                cropIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
                 startActivityForResult(cropIntent, CROP_PIC);
             } catch (ActivityNotFoundException anfe) {
                 // display an error message
@@ -277,15 +268,15 @@ public class OpenCamera extends AppCompatActivity {
         return image;
     }
 
-
-
     protected void onPhotoTaken() {
-
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 4;
 
         Bitmap bitmap = BitmapFactory.decodeFile(cropFile.getPath(), options);
-
+        if (bitmap == null) {
+            Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
+            return;
+        }
         try {
             ExifInterface exif = new ExifInterface(cropFile.getPath());
             int exifOrientation = exif.getAttributeInt(
@@ -344,9 +335,8 @@ public class OpenCamera extends AppCompatActivity {
         else
             Log.v(TAG, "I DID SET THE SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
         baseApi.init(DATA_PATH, lang);
-        //baseApi.setImage(bitmap);
-
-        //recognizedText = baseApi.getUTF8Text();
+        baseApi.setImage(bitmap);
+        recognizedText = baseApi.getUTF8Text();
         baseApi.end();
         Log.v(TAG, "\n\n\n\n\n\n\n\n AHHHHHHH!!!!!!!" + recognizedText + "\n\n\n\n\n OOOOOH");
     }
