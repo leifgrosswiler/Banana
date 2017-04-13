@@ -25,6 +25,7 @@ public class MyList extends Application {
         }
         System.out.print(split.size());
     }
+
 }
 
 
