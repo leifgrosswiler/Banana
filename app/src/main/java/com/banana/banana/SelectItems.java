@@ -4,13 +4,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import android.app.Application;
 
 public class SelectItems extends AppCompatActivity {
 
@@ -18,6 +25,7 @@ public class SelectItems extends AppCompatActivity {
     public static final String SELECTED_ID = "com.banana.selectedID";
     ListView listView;
     ArrayList<Order> dataModels;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,22 +50,34 @@ public class SelectItems extends AppCompatActivity {
                 EditText tv = (EditText) findViewById(R.id.userName);
                 String name = tv.getText().toString();
 
+                EditText tv2 = (EditText) findViewById(R.id.userEmail);
+                String email = tv2.getText().toString();
+
+                ArrayList<String> emailAndItems = new ArrayList<>(Arrays.asList(email));
+
                 // create boolean[] to store positions of checked items
                 View v;
                 CheckBox cb;
                 boolean[] checked = new boolean[listView.getCount()];
-                for (int i = 0; i < listView.getCount(); i++){
+                for (int i = 0; i < listView.getCount(); i++) {
                     v = listView.getChildAt(i);
                     cb = (CheckBox) v.findViewById(R.id.checkBox);
-                    if(cb.isChecked()){
+                    if(cb.isChecked()) {
                         checked[i] = true;
+                        String selected = ((TextView) v.findViewById(R.id.list_item_select)).getText().toString();
+                        String price = ((TextView) v.findViewById(R.id.price_select)).getText().toString();
+                        //System.out.println(selected + " " + price);
+                        emailAndItems.add(selected);
+                        emailAndItems.add(price);
                     }
-                    else{
+                    else {
                         checked[i] = false;
                     }
                 }
-                Intent resultIntent = new Intent();
 
+                ((MyList) getApplication()).addPair(name, emailAndItems);
+
+                Intent resultIntent = new Intent();
                 resultIntent.putExtra(SELECTED_ID, checked);
                 resultIntent.putExtra(NAME_ID, name);
                 setResult(Activity.RESULT_OK,resultIntent);

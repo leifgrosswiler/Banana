@@ -36,11 +36,19 @@
         android:id="@+id/userName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/finish"
-        android:layout_marginEnd="18dp"
         android:layout_marginRight="18dp"
-        android:layout_toLeftOf="@+id/checkTitle"
-        android:layout_toStartOf="@+id/checkTitle"
-        android:text="name?" />
+        android:text="name?"
+        android:layout_below="@+id/checkList"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="19dp" />
+
+    <EditText
+        android:id="@+id/userEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="18dp"
+        android:text="email?"
+        android:layout_below="@+id/checkList"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

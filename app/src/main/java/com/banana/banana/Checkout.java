@@ -61,6 +61,7 @@ public class Checkout extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         switch(requestCode) {
             case (request) : {
 
@@ -71,6 +72,7 @@ public class Checkout extends AppCompatActivity {
                     selected = data.getBooleanArrayExtra(SelectItems.SELECTED_ID);
                 }
 
+                ((MyList) getApplication()).printList();
 
                 for (int i = 0; i < listView.getCount(); i++) {
                     View v = listView.getChildAt(i);

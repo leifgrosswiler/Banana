@@ -39,6 +39,7 @@ import com.google.api.services.gmail.GmailScopes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -120,14 +121,7 @@ public class MainActivity extends Activity
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
 
-//        mLovelyTest = new TextView(this);
-//        mLovelyTest.setLayoutParams(tlp);
-//        mLovelyTest.setPadding(16, 16, 16, 16);
-//        mLovelyTest.setVerticalScrollBarEnabled(true);
-//        mLovelyTest.setMovementMethod(new ScrollingMovementMethod());
-//        mLovelyTest.setText(
-//                "Click the \'" + BUTTON_TEXT +"\' button to test the API.");
-//        activityLayout.addView(mOutputText);
+
     }
 
 
@@ -496,16 +490,32 @@ public class MainActivity extends Activity
         return message;
     }
 
+
+
+
     public void buttonPressPooper(Gmail service) throws MessagingException {
-        MimeMessage message = createEmail(((EditText)findViewById(R.id.inputEmail)).getText().toString(), mCredential.getSelectedAccountName(), "Poo poo", "pee pee");
-        try {
-            sendMessage(service, "me", message);
-        }
-        catch (UserRecoverableAuthIOException e) {
-            startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
-        }
-        catch (Exception e) {
-            System.out.println("YA DONE FUCKED UP NAO");
+
+        HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
+
+        for (String name : map.keySet()) {
+
+            List<String> list = map.get(name);
+            String email = list.get(0);
+            StringBuilder body = new StringBuilder();
+            body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
+            for (int i = 1; i < list.size(); i = i+2) {
+                body.append(list.get(i) + "\t" + list.get(i+1)+"\n");
+            }
+            String subject = "Payment from your group receipt";
+
+            MimeMessage message = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
+            try {
+                sendMessage(service, "me", message);
+            } catch (UserRecoverableAuthIOException e) {
+                startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+            } catch (Exception e) {
+                System.out.println("YA DONE FUCKED UP NAO");
+            }
         }
     }
 
