@@ -33,16 +33,18 @@ public class AddOrder extends AppCompatActivity {
                 // temporary way to update original array list
                 String newName = addName.getText().toString();
                 String newPrice = addPrice.getText().toString();
-                String newItems[] = new String[com.banana.banana.EditReceipt.food.length + 1];
-                String newPrices[] = new String[com.banana.banana.EditReceipt.price.length + 1];
-                for(int i = 0; i < com.banana.banana.EditReceipt.food.length; i++){
-                    newItems[i] = com.banana.banana.EditReceipt.food[i];
-                    newPrices[i] = com.banana.banana.EditReceipt.price[i];
-                }
-                newItems[newItems.length - 1] = newName;
-                newPrices[newItems.length - 1] = newPrice;
-                com.banana.banana.EditReceipt.food = newItems;
-                com.banana.banana.EditReceipt.price = newPrices;
+//                String newItems[] = new String[com.banana.banana.EditReceipt.food.length + 1];
+//                String newPrices[] = new String[com.banana.banana.EditReceipt.price.length + 1];
+//                for(int i = 0; i < com.banana.banana.EditReceipt.food.length; i++){
+//                    newItems[i] = com.banana.banana.EditReceipt.food[i];
+//                    newPrices[i] = com.banana.banana.EditReceipt.price[i];
+//                }
+//                newItems[newItems.length - 1] = newName;
+//                newPrices[newItems.length - 1] = newPrice;
+//                com.banana.banana.EditReceipt.food = newItems;
+//                com.banana.banana.EditReceipt.price = newPrices;
+
+
 
                 startActivity(intentDone);
                 finish();

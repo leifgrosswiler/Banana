@@ -22,7 +22,7 @@ public class EditReceipt extends AppCompatActivity {
     public static String price[] = {"$15.74", "$1300.02", "$14.00", "$5.99", "$2.33", "$0.99"};
 
     ListView listView;
-    ArrayList<Order> dataModels;
+    ArrayList<OrderOld> dataModels;
     private static EditReceiptListAdapter adapter;
 
 
@@ -37,14 +37,14 @@ public class EditReceipt extends AppCompatActivity {
         listView=(ListView)findViewById(android.R.id.list);
         dataModels= new ArrayList<>();
         for (int i = 0; i < food.length; i++) {
-            dataModels.add(new Order(food[i], price[i]));
+            dataModels.add(new OrderOld(food[i], price[i]));
         }
         adapter = new EditReceiptListAdapter(dataModels, getApplicationContext());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Order dataModel= dataModels.get(position);
+                OrderOld dataModel= dataModels.get(position);
                 editSpecifics(dataModel, position);
             }
         });
@@ -77,7 +77,7 @@ public class EditReceipt extends AppCompatActivity {
 
     }
 
-    public void editSpecifics(Order dataModel, int position){
+    public void editSpecifics(OrderOld dataModel, int position){
         Intent intentEdit = new Intent(EditReceipt.this, EditSpecifics.class);
         intentEdit.putExtra(ITEM_ID, dataModel.getItem());
         intentEdit.putExtra(PRICE_ID, dataModel.getPrice());

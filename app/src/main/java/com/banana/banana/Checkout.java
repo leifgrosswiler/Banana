@@ -17,7 +17,7 @@ public class Checkout extends AppCompatActivity {
 
     public static final int request =  18;
     ListView listView;
-    ArrayList<Order> dataModels;
+    ArrayList<OrderOld> dataModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class Checkout extends AppCompatActivity {
 
         Intent intentReceive = getIntent();
         //String tmp = (String) intentReceive.getStringExtra(EditRecepit.DATAMODELS_ID);
-        dataModels = (ArrayList<Order>) intentReceive.getSerializableExtra(DATAMODELS_ID);
+        dataModels = (ArrayList<OrderOld>) intentReceive.getSerializableExtra(DATAMODELS_ID);
 
         // LISTVIEW
         listView = (ListView) findViewById(R.id.checkOutList);

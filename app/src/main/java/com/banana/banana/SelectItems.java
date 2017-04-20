@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -12,19 +11,15 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import android.app.Application;
 
 public class SelectItems extends AppCompatActivity {
 
     public static final String NAME_ID = "com.banana.nameID";
     public static final String SELECTED_ID = "com.banana.selectedID";
     ListView listView;
-    ArrayList<Order> dataModels;
+    ArrayList<OrderOld> dataModels;
 
 
     @Override
@@ -34,7 +29,7 @@ public class SelectItems extends AppCompatActivity {
 
         Intent intentReceive = getIntent();
         //String tmp = (String) intentReceive.getStringExtra(EditRecepit.DATAMODELS_ID);
-        dataModels = (ArrayList<Order>) intentReceive.getSerializableExtra(EditReceipt.DATAMODELS_ID);
+        dataModels = (ArrayList<OrderOld>) intentReceive.getSerializableExtra(EditReceipt.DATAMODELS_ID);
 
         // LISTVIEW
         listView = (ListView) findViewById(R.id.checkList);
