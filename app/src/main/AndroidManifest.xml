@@ -8,33 +8,35 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
+    <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
+    <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
-        android:name =".MyList"
+        android:name=".MyList"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Banana"
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="Gmail API Android Quickstart">
-        </activity>
-
+            android:label="Gmail API Android Quickstart"></activity>
         <activity android:name=".OpenCamera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".EditReceipt"/>
         <activity android:name=".EditSpecifics" />
+        <activity android:name=".EditReceipt" />
         <activity android:name=".AddOrder" />
         <activity
             android:name=".Checkout"
-            android:parentActivityName="com.banana.banana.EditReceipt" />
+            android:parentActivityName=".EditReceipt" />
         <activity
             android:name=".SelectItems"
-            android:parentActivityName="com.banana.banana.Checkout" />
+            android:parentActivityName=".Checkout" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -42,11 +44,10 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
-    </application>
 
-    <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
-    <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <activity android:name=".MainReceipt"></activity>
+    </application>
 
 </manifest>

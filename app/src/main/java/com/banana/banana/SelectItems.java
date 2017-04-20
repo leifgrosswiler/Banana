@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,20 +19,22 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+<<<<<<< HEAD
 import java.util.HashMap;
 import java.util.List;
 import android.app.Application;
 import android.widget.Toast;
+=======
+>>>>>>> 8d60e4ab45f735f95642bf0b7b6248749ddcb1ba
 
 public class SelectItems extends AppCompatActivity {
 
     public static final String NAME_ID = "com.banana.nameID";
     public static final String SELECTED_ID = "com.banana.selectedID";
     ListView listView;
-    ArrayList<Order> dataModels;
+    ArrayList<OrderOld> dataModels;
 
     //Contacts stuff
     private ListView contNames;
@@ -52,7 +53,7 @@ public class SelectItems extends AppCompatActivity {
 
         Intent intentReceive = getIntent();
         //String tmp = (String) intentReceive.getStringExtra(EditRecepit.DATAMODELS_ID);
-        dataModels = (ArrayList<Order>) intentReceive.getSerializableExtra(EditReceipt.DATAMODELS_ID);
+        dataModels = (ArrayList<OrderOld>) intentReceive.getSerializableExtra(EditReceipt.DATAMODELS_ID);
 
         // LISTVIEW
         listView = (ListView) findViewById(R.id.checkList);
