@@ -1,1 +1,2 @@
 include ':app', 'Material', 'MaterialDesign', 'material.gradle', ':material.build.gradle'
+include ':openCVLibrary2411'

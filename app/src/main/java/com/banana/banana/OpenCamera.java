@@ -27,6 +27,8 @@ import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,6 +63,13 @@ public class OpenCamera extends AppCompatActivity {
     // https://github.com/tesseract-ocr/tessdata
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
+
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+            System.out.println("UH OH");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,10 +175,15 @@ public class OpenCamera extends AppCompatActivity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
+
+            ReceiptScanner scanner = new ReceiptScanner();
+            scanner.refine(mFile);
+
             ImageView rawView = (ImageView) findViewById(R.id.imageview);
             rawView.setImageURI(imageUri);
+
             Log.v(TAG, "entering crop");
-            performCrop(mFile);
+            //performCrop(mFile);
         }
         // user is returning from cropping the image
         else if (requestCode == CROP_PIC) {
