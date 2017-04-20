@@ -6,7 +6,6 @@
     <string name="title_activity_add_item">AddOrder</string>
     <string name="new_item">Item:</string>
     <string name="new_price">Price:</string>
-    <string name="edit_message">Enter a message plz</string>
-    <string name="button_send">Send</string>
+    <string name="button_send">Crop</string>
     <string name="take_picture">Take A Picture</string>
 </resources>

@@ -25,9 +25,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.Pixa;
+import com.googlecode.tesseract.android.ResultIterator;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Rect;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,6 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public class OpenCamera extends AppCompatActivity {
@@ -176,22 +181,22 @@ public class OpenCamera extends AppCompatActivity {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
 
-            ReceiptScanner scanner = new ReceiptScanner();
-            scanner.refine(mFile);
 
             ImageView rawView = (ImageView) findViewById(R.id.imageview);
             rawView.setImageURI(imageUri);
 
-            Log.v(TAG, "entering crop");
-            //performCrop(mFile);
+            performCrop(mFile);
         }
         // user is returning from cropping the image
         else if (requestCode == CROP_PIC) {
             // get the cropped bitmap
-            System.out.println("processing crop result");
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+
+            ReceiptScanner scanner = new ReceiptScanner();
+            scanner.refine(mFile);
+
+            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(croppedUri);
             onPhotoTaken();
         }
@@ -211,15 +216,9 @@ public class OpenCamera extends AppCompatActivity {
         croppedUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
 
-        Log.v(TAG, photoURI.toString());
-        Log.v(TAG, mCurrentPhotoPath);
-        Log.v(TAG, photoFile.getPath());
-        Log.v(TAG, imageFile.getPath());
         Uri tempUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
-        Log.v(TAG, tempUri.toString());
-        //InputStream ims = new FileInputStream(mCurrentPhotoPath);
-        ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
         croppedView.setImageURI(photoURI);
 
         try {
@@ -234,16 +233,12 @@ public class OpenCamera extends AppCompatActivity {
                 cropIntent.putExtra("crop", "true");
                 cropIntent.putExtra("output", croppedUri);
                 cropIntent.putExtra("outputFormat", "PNG");
-                //cropIntent.putExtra("return-data", true);
-                System.out.println("about to call crop");
-
 
                 List<ResolveInfo> resInfoList = OpenCamera.this.getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
                 for (ResolveInfo resolveInfo : resInfoList) {
                     String packageName = resolveInfo.activityInfo.packageName;
                     OpenCamera.this.grantUriPermission(packageName, croppedUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
-
 
                 cropIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 cropIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -287,86 +282,26 @@ public class OpenCamera extends AppCompatActivity {
         options.inSampleSize = 4;
 
         Bitmap bitmap = BitmapFactory.decodeFile(cropFile.getPath(), options);
-        if (bitmap == null) {
-            Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
-            return;
-        }
-        try {
-            ExifInterface exif = new ExifInterface(cropFile.getPath());
-            int exifOrientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            Log.v(TAG, "Orient: " + exifOrientation);
-
-            int rotate = 0;
-
-            switch (exifOrientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-            }
-
-            Log.v(TAG, "Rotation: " + rotate);
-
-            if (rotate != 0) {
-
-                // Getting width & height of the given image.
-                int w = bitmap.getWidth();
-                int h = bitmap.getHeight();
-
-                // Setting pre rotate
-                Matrix mtx = new Matrix();
-                mtx.preRotate(rotate);
-
-                // Rotating Bitmap
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
-            }
-
-            // Convert to ARGB_8888, required by tess
-            bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-
-        } catch (IOException e) {
-            Log.e(TAG, "Couldn't correct orientation: " + e.toString());
-        }
 
         //_image.setImageBitmap( bitmap );
         ImageView imageView = (ImageView) findViewById(R.id.imageview);
         imageView.setImageBitmap(bitmap);
 
-        Log.v(TAG, "Before baseApi");
 
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
-        if (!baseApi.setVariable("tessedit_write_images", "T"))
-            Log.v(TAG, "COULDN'T SET SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
-        else
-            Log.v(TAG, "I DID SET THE SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
+        System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
+
         baseApi.end();
-        Log.v(TAG, "\n\n\n\n\n\n\n\n AHHHHHHH!!!!!!!" + recognizedText + "\n\n\n\n\n OOOOOH");
+
     }
 
     /** Called when the user taps the Send button */
     public void sendMessage(View view) {
         Intent intent = new Intent(this, EditReceipt.class);
-        //EditText editText = (EditText) findViewById(R.id.editText);
-        //String message = editText.getText().toString();
-
-        //Delete pics
-        //new File(file.getPath()).delete();
-        //new File(cropFile.getPath()).delete();
-        //getContentResolver().delete(file, null, null);
-
-        Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
         //intent.putExtra(EXTRA_MESSAGE, recognizedText);
         startActivity(intent);
     }
