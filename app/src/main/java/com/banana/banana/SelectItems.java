@@ -19,6 +19,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static com.banana.banana.MainReceipt.categories;
+import static com.banana.banana.MainReceipt.spinnerAdapter;
 
 public class SelectItems extends AppCompatActivity {
 
@@ -33,6 +37,8 @@ public class SelectItems extends AppCompatActivity {
     private List<String> addrs;
     private List<String> phNums;
     private List<String> both;
+//    private ArrayList<String> newNames = new ArrayList<>();
+
 
     // Request code for READ_CONTACTS. It can be any number > 0.
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -64,15 +70,21 @@ public class SelectItems extends AppCompatActivity {
         // Click on contact so it shows up in text view
         contNames.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-
-                if (addrs.get(position).length() != 0) {
-                    cont[0] = addrs.get(position);
-                } else {
-                    cont[0] = phNums.get(position);
+                if(!((MyList) getApplication()).contains(conts.get(position))) {
+                    if (addrs.get(position).length() != 0) {
+//                    cont[0] = addrs.get(position);
+                        System.out.println("Email adding");
+                        ((MyList) getApplication()).add(conts.get(position), addrs.get(position), false);
+                    } else {
+//                    cont[0] = phNums.get(position);
+                        System.out.println("Number adding");
+                        ((MyList) getApplication()).add(conts.get(position), phNums.get(position), true);
+                    }
+//                cont[1] = conts.get(position);
+//                    newNames.add(conts.get(position));
+                    System.out.println(((MyList) getApplication()).getUsers());
                 }
-                cont[1] = conts.get(position);
-                System.out.println(cont[0]);
-
+                System.out.println(conts.get(position));
             }
         });
 
@@ -85,6 +97,8 @@ public class SelectItems extends AppCompatActivity {
 
 //                String email = cont[0];
 //                String name = cont[1];
+
+
 //
 //                ArrayList<String> emailAndItems = new ArrayList<>(Arrays.asList(email));
 //
@@ -114,6 +128,14 @@ public class SelectItems extends AppCompatActivity {
 //                resultIntent.putExtra(SELECTED_ID, checked);
 //                resultIntent.putExtra(NAME_ID, name);
                 setResult(Activity.RESULT_OK,resultIntent);
+                Set<String> users = ((MyList) getApplication()).getUsers();
+//                System.out.println(users.toString());
+                for (String user : users){
+                    if (!categories.contains(user)){
+                        spinnerAdapter.add(user);
+                    }
+                }
+                spinnerAdapter.notifyDataSetChanged();
                 finish();
 
             }

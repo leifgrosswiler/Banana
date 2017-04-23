@@ -34,6 +34,8 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     private RecyclerView recView;
     private ReceiptAdapter adapter;
     private Toolbar toolbar;
+    public static List<String> categories;
+    public static ArrayAdapter<String> spinnerAdapter;
 
 
     @Override
@@ -84,10 +86,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         // Spinner
 
         spinner = (Spinner) findViewById(R.id.spinner);
-        List<String> categories = new ArrayList<String>();
+        categories = new ArrayList<String>();
         categories.add("Master");
         categories.add("Andrew");
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(MainReceipt.this,
+        spinnerAdapter = new ArrayAdapter<String>(MainReceipt.this,
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(spinnerAdapter);
@@ -144,6 +146,14 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 adapter.setMode(1);
                 Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
                 startActivityForResult(intentDone, request);
+//                Set<String> users = ((MyList) getApplication()).getUsers();
+//                System.out.println(users.toString());
+//                for (String user : users){
+//                    if (!categories.contains(user)){
+//                        spinnerAdapter.add(user);
+//                    }
+//                }
+//                spinnerAdapter.notifyDataSetChanged();
                 return true;
             case R.id.add_item:
                 Intent addOrder = new Intent(this, AddOrder.class);
