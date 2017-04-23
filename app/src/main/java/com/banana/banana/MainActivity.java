@@ -59,7 +59,6 @@ public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
-    private TextView mLovelyTest;
     private Button mCallApiButton;
     ProgressDialog mProgress;
 
@@ -97,7 +96,6 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View v) {
                 mCallApiButton.setEnabled(false);
-                mOutputText.setText("");
                 getResultsFromApi();
                 mCallApiButton.setEnabled(true);
             }
@@ -139,7 +137,8 @@ public class MainActivity extends Activity
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else if (! isDeviceOnline()) {
-            mOutputText.setText("No network connection available.");
+//            mOutputText.setText("No network connection available.");
+            System.out.println("No network connection available.");
         } else {
             new MakeRequestTask(mCredential).execute();
         }

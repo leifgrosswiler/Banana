@@ -31,6 +31,7 @@ public class SelectItems extends AppCompatActivity {
     private ListView contNames;
     private List<String> conts;
     private List<String> addrs;
+    private List<String> phNums;
     private List<String> both;
 
     // Request code for READ_CONTACTS. It can be any number > 0.
@@ -64,8 +65,13 @@ public class SelectItems extends AppCompatActivity {
         contNames.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
-                cont[0] = addrs.get(position);
+                if (addrs.get(position).length() != 0) {
+                    cont[0] = addrs.get(position);
+                } else {
+                    cont[0] = phNums.get(position);
+                }
                 cont[1] = conts.get(position);
+                System.out.println(cont[0]);
 
             }
         });
@@ -152,6 +158,7 @@ public class SelectItems extends AppCompatActivity {
     private void getContactNames() {
         List<String> contacts = new ArrayList<>();
         List<String> emails = new ArrayList<>();
+        List<String> numbers = new ArrayList<>();
         List<String> together = new ArrayList<>();
 
         // Get the ContentResolver
@@ -171,11 +178,27 @@ public class SelectItems extends AppCompatActivity {
                 Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
                         ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
 
-                //Only adds contact if an email address is associated with it
-                if (emailCursor.moveToNext()) {
+                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
+
+                //Only adds contact if an email address or phone numbers is associated with it
+                if (phoneCursor.moveToNext()) {
+                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+                    if (emailCursor.moveToNext()) {
+                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                        together.add(name + "\n" + number + "\n" + email);
+                        emails.add(email);
+                    } else {
+                        together.add(name + "\n" + number);
+                        emails.add("");
+                    }
+                    contacts.add(name);
+                    numbers.add(number);
+                } else if (emailCursor.moveToNext()) {
                     String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                     together.add(name + "\n" + email);
                     contacts.add(name);
+                    numbers.add("");
                     emails.add(email);
                 }
             } while (cursor.moveToNext());
@@ -187,6 +210,8 @@ public class SelectItems extends AppCompatActivity {
         conts = contacts;
         //List with all contact email addresses
         addrs = emails;
+        //List with all contact phone numbers
+        phNums = numbers;
         //List with both of the above for all contacts
         both = together;
     }
