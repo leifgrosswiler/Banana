@@ -1,56 +1,40 @@
 package com.banana.banana;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
- * Created by andrewjayzhou on 4/10/17.
+ * Created by andrewjayzhou on 4/14/17.
  */
 
-public class Order implements Parcelable {
-    String item;
-    String price;
+public class Order {
+
+    private String item;
+    private String price;
+//    private ArrayList<String> users;
+
 
     public Order(String item, String price) {
         this.item = item;
         this.price = price;
+//        users = new ArrayList<>();
+    }
+
+    public void setItem(String item) {
+        this.item = item;
     }
 
     public String getItem() {
         return item;
     }
 
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
     public String getPrice() {
         return price;
     }
+//
+//    public void add(String name){ users.add(name); }
+//    public void remove(String name) {users.remove(name); }
+//    public boolean isSelected(String name){ return users.contains(name);}
 
-    // The following methods that are required for using Parcelable
-    private Order(Parcel in) {
-        // This order must match the order in writeToParcel()
-        item = in.readString();
-        price = in.readString();
-        // Continue doing this for the rest of your member data
-    }
-
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(item);
-        out.writeString(price);
-    }
-
-    // Just cut and paste this for now
-    public int describeContents() {
-        return 0;
-    }
-
-    // Just cut and paste this for now
-    public static final Parcelable.Creator<Order> CREATOR = new Parcelable.Creator<Order>() {
-        public Order createFromParcel(Parcel in) {
-            return new Order(in);
-        }
-
-        public Order[] newArray(int size) {
-            return new Order[size];
-        }
-    };
 }
-

@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 
 public class EditReceiptListAdapter extends ArrayAdapter implements View.OnClickListener{
-    private ArrayList<Order> dataSet;
+    private ArrayList<OrderOld> dataSet;
     Context mContext;
 
     // View lookup cache
@@ -24,7 +24,7 @@ public class EditReceiptListAdapter extends ArrayAdapter implements View.OnClick
         TextView identifier;
     }
 
-    public EditReceiptListAdapter(ArrayList<Order> data, Context context) {
+    public EditReceiptListAdapter(ArrayList<OrderOld> data, Context context) {
 
         super(context, R.layout.row_edit_receipt, data);
         this.dataSet = data;
@@ -36,7 +36,7 @@ public class EditReceiptListAdapter extends ArrayAdapter implements View.OnClick
 
         int position=(Integer) v.getTag();
         Object object= getItem(position);
-        Order dataModel=(Order)object;
+        OrderOld dataModel=(OrderOld)object;
 
         switch (v.getId())
         {
@@ -48,7 +48,7 @@ public class EditReceiptListAdapter extends ArrayAdapter implements View.OnClick
     private int lastPosition = -1;
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Order dataModel = (Order) getItem(position);
+        OrderOld dataModel = (OrderOld) getItem(position);
         ViewHolder viewHolder;
 
         final View result;

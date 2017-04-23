@@ -9,28 +9,28 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,16 +64,28 @@ public class OpenCamera extends AppCompatActivity {
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
 
+    private Camera mCamera;
+    private CameraPreview mPreview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
 
-        Log.v(TAG,"HELLO???");
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
+
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, mCamera);
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+
+        TextView txt=(TextView)findViewById(R.id.text3);
+        ((ViewGroup)txt.getParent()).removeView(txt);
+        preview.addView(txt);
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
-        Log.v(TAG,"hi!");
         for (String path : paths) {
             File dir = new File(path);
             if (!dir.exists()) {
@@ -87,11 +99,7 @@ public class OpenCamera extends AppCompatActivity {
 
         }
 
-        Log.v(TAG,"nice to see you");
         // lang.traineddata file with the app (in assets folder)
-        // You can get them at:
-        // http://code.google.com/p/tesseract-ocr/downloads/list
-        // This area needs work and optimization
         if (!(new File(DATA_PATH + "tessdata/" + lang + ".traineddata")).exists()) {
             try {
                 AssetManager assetManager = getAssets();
@@ -162,14 +170,22 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    protected Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open();
+        } catch (Exception e) {
+        }
+        return c;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         Log.v(TAG, "in result handler");
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView rawView = (ImageView) findViewById(R.id.imageview);
-            rawView.setImageURI(imageUri);
             Log.v(TAG, "entering crop");
             performCrop(mFile);
         }
@@ -179,9 +195,9 @@ public class OpenCamera extends AppCompatActivity {
             System.out.println("processing crop result");
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(croppedUri);
-            onPhotoTaken();
+            sendMessage(croppedView);
         }
     }
 
@@ -207,7 +223,7 @@ public class OpenCamera extends AppCompatActivity {
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
         Log.v(TAG, tempUri.toString());
         //InputStream ims = new FileInputStream(mCurrentPhotoPath);
-        ImageView croppedView = (ImageView) findViewById(R.id.cropview);
+        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
         croppedView.setImageURI(photoURI);
 
         try {
@@ -259,11 +275,13 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
+
         if (storageDir.exists())
             System.out.println("the file/directory exists!");
         else {
             boolean result = storageDir.mkdir();
             System.out.println(result);
+
         }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -352,7 +370,7 @@ public class OpenCamera extends AppCompatActivity {
 
     /** Called when the user taps the Send button */
     public void sendMessage(View view) {
-        Intent intent = new Intent(this, EditReceipt.class);
+        Intent intent = new Intent(this, MainReceipt.class);
         //EditText editText = (EditText) findViewById(R.id.editText);
         //String message = editText.getText().toString();
 
