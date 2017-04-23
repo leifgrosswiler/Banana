@@ -281,7 +281,14 @@ public class OpenCamera extends AppCompatActivity {
     protected void onPhotoTaken(Boolean optimized) {
         String outputText;
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 1;
+        if (optimized) {
+            options.inSampleSize = 1;
+            options.inScaled = false;
+            options.inDither = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        }
+        else
+            options.inSampleSize = 4;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
 
