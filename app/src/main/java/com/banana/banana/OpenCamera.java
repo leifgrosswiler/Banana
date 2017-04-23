@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static com.banana.banana.TextParser.parse;
+
 public class OpenCamera extends AppCompatActivity {
 
     public static final String PACKAGE_NAME = "com.datumdroid.android.ocr.simple";
@@ -273,12 +275,13 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
-        if (storageDir.exists()){
-            System.out.println("the file/directory exists");
-        }
-        else{
-            storageDir.mkdir();
-            System.out.println("don't exist, so we created it");
+
+        if (storageDir.exists())
+            System.out.println("the file/directory exists!");
+        else {
+            boolean result = storageDir.mkdir();
+            System.out.println(result);
+
         }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -362,6 +365,7 @@ public class OpenCamera extends AppCompatActivity {
         recognizedText = baseApi.getUTF8Text();
         baseApi.end();
         Log.v(TAG, "\n\n\n\n\n\n\n\n AHHHHHHH!!!!!!!" + recognizedText + "\n\n\n\n\n OOOOOH");
+        parse(recognizedText);
     }
 
     /** Called when the user taps the Send button */
