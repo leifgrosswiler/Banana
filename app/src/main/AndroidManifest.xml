@@ -37,7 +37,7 @@
             android:parentActivityName=".EditReceipt" />
         <activity
             android:name=".SelectItems"
-            android:parentActivityName=".Checkout" />
+            android:parentActivityName=".MainReceipt" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

@@ -9,7 +9,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -39,6 +38,8 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static com.banana.banana.TextParser.parse;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -274,6 +275,14 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
+
+        if (storageDir.exists())
+            System.out.println("the file/directory exists!");
+        else {
+            boolean result = storageDir.mkdir();
+            System.out.println(result);
+
+        }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -356,6 +365,7 @@ public class OpenCamera extends AppCompatActivity {
         recognizedText = baseApi.getUTF8Text();
         baseApi.end();
         Log.v(TAG, "\n\n\n\n\n\n\n\n AHHHHHHH!!!!!!!" + recognizedText + "\n\n\n\n\n OOOOOH");
+        parse(recognizedText);
     }
 
     /** Called when the user taps the Send button */
