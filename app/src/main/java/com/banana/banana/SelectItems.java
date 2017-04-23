@@ -18,16 +18,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-<<<<<<< HEAD
-import java.util.HashMap;
 import java.util.List;
-import android.app.Application;
-import android.widget.Toast;
-=======
->>>>>>> 8d60e4ab45f735f95642bf0b7b6248749ddcb1ba
 
 public class SelectItems extends AppCompatActivity {
 

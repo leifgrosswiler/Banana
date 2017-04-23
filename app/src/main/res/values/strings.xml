@@ -8,5 +8,8 @@
     <string name="new_price">Price:</string>
     <string name="edit_message">Enter a message plz</string>
     <string name="button_send">Send</string>
-    <string name="take_picture">Take A Picture</string>
+    <string name="take_picture">New Receipt</string>
+    <string name="old_receipt">History</string>
+    <string name="settings">Settings</string>
+
 </resources>
