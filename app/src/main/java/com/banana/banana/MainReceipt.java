@@ -19,6 +19,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.banana.banana.Checkout.request;
 import static com.banana.banana.R.menu.app_bar_menu;
 
 
@@ -141,6 +142,8 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         switch (item.getItemId()) {
             case R.id.add_user:
                 adapter.setMode(1);
+                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
+                startActivityForResult(intentDone, request);
                 return true;
             case R.id.add_item:
                 Intent addOrder = new Intent(this, AddOrder.class);

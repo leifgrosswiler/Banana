@@ -9,7 +9,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -274,6 +273,13 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
+        if (storageDir.exists()){
+            System.out.println("the file/directory exists");
+        }
+        else{
+            storageDir.mkdir();
+            System.out.println("don't exist, so we created it");
+        }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
