@@ -52,13 +52,11 @@ public class OpenCamera extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
-    private String recognizedText = "";
+    private String recognizedText1 = "";
+    private String recognizedText0 = "";
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
-    private static File photoFile;
-    private static File cropFile;
-    private static Uri croppedUri;
     private Uri photoURI;
 
     public static final String DATA_PATH = Environment
@@ -155,7 +153,7 @@ public class OpenCamera extends AppCompatActivity {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            photoFile = null;
+            File photoFile = null;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
@@ -179,33 +177,32 @@ public class OpenCamera extends AppCompatActivity {
         Log.v(TAG, "in result handler");
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
-            File mFile = new File(imageUri.getPath());
-
 
             ImageView rawView = (ImageView) findViewById(R.id.imageview);
             rawView.setImageURI(imageUri);
 
-            performCrop(mFile);
+            performCrop();
         }
         // user is returning from cropping the image
         else if (requestCode == CROP_PIC) {
             // get the cropped bitmap
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
-            File mFile = new File(imageUri.getPath());
+            onPhotoTaken(false);
 
-            ReceiptScanner scanner = new ReceiptScanner();
-            scanner.refine(mFile);
+            File mFile = new File(imageUri.getPath()); //maybe just have mCurrentPhotoPath?
+            //ReceiptScanner scanner = new ReceiptScanner();
+            //scanner.refine(mFile);
 
             ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-            croppedView.setImageURI(croppedUri);
-            onPhotoTaken();
+            croppedView.setImageURI(imageUri);
+            onPhotoTaken(true);
         }
     }
 
-    private void performCrop(File imageFile) {
+    private void performCrop() {
         Log.v(TAG, "at top of crop");
 
-        cropFile = null;
+        File cropFile = null;
         try {
             cropFile = createImageFile();
         } catch (IOException ex) {
@@ -213,11 +210,9 @@ public class OpenCamera extends AppCompatActivity {
             return;
         }
 
-        croppedUri = FileProvider.getUriForFile(OpenCamera.this,
+        Uri croppedUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
 
-        Uri tempUri = FileProvider.getUriForFile(OpenCamera.this,
-                BuildConfig.APPLICATION_ID + ".provider", cropFile);
         ImageView croppedView = (ImageView) findViewById(R.id.imageview);
         croppedView.setImageURI(photoURI);
 
@@ -266,6 +261,12 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
+        if (storageDir.exists())
+            System.out.println("the file/directory exists!");
+        else {
+            storageDir.mkdir();
+            System.out.println("don't exist!, so we created it");
+        }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -277,28 +278,34 @@ public class OpenCamera extends AppCompatActivity {
         return image;
     }
 
-    protected void onPhotoTaken() {
+    protected void onPhotoTaken(Boolean optimized) {
+        String outputText;
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 4;
+        options.inSampleSize = 1;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(cropFile.getPath(), options);
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
 
         //_image.setImageBitmap( bitmap );
         ImageView imageView = (ImageView) findViewById(R.id.imageview);
         imageView.setImageBitmap(bitmap);
 
-
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
+        if (!baseApi.setVariable("tessedit_write_images", "T"))
+            Log.v(TAG, "COULDN'T SET SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
+        else
+            Log.v(TAG, "I DID SET THE SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
-        recognizedText = baseApi.getUTF8Text();
-        System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
+        outputText = baseApi.getUTF8Text();
+        if (optimized)
+            recognizedText1 = outputText;
+        else
+            recognizedText0 = outputText;
+        System.out.println("RECOGNIZED TEXT:\n\n\n"+outputText + "\n\n\n");
 
         baseApi.end();
-
     }
-
     /** Called when the user taps the Send button */
     public void sendMessage(View view) {
         Intent intent = new Intent(this, EditReceipt.class);
