@@ -50,6 +50,7 @@ public class EditReceipt extends AppCompatActivity {
         });
 
         // ADD BUTTON
+        // test commit
         Button add = (Button) findViewById(R.id.add);
         add.setOnClickListener(new View.OnClickListener() {
 
