@@ -185,8 +185,8 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(false);
 
             File mFile = new File(imageUri.getPath()); //maybe just have mCurrentPhotoPath?
-            //ReceiptScanner scanner = new ReceiptScanner();
-            //scanner.refine(mFile);
+            ReceiptScanner scanner = new ReceiptScanner();
+            scanner.refine(mFile);
 
             ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(imageUri);
