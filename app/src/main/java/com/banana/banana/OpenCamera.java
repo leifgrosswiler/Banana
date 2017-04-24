@@ -67,11 +67,10 @@ public class OpenCamera extends AppCompatActivity {
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
 
-    //static {System.loadLibrary("opencv_java");}
+    static {System.loadLibrary("opencv_java");}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //System.loadLibrary("opencv_java");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
 
