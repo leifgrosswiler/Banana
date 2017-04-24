@@ -13,6 +13,7 @@ import java.util.Set;
 public class MyList extends Application {
 
     private HashMap<String, List<String> > split = new HashMap<>();
+    private String currentUser = "Master";
 
     public HashMap<String, List<String>> getList() {
         return split;
@@ -57,6 +58,14 @@ public class MyList extends Application {
 
     public Set<String> getUsers(){
         return info.keySet();
+    }
+
+    public void setUser(String name) {
+        currentUser = name;
+    }
+
+    public String getUser() {
+        return currentUser;
     }
 
 }
