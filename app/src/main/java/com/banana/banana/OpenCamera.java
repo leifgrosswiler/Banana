@@ -314,7 +314,4 @@ public class OpenCamera extends AppCompatActivity {
         //intent.putExtra(EXTRA_MESSAGE, recognizedText);
         startActivity(intent);
     }
-
-    private static class OpenCVLoader {
-    }
 }
