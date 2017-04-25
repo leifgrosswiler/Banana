@@ -62,6 +62,8 @@ public class OpenCamera extends AppCompatActivity {
     private static final String TAG = "SimpleAndroidOCR.java";
 
 
+    public static List<List<String>> parseResult;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -335,8 +337,10 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
         baseApi.end();
-        Log.v(TAG, "\n\n\n\n\n\n\n\n AHHHHHHH!!!!!!!" + recognizedText + "\n\n\n\n\n OOOOOH");
-        parse(recognizedText);
+        Log.v(TAG, "Input in OpenCamera:");
+        Log.v(TAG, recognizedText);
+        //Log.v(TAG, parse(recognizedText).toString());
+        parseResult = parse(recognizedText);
     }
 
     /** Called when the user taps the Send button */
@@ -352,6 +356,7 @@ public class OpenCamera extends AppCompatActivity {
 
         Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
         intent.putExtra(EXTRA_MESSAGE, recognizedText);
+
         startActivity(intent);
     }
 }

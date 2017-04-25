@@ -38,10 +38,12 @@ import com.google.api.services.gmail.GmailScopes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -495,11 +497,22 @@ public class MainActivity extends Activity
     public void buttonPressPooper(Gmail service) throws MessagingException {
 
         HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
+        Set<String> names = ((MyList) getApplication()).getUsers();
+        List<String> list;
 
-        for (String name : map.keySet()) {
+        for (String name : names) {
 
-            List<String> list = map.get(name);
-            String email = list.get(0);
+            if (map.containsKey(name)) {
+                list = map.get(name);
+            } else {
+                list = new ArrayList<>();
+                list.add("Food");
+                list.add("$40");
+            }
+            String email = ((MyList) getApplication()).getMethod(name);
+            if (!email.equals("whitlow@princeton.edu") && !email.equals("jacowhitlo@gmail.com")) {
+                continue;
+            }
             StringBuilder body = new StringBuilder();
             body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
             for (int i = 1; i < list.size(); i = i+2) {
