@@ -92,6 +92,15 @@ public class TextParser {
         return checklistOutput;
     }
 
+    // Parses OCR string David-style:
+    // 1: Read backwards until you hit a letter
+    // 2: As soon as you hit something not a number, price has ended
+    private static List<List<String>> davidParse(String input) {
+        List<List<String>> checklistOutput = new ArrayList<>();
+        List<String> words = new ArrayList<>(Arrays.asList(input.split(" ")));
+        return checklistOutput;
+    }
+
     private static String categorizeWord(String word) {
         if(word.contains(String.valueOf('$')) || word.contains(String.valueOf('.'))) {
             return "Price";

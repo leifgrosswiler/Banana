@@ -299,7 +299,7 @@ public class OpenCamera extends AppCompatActivity {
 
     protected void onPhotoTaken() {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 4;
+        options.inSampleSize = 1;
 
         Bitmap bitmap = BitmapFactory.decodeFile(cropFile.getPath(), options);
         if (bitmap == null) {
