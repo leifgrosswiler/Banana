@@ -67,7 +67,12 @@ public class OpenCamera extends AppCompatActivity {
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
 
-    static {System.loadLibrary("opencv_java");}
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+            System.out.println("UH OH");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,8 +190,8 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(false);
 
             File mFile = new File(imageUri.getPath()); //maybe just have mCurrentPhotoPath?
-            ReceiptScanner scanner = new ReceiptScanner();
-            scanner.refine(mFile);
+            //ReceiptScanner scanner = new ReceiptScanner();
+            //scanner.refine(mFile);
 
             ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(imageUri);

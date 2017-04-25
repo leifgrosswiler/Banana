@@ -19,6 +19,7 @@ MaterialDesign/*
 *.dll
 *.exe
 *.o
+*.so
 
 # Packages #
 ############
