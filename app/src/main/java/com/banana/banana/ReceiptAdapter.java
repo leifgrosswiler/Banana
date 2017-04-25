@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 import static com.banana.banana.MainReceipt.ITEM_ID;
 import static com.banana.banana.MainReceipt.PRICE_ID;
 
@@ -26,6 +28,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     private List<Order> listData;
     private LayoutInflater inflater;
     private int mode = DEFAULT;
+    private MyList app;
 
 
     @Override
@@ -53,6 +56,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         private TextView price;
         private View container;
         private View avatar;
+        private CircleImageView circle;
+        private TextView letter;
 
         public ReceiptHolder(View itemView) {
             super(itemView);
@@ -63,11 +68,16 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
             avatar = itemView.findViewById(R.id.avatar);
             avatar.setVisibility(View.GONE);
 
+            circle = (CircleImageView) avatar.findViewById(R.id.circle);
+            letter = (TextView) avatar.findViewById(R.id.initial);
+
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+
+            String user = app.getUser();
 
             if (mode == DEFAULT) {
                 int p = getLayoutPosition();
@@ -79,19 +89,21 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 intent.putExtra(item.getPrice(), PRICE_ID);
 
                 view.getContext().startActivity(intent);
-            } else {
+            } else if (user != "Master") {
+                letter.setText(Character.toString(user.charAt(0)));
+                circle.setBackgroundColor(0xff0000ff);
                 int p = getLayoutPosition();
                 if (view.isSelected()) {
                     view.setSelected(false);
                     avatar.setVisibility(View.GONE);
-                    Tracker.isSelected("Andrew", p, false);
+                    Tracker.isSelected(user, p, false);
 
                 }
                 else {
                     view.setSelected(true);
                     avatar.setVisibility(View.VISIBLE);
-                    Tracker.isSelected("Andrew", p, true);
-                    System.out.println(Tracker.getTracker("Andrew")[p]);
+                    Tracker.isSelected(user, p, true);
+                    System.out.println(Tracker.getTracker(user)[p]);
                 }
             }
         }
@@ -103,9 +115,10 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         this.mode = mode;
     }
 
-    public ReceiptAdapter(List<Order> listData, Context c) {
+    public ReceiptAdapter(List<Order> listData, Context c, MyList application) {
         inflater = LayoutInflater.from(c);
         this.listData = listData;
+        this.app = application;
     }
 
 }

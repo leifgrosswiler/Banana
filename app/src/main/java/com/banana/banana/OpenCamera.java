@@ -9,7 +9,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,9 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -64,8 +61,6 @@ public class OpenCamera extends AppCompatActivity {
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
 
-    private Camera mCamera;
-    private CameraPreview mPreview;
 
     public static List<List<String>> parseResult;
 
@@ -73,18 +68,6 @@ public class OpenCamera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
-
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        TextView txt=(TextView)findViewById(R.id.text3);
-        ((ViewGroup)txt.getParent()).removeView(txt);
-        preview.addView(txt);
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
@@ -166,19 +149,11 @@ public class OpenCamera extends AppCompatActivity {
                 photoURI = FileProvider.getUriForFile(OpenCamera.this,
                         BuildConfig.APPLICATION_ID + ".provider",
                         photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                takePictureIntent.putExtra(MediaStore
+                        .EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
-    }
-
-    protected Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open();
-        } catch (Exception e) {
-        }
-        return c;
     }
 
     @Override
@@ -200,7 +175,6 @@ public class OpenCamera extends AppCompatActivity {
             ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(croppedUri);
             onPhotoTaken();
-            sendMessage(croppedView);
         }
     }
 
@@ -359,10 +333,6 @@ public class OpenCamera extends AppCompatActivity {
 
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
-        if (!baseApi.setVariable("tessedit_write_images", "T"))
-            Log.v(TAG, "COULDN'T SET SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
-        else
-            Log.v(TAG, "I DID SET THE SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
@@ -380,12 +350,13 @@ public class OpenCamera extends AppCompatActivity {
         //String message = editText.getText().toString();
 
         //Delete pics
-        //new File(file.getPath()).delete();
-        //new File(cropFile.getPath()).delete();
+        new File(photoFile.getPath()).delete();
+        new File(cropFile.getPath()).delete();
         //getContentResolver().delete(file, null, null);
 
-        //Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
-        //intent.putExtra(EXTRA_MESSAGE, recognizedText);
+        Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
+        intent.putExtra(EXTRA_MESSAGE, recognizedText);
+
         startActivity(intent);
     }
 }

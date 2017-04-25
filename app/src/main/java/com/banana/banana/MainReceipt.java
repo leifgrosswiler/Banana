@@ -51,7 +51,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         recView = (RecyclerView) findViewById(R.id.rec_list);
         recView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new ReceiptAdapter(OrderData.getListData(), this);
+        adapter = new ReceiptAdapter(OrderData.getListData(), this, (MyList) getApplication());
         recView.setAdapter(adapter);
 
         // floating action button
@@ -94,19 +94,22 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String user = spinner.getSelectedItem().toString();
                 Toast.makeText(MainReceipt.this, user, Toast.LENGTH_SHORT).show();
                 // TODO: replace this hard code
-                Tracker.addUser("Andrew");
-                System.out.println("THE ARRAY HAS SIZE " + Tracker.getTracker("Andrew").length);
-                if (user == "Andrew") {
+                Tracker.addUser(user);
+                System.out.println("THE ARRAY HAS SIZE " + Tracker.getTracker(user).length);
+                if (user != "Master") {
+                    ((MyList) getApplication()).setUser(user);
+                    String name = ((MyList) getApplication()).getUser();
                     adapter.setMode(ReceiptAdapter.USER);
-                    boolean[] andrewTracker = Tracker.getTracker("Andrew");
+                    boolean[] andrewTracker = Tracker.getTracker(user);
                     System.out.print(andrewTracker.length);
                     for(int p = 0; p < recView.getChildCount(); p++) {
-                        System.out.println("Main: " + Tracker.getTracker("Andrew")[p]);
+                        System.out.println("Main: " + Tracker.getTracker(user)[p]);
                         // TODO: FIX THIS BUG
                         try {
                             recView.getChildAt(p).setSelected(andrewTracker[p]);
@@ -119,7 +122,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                     adapter.setMode(ReceiptAdapter.DEFAULT);
                     // change all background color back to normal in Master
                     for(int p = 0; p < recView.getChildCount(); p++) {
-                        System.out.println("Master: " + Tracker.getTracker("Andrew")[p]);
+                        System.out.println("Master: " + Tracker.getTracker(user)[p]);
                         recView.getChildAt(p).setSelected(false);
                     }
 
