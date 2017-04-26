@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context="com.banana.banana.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/callApi"
         android:layout_width="wrap_content"
@@ -25,22 +16,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:onClick="sendMessage"
-        />
+        app:layout_constraintVertical_bias="0.992" />
 
-    <EditText
-        android:id="@+id/inputEmail"
-        android:layout_width="215dp"
-        android:layout_height="43dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:ems="10"
+    <ListView
+        android:id="@+id/finalList"
+        android:layout_width="368dp"
+        android:layout_height="500dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:inputType="textEmailAddress"
-        android:text="Friend's Email"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintVertical_bias="0.365" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintVertical_bias="0.0"></ListView>
 
 </android.support.constraint.ConstraintLayout>
