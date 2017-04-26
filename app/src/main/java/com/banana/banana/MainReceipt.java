@@ -32,7 +32,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static Tracker tracker;
 
     private RecyclerView recView;
-    private ReceiptAdapter adapter;
+    public static ReceiptAdapter adapter;
     private Toolbar toolbar;
     public static List<String> categories;
     public static ArrayAdapter<String> spinnerAdapter;

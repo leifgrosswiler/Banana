@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
 public class OpenCamera extends AppCompatActivity {
@@ -371,6 +372,7 @@ public class OpenCamera extends AppCompatActivity {
         Log.v(TAG, recognizedText);
         //Log.v(TAG, parse(recognizedText).toString());
         parseResult = parse(recognizedText);
+        setFoodAndPrice();
     }
 
     /** Called when the user taps the Send button */
