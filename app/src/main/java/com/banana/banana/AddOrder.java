@@ -28,11 +28,12 @@ public class AddOrder extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.EditReceipt.class);
+                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
 
                 // temporary way to update original array list
                 String newName = addName.getText().toString();
                 String newPrice = addPrice.getText().toString();
+
 //                String newItems[] = new String[com.banana.banana.EditReceipt.food.length + 1];
 //                String newPrices[] = new String[com.banana.banana.EditReceipt.price.length + 1];
 //                for(int i = 0; i < com.banana.banana.EditReceipt.food.length; i++){
@@ -44,6 +45,7 @@ public class AddOrder extends AppCompatActivity {
 //                com.banana.banana.EditReceipt.food = newItems;
 //                com.banana.banana.EditReceipt.price = newPrices;
 
+                OrderData.add(newName, newPrice);
 
 
                 startActivity(intentDone);
