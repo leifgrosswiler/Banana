@@ -14,6 +14,7 @@ public class MyList extends Application {
 
     private HashMap<String, List<String> > split = new HashMap<>();
     private String currentUser = "Master";
+    private int dataLength;
 
     public HashMap<String, List<String>> getList() {
         return split;
@@ -29,7 +30,8 @@ public class MyList extends Application {
         System.out.print(split.size());
     }
 
-    // Below is stuff for contacts info
+
+    // **Contacts Info**
 
     private HashMap<String, String> info = new HashMap<>();
     // True = number
@@ -67,6 +69,52 @@ public class MyList extends Application {
     public String getUser() {
         return currentUser;
     }
+
+
+    // **Tracker**
+
+    private static HashMap<String, boolean[]> tracker = new HashMap<>();
+    //private static int length = OrderData.size();
+
+
+    public static void addUser(String name, int length){
+        boolean[] tmp = new boolean[length];
+        for (int i = 0; i < length; i++){
+            tmp[i] = false;
+        }
+        tracker.put(name, tmp);
+        System.out.println("THIS IS THE REAL LENGTH:" + length);
+    }
+
+    public static void isSelected(String name, int p, boolean value){
+        try {
+            tracker.get(name)[p] = value;
+        } catch (Exception e){
+            System.out.println("shitt" + tracker.get(name).length);
+        }
+
+    }
+
+    public static boolean[] getTracker(String name){
+        return tracker.get(name);
+    }
+
+    // TODO: test this
+    public static void removeItem(int p){
+        for (String name : tracker.keySet()) {
+            boolean[] tmp = tracker.get(name);
+            boolean[] tmp2 = new boolean[tmp.length-1];
+            for (int i = 0; i < tmp2.length; i++){
+                if (i < p)
+                    tmp2[i] = tmp[i];
+                else
+                    tmp2[i] = tmp[i+1];
+            }
+            tracker.put(name, tmp2);
+        }
+
+    }
+
 
 }
 

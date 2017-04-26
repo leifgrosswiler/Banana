@@ -96,14 +96,14 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 if (view.isSelected()) {
                     view.setSelected(false);
                     avatar.setVisibility(View.GONE);
-                    Tracker.isSelected(user, p, false);
+                    MyList.isSelected(user, p, false);
 
                 }
                 else {
                     view.setSelected(true);
                     avatar.setVisibility(View.VISIBLE);
-                    Tracker.isSelected(user, p, true);
-                    System.out.println(Tracker.getTracker(user)[p]);
+                    MyList.isSelected(user, p, true);
+                    System.out.println(MyList.getTracker(user)[p]);
                 }
             }
         }
