@@ -275,6 +275,7 @@ public class MainActivity extends Activity
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     SmsManager smsManager = SmsManager.getDefault();
+                    System.out.println(phoneNo);
                     smsManager.sendTextMessage(phoneNo, null, txtMessage, null, null);
                     Toast.makeText(getApplicationContext(), "SMS sent.",
                             Toast.LENGTH_LONG).show();
@@ -432,12 +433,12 @@ public class MainActivity extends Activity
         @Override
         protected void onPreExecute() {
             mOutputText.setText("");
-            mProgress.show();
+            //mProgress.show();
         }
 
         @Override
         protected void onPostExecute(List<String> output) {
-            mProgress.hide();
+           // mProgress.hide();
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
             } else {
@@ -448,7 +449,7 @@ public class MainActivity extends Activity
 
         @Override
         protected void onCancelled() {
-            mProgress.hide();
+          //  mProgress.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
@@ -558,6 +559,7 @@ public class MainActivity extends Activity
                 for (Order order: list)
                     body.append(order.getItem() + "\t" + order.getPrice() + "\n");
                 txtMessage = body.toString();
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.SEND_SMS)) {
                     System.out.println("2a");
@@ -583,6 +585,8 @@ public class MainActivity extends Activity
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
                 try {
                     sendMessage(service, "me", mimeMessage);
+                    Toast.makeText(getApplicationContext(), "Gmail sent.",
+                            Toast.LENGTH_LONG).show();
                 } catch (UserRecoverableAuthIOException e) {
                     startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
                 } catch (Exception e) {
