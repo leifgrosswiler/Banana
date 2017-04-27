@@ -75,10 +75,12 @@ public class SelectItems extends AppCompatActivity {
 //                    cont[0] = addrs.get(position);
                         System.out.println("Email adding");
                         ((MyList) getApplication()).add(conts.get(position), addrs.get(position), false);
+                        MyList.addUser(conts.get(position), OrderData.size());
                     } else {
 //                    cont[0] = phNums.get(position);
                         System.out.println("Number adding");
                         ((MyList) getApplication()).add(conts.get(position), phNums.get(position), true);
+                        MyList.addUser(conts.get(position), OrderData.size());
                     }
 //                cont[1] = conts.get(position);
 //                    newNames.add(conts.get(position));

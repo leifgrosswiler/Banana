@@ -26,13 +26,13 @@ import static com.banana.banana.R.menu.app_bar_menu;
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
     public static final String PRICE_ID = "com.banana.priceID";
-    public static final String NEW_ID = "com.banana.newID";
+    public static final String SPINNER_ID = "com.banana.spinnerID";
 
     public Spinner spinner;
     public static Tracker tracker;
 
     private RecyclerView recView;
-    private ReceiptAdapter adapter;
+    public static ReceiptAdapter adapter;
     private Toolbar toolbar;
     public static List<String> categories;
     public static ArrayAdapter<String> spinnerAdapter;
@@ -84,7 +84,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         itemTouchHelper.attachToRecyclerView(recView);
 
         // Spinner
-
+        // TODO: remove hardcorded cateogires
         spinner = (Spinner) findViewById(R.id.spinner);
         categories = new ArrayList<String>();
         categories.add("Master");
@@ -93,24 +93,22 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(spinnerAdapter);
+        MyList.addUser("Andrew", OrderData.size());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
+            // Spinner OnClick
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String user = spinner.getSelectedItem().toString();
                 Toast.makeText(MainReceipt.this, user, Toast.LENGTH_SHORT).show();
-                // TODO: replace this hard code
-                Tracker.addUser(user);
-                System.out.println("THE ARRAY HAS SIZE " + Tracker.getTracker(user).length);
                 if (user != "Master") {
                     ((MyList) getApplication()).setUser(user);
                     String name = ((MyList) getApplication()).getUser();
                     adapter.setMode(ReceiptAdapter.USER);
-                    boolean[] andrewTracker = Tracker.getTracker(user);
-                    System.out.print(andrewTracker.length);
+                    boolean[] andrewTracker = MyList.getTracker(user);
+
                     for(int p = 0; p < recView.getChildCount(); p++) {
-                        System.out.println("Main: " + Tracker.getTracker(user)[p]);
-                        // TODO: FIX THIS BUG
+                        System.out.println("Main: " + MyList.getTracker(user)[p]);
                         try {
                             recView.getChildAt(p).setSelected(andrewTracker[p]);
                         } catch (Exception e) {
@@ -122,8 +120,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                     adapter.setMode(ReceiptAdapter.DEFAULT);
                     // change all background color back to normal in Master
                     for(int p = 0; p < recView.getChildCount(); p++) {
-                        System.out.println("Master: " + Tracker.getTracker(user)[p]);
+//                        System.out.println("Master: " + ((MyList) getApplication()).getTracker(user)[p]);
                         recView.getChildAt(p).setSelected(false);
+                        if (MyList.getTracker(user) != null)
+                            System.out.println("Tracker: " + MyList.getTracker(user)[p]);
                     }
 
                 }
@@ -142,11 +142,12 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         return true;
     }
 
+
+    // App Bar Icons OnClick
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_user:
-                adapter.setMode(1);
                 Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
                 startActivityForResult(intentDone, request);
 //                Set<String> users = ((MyList) getApplication()).getUsers();

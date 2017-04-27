@@ -8,19 +8,26 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -62,6 +69,7 @@ public class MainActivity extends Activity
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
     private Button mCallApiButton;
+    private ListView mFinalList;
     ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -73,8 +81,13 @@ public class MainActivity extends Activity
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { GmailScopes.MAIL_GOOGLE_COM };
 
+    private String phoneNo;
+    private String txtMessage;
+
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
+
     /**
-     * Create the main activity.
+     * Create the final activity.
      * @param savedInstanceState previously saved instance data.
      */
     @Override
@@ -103,6 +116,22 @@ public class MainActivity extends Activity
             }
         });
         //activityLayout.addView(mCallApiButton);
+
+        mFinalList = (ListView)findViewById(R.id.finalList);
+        Set<String> userSet = ((MyList) getApplication()).getUsers();
+        List<String> userList = new ArrayList<String>();
+        for (String s: userSet) {
+            StringBuilder sb = new StringBuilder("");
+            sb.append(s + "   ");
+            sb.append(((MyList) getApplication()).getMethod(s));
+            List<Order> orders = ((MyList) getApplication()).getUserOrders(s);
+            for (Order order: orders)
+                sb.append("\n" + order.getItem() + " " + order.getPrice());
+            userList.add(sb.toString());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_selectable_list_item, userList);
+        mFinalList.setAdapter(adapter);
 
         mOutputText = new TextView(this);
         mOutputText.setLayoutParams(tlp);
@@ -241,9 +270,27 @@ public class MainActivity extends Activity
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(
-                requestCode, permissions, grantResults, this);
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_SEND_SMS: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(phoneNo, null, txtMessage, null, null);
+                    Toast.makeText(getApplicationContext(), "SMS sent.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "SMS failed, please try again.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+            default: {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                EasyPermissions.onRequestPermissionsResult(
+                        requestCode, permissions, grantResults, this);
+            }
+        }
     }
 
     /**
@@ -373,7 +420,7 @@ public class MainActivity extends Activity
 //            }
 
             try {
-                buttonPressPooper(mService);
+                CreateAndSend(mService);
             } catch (Exception e) {
                 System.out.println("SHiiit");
             }
@@ -492,41 +539,55 @@ public class MainActivity extends Activity
     }
 
 
+    public void CreateAndSend(Gmail service) throws MessagingException {
 
-
-    public void buttonPressPooper(Gmail service) throws MessagingException {
-
-        HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
+        //HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
         Set<String> names = ((MyList) getApplication()).getUsers();
-        List<String> list;
+        List<Order> list;
 
         for (String name : names) {
 
-            if (map.containsKey(name)) {
-                list = map.get(name);
+            if (((MyList) getApplication()).isNumber(name)) {
+                // Do texting stuff
+                phoneNo = ((MyList) getApplication()).getMethod(name);
+                list = ((MyList) getApplication()).getUserOrders(name);
+                if (list.size() == 0)
+                    continue;
+                StringBuilder body = new StringBuilder();
+                body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
+                for (Order order: list)
+                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
+                txtMessage = body.toString();
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.SEND_SMS)) {
+                    System.out.println("2a");
+                } else {
+                    System.out.println("2b");
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.SEND_SMS},
+                            MY_PERMISSIONS_REQUEST_SEND_SMS);
+                }
             } else {
-                list = new ArrayList<>();
-                list.add("Food");
-                list.add("$40");
-            }
-            String email = ((MyList) getApplication()).getMethod(name);
-            if (!email.equals("whitlow@princeton.edu") && !email.equals("jacowhitlo@gmail.com")) {
-                continue;
-            }
-            StringBuilder body = new StringBuilder();
-            body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
-            for (int i = 1; i < list.size(); i = i+2) {
-                body.append(list.get(i) + "\t" + list.get(i+1)+"\n");
-            }
-            String subject = "Payment from your group receipt";
+                // Do email stuff
+                list = ((MyList) getApplication()).getUserOrders(name);
+                if (list.size() == 0) {
+                    continue;
+                }
+                String email = ((MyList) getApplication()).getMethod(name);
+                StringBuilder body = new StringBuilder();
+                body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
+                for (Order order: list)
+                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
+                String subject = "Payment from your group receipt";
 
-            MimeMessage message = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
-            try {
-                sendMessage(service, "me", message);
-            } catch (UserRecoverableAuthIOException e) {
-                startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
-            } catch (Exception e) {
-                System.out.println("YA DONE FUCKED UP NAO");
+                MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
+                try {
+                    sendMessage(service, "me", mimeMessage);
+                } catch (UserRecoverableAuthIOException e) {
+                    startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
+                } catch (Exception e) {
+                    System.out.println("YA DONE FUCKED UP NAO");
+                }
             }
         }
     }
