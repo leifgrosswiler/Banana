@@ -124,6 +124,9 @@ public class MainActivity extends Activity
             StringBuilder sb = new StringBuilder("");
             sb.append(s + "   ");
             sb.append(((MyList) getApplication()).getMethod(s));
+            List<Order> orders = ((MyList) getApplication()).getUserOrders(s);
+            for (Order order: orders)
+                sb.append("\n" + order.getItem() + " " + order.getPrice());
             userList.add(sb.toString());
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -538,25 +541,22 @@ public class MainActivity extends Activity
 
     public void CreateAndSend(Gmail service) throws MessagingException {
 
-        HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
+        //HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
         Set<String> names = ((MyList) getApplication()).getUsers();
-        List<String> list;
+        List<Order> list;
 
         for (String name : names) {
 
             if (((MyList) getApplication()).isNumber(name)) {
                 // Do texting stuff
                 phoneNo = ((MyList) getApplication()).getMethod(name);
-                if (map.containsKey(name)) {
-                    list = map.get(name);
-                } else {
+                list = ((MyList) getApplication()).getUserOrders(name);
+                if (list.size() == 0)
                     continue;
-                }
                 StringBuilder body = new StringBuilder();
                 body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
-                for (int i = 1; i < list.size(); i = i + 2) {
-                    body.append(list.get(i) + "\t" + list.get(i + 1) + "\n");
-                }
+                for (Order order: list)
+                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
                 txtMessage = body.toString();
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.SEND_SMS)) {
@@ -569,17 +569,15 @@ public class MainActivity extends Activity
                 }
             } else {
                 // Do email stuff
-                if (map.containsKey(name)) {
-                    list = map.get(name);
-                } else {
+                list = ((MyList) getApplication()).getUserOrders(name);
+                if (list.size() == 0) {
                     continue;
                 }
                 String email = ((MyList) getApplication()).getMethod(name);
                 StringBuilder body = new StringBuilder();
                 body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
-                for (int i = 1; i < list.size(); i = i + 2) {
-                    body.append(list.get(i) + "\t" + list.get(i + 1) + "\n");
-                }
+                for (Order order: list)
+                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
 
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());

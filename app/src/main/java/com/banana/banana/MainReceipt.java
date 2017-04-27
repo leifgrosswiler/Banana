@@ -26,7 +26,7 @@ import static com.banana.banana.R.menu.app_bar_menu;
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
     public static final String PRICE_ID = "com.banana.priceID";
-    public static final String NEW_ID = "com.banana.newID";
+    public static final String SPINNER_ID = "com.banana.spinnerID";
 
     public Spinner spinner;
     public static Tracker tracker;
