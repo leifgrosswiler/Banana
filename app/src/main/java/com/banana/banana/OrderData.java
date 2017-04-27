@@ -37,7 +37,7 @@ public class OrderData {
         ArrayList<String> tempPrice = new ArrayList<>();
 
         for(List<String> parsedLine : parseResult) {
-            tempFood.add(parsedLine.get(1));
+            tempFood.add(parsedLine.get(0));
             tempPrice.add(parsedLine.get(2));
         }
         food = new String[tempFood.size()];
