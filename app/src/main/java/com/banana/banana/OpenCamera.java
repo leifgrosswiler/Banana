@@ -66,6 +66,7 @@ public class OpenCamera extends AppCompatActivity {
     // https://github.com/tesseract-ocr/tessdata
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
+    private String recognizedText;
 
     public static List<List<String>> parseResult;
 
@@ -197,7 +198,7 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.imageview_proc);
+            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
@@ -348,12 +349,12 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.setDebug(true);
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
-        outputText = baseApi.getUTF8Text();
+        recognizedText = baseApi.getUTF8Text();
         if (optimized)
-            recognizedText1 = outputText;
+            recognizedText1 = recognizedText;
         else
-            recognizedText0 = outputText;
-        System.out.println("RECOGNIZED TEXT:\n\n\n"+outputText + "\n\n\n");
+            recognizedText0 = recognizedText;
+        System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
 
         baseApi.end();
 
