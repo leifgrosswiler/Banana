@@ -3,15 +3,18 @@ package com.banana.banana;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.banana.banana.OpenCamera.parseResult;
+
 /**
  * Created by andrewjayzhou on 4/14/17.
  */
 
 public class OrderData {
 
-    private static String[] food = {"Pepperoni and Sausage Pizza", "Pasta", "Ice Cream Sandwitches", "Cheerios with Honey Oats", "Chicken Nuggets", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup"};
-    private static String[] price = {"$15.74", "$1300.02", "$14.00", "$5.99", "$2.33", "$0.99", "$0.99", "$0.99", "$0.99", "$0.99","$0.99"};
+    private static String[] food;// = {"Pepperoni and Sausage Pizza", "Pasta", "Ice Cream Sandwitches", "Cheerios with Honey Oats", "Chicken Nuggets", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup"};
+    private static String[] price;// = {"$15.74", "$1300.02", "$14.00", "$5.99", "$2.33", "$0.99", "$0.99", "$0.99", "$0.99", "$0.99","$0.99"};
     private static List<Order> data = new ArrayList<>();
+
 
     private static int length;
 
@@ -21,6 +24,8 @@ public class OrderData {
         return data.size();
     }
 
+    public static Order getAt(int p){ return data.get(p); };
+
     public static void delete(int p) {
 
         data.remove(p);
@@ -28,17 +33,17 @@ public class OrderData {
     }
 
     public static void setFoodAndPrice() {
-//        ArrayList<String> tempFood = new ArrayList<>();
-//        ArrayList<String> tempPrice = new ArrayList<>();
-//
-//        for(List<String> parsedLine : parseResult) {
-//            tempFood.add(parsedLine.get(1));
-//            tempPrice.add(parsedLine.get(2));
-//        }
-//        food = new String[tempFood.size()];
-//        price = new String[tempPrice.size()];
-//        food = tempFood.toArray(food);
-//        price = tempPrice.toArray(price);
+        ArrayList<String> tempFood = new ArrayList<>();
+        ArrayList<String> tempPrice = new ArrayList<>();
+
+        for(List<String> parsedLine : parseResult) {
+            tempFood.add(parsedLine.get(1));
+            tempPrice.add(parsedLine.get(2));
+        }
+        food = new String[tempFood.size()];
+        price = new String[tempPrice.size()];
+        food = tempFood.toArray(food);
+        price = tempPrice.toArray(price);
 
         for (int i = 0; i < food.length; i++) {
 
@@ -52,10 +57,11 @@ public class OrderData {
     }
 
     public static void add(String item, String price){
+        int tmp = data.size();
         Order order = new Order(item, price);
         data.add(order);
 
-        MainReceipt.adapter.notifyDataSetChanged();
+        MainReceipt.adapter.notifyItemInserted(tmp);
     }
 
 }
