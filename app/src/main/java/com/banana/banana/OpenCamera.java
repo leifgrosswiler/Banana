@@ -53,9 +53,6 @@ public class OpenCamera extends AppCompatActivity {
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
-    private static File photoFile;
-    private static File cropFile;
-    private static Uri croppedUri;
     private Uri photoURI;
 
     public static final String DATA_PATH = Environment
@@ -131,13 +128,16 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
-    private static void refineImg() {
+    private void refineImg(Uri fileUri) {
         System.out.println("Refining image");
-        Mat image = Imgcodecs.imread(cropFile.getPath());
+        Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
-        Imgcodecs.imwrite(cropFile.getPath(),image);
+        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,8);
+        Imgcodecs.imwrite(fileUri.getPath(), gray);
+        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+        croppedView.setImageURI(fileUri);
     }
 
     @Override
@@ -156,7 +156,7 @@ public class OpenCamera extends AppCompatActivity {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            photoFile = null;
+            File photoFile = null;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
@@ -190,19 +190,21 @@ public class OpenCamera extends AppCompatActivity {
         else if (requestCode == CROP_PIC) {
             // get the cropped bitmap
             System.out.println("processing crop result");
+            onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            refineImg();
-            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-            croppedView.setImageURI(croppedUri);
-            onPhotoTaken();
+            ImageView croppedView = (ImageView) findViewById(R.id.imageview_proc);
+            croppedView.setImageURI(imageUri);
+
+            refineImg(imageUri);
+            onPhotoTaken(true);
         }
     }
 
     private void performCrop(File imageFile) {
         Log.v(TAG, "at top of crop");
 
-        cropFile = null;
+        File cropFile = null;
         try {
             cropFile = createImageFile();
         } catch (IOException ex) {
@@ -210,16 +212,11 @@ public class OpenCamera extends AppCompatActivity {
             return;
         }
 
-        croppedUri = FileProvider.getUriForFile(OpenCamera.this,
+        Uri croppedUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
 
-        Log.v(TAG, photoURI.toString());
         Log.v(TAG, mCurrentPhotoPath);
-        Log.v(TAG, photoFile.getPath());
         Log.v(TAG, imageFile.getPath());
-        Uri tempUri = FileProvider.getUriForFile(OpenCamera.this,
-                BuildConfig.APPLICATION_ID + ".provider", cropFile);
-        Log.v(TAG, tempUri.toString());
         //InputStream ims = new FileInputStream(mCurrentPhotoPath);
         ImageView croppedView = (ImageView) findViewById(R.id.imageview);
         croppedView.setImageURI(photoURI);
@@ -232,7 +229,6 @@ public class OpenCamera extends AppCompatActivity {
                 // indicate image type and Uri
                 cropIntent.setDataAndType(photoURI, "image/*");
                 cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                //cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, croppedUri);
                 cropIntent.putExtra("crop", "true");
                 cropIntent.putExtra("output", croppedUri);
                 cropIntent.putExtra("outputFormat", "PNG");
@@ -292,20 +288,20 @@ public class OpenCamera extends AppCompatActivity {
         return image;
     }
 
-    protected void onPhotoTaken() {
+    protected void onPhotoTaken(boolean test) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
         options.inScaled = false;
         options.inDither = false;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(cropFile.getPath(), options);
+        //cropFile.getPath()
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
         if (bitmap == null) {
             Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
             return;
         }
         try {
-            ExifInterface exif = new ExifInterface(cropFile.getPath());
+            ExifInterface exif = new ExifInterface(mCurrentPhotoPath.replaceFirst("file:", ""));
             int exifOrientation = exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
@@ -350,8 +346,8 @@ public class OpenCamera extends AppCompatActivity {
         }
 
         //_image.setImageBitmap( bitmap );
-        ImageView imageView = (ImageView) findViewById(R.id.imageview);
-        imageView.setImageBitmap(bitmap);
+        //ImageView imageView = (ImageView) findViewById(R.id.imageview);
+        //imageView.setImageBitmap(bitmap);
 
         Log.v(TAG, "Before baseApi");
 
@@ -361,11 +357,17 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
         baseApi.end();
-        Log.v(TAG, "Input in OpenCamera:");
-        Log.v(TAG, recognizedText);
+        //Log.v(TAG, "Input in OpenCamera:");
+        if (test) {
+            Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + recognizedText);
+        } else {
+            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + recognizedText);
+        }
         //Log.v(TAG, parse(recognizedText).toString());
-        parseResult = parse(recognizedText);
-        setFoodAndPrice();
+        if (!test) {
+            parseResult = parse(recognizedText);
+            setFoodAndPrice();
+        }
     }
 
     /** Called when the user taps the Send button */
@@ -375,8 +377,8 @@ public class OpenCamera extends AppCompatActivity {
         //String message = editText.getText().toString();
 
         //Delete pics
-        new File(photoFile.getPath()).delete();
-        new File(cropFile.getPath()).delete();
+        //new File(photoFile.getPath()).delete();
+        //new File(cropFile.getPath()).delete();
         //getContentResolver().delete(file, null, null);
 
         Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
