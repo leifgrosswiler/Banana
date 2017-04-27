@@ -13,7 +13,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 
@@ -55,7 +55,7 @@ public class ReceiptScanner {
         int erosion_size = 6;
         Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS,new Size(2*erosion_size+1,2*erosion_size+1));
 
-        Imgproc.blur(grayImage,blurImage,new Size(5,5),new Point(0,0),Imgproc.BORDER_DEFAULT);
+        Imgproc.blur(grayImage,blurImage,new Size(5,5),new Point(0,0),1);
         Imgproc.dilate(blurImage,blurImage,element);
         Imgproc.erode(blurImage,blurImage,element);
         Imgproc.Canny(blurImage,detectedEdges,15,90);
@@ -66,7 +66,7 @@ public class ReceiptScanner {
 
     public void refine(File imgFile) {
 
-        Mat image = Highgui.imread(imgFile.getAbsolutePath());
+        Mat image = Imgcodecs.imread(imgFile.getAbsolutePath());
         Mat canny = this.cannyEdgeDetector(image);
         List<MatOfPoint> contours = new ArrayList();
         Mat hierarchy = new Mat();
@@ -75,7 +75,7 @@ public class ReceiptScanner {
 
         Imgproc.adaptiveThreshold(grayImage,grayImage,255,ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,8);
         Photo.fastNlMeansDenoising(grayImage,grayImage);
-        Highgui.imwrite(imgFile.getAbsolutePath(),grayImage);
+        Imgcodecs.imwrite(imgFile.getAbsolutePath(),grayImage);
 
     }
 

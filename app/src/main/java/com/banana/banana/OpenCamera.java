@@ -207,7 +207,7 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
-    private void performCrop() {
+    private void performCrop(File imageFile) {
         Log.v(TAG, "at top of crop");
 
         File cropFile = null;
@@ -339,8 +339,10 @@ public class OpenCamera extends AppCompatActivity {
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
             }
 
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
-
+        }
+        catch (Exception e) {
+            System.out.println("FUckme");
+        }
         //_image.setImageBitmap( bitmap );
         //ImageView imageView = (ImageView) findViewById(R.id.imageview);
         //imageView.setImageBitmap(bitmap);
@@ -350,10 +352,6 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
-        if (optimized)
-            recognizedText1 = recognizedText;
-        else
-            recognizedText0 = recognizedText;
         System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
 
         baseApi.end();
@@ -371,6 +369,7 @@ public class OpenCamera extends AppCompatActivity {
         }
 
     }
+
     /** Called when the user taps the Send button */
     public void sendMessage(View view) {
 
