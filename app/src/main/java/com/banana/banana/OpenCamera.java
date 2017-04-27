@@ -24,13 +24,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.Pixa;
+import com.googlecode.tesseract.android.ResultIterator;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
@@ -49,7 +52,8 @@ public class OpenCamera extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
-    private String recognizedText = "";
+    private String recognizedText1 = "";
+    private String recognizedText0 = "";
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
@@ -62,7 +66,6 @@ public class OpenCamera extends AppCompatActivity {
     // https://github.com/tesseract-ocr/tessdata
     public static final String lang = "eng";
     private static final String TAG = "SimpleAndroidOCR.java";
-
 
     public static List<List<String>> parseResult;
 
@@ -185,6 +188,7 @@ public class OpenCamera extends AppCompatActivity {
             File mFile = new File(imageUri.getPath());
             Log.v(TAG, "entering crop");
             performCrop(mFile);
+
         }
         // user is returning from cropping the image
         else if (requestCode == CROP_PIC) {
@@ -197,11 +201,12 @@ public class OpenCamera extends AppCompatActivity {
             croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
+
             onPhotoTaken(true);
         }
     }
 
-    private void performCrop(File imageFile) {
+    private void performCrop() {
         Log.v(TAG, "at top of crop");
 
         File cropFile = null;
@@ -217,7 +222,7 @@ public class OpenCamera extends AppCompatActivity {
 
         Log.v(TAG, mCurrentPhotoPath);
         Log.v(TAG, imageFile.getPath());
-        //InputStream ims = new FileInputStream(mCurrentPhotoPath);
+
         ImageView croppedView = (ImageView) findViewById(R.id.imageview);
         croppedView.setImageURI(photoURI);
 
@@ -232,16 +237,12 @@ public class OpenCamera extends AppCompatActivity {
                 cropIntent.putExtra("crop", "true");
                 cropIntent.putExtra("output", croppedUri);
                 cropIntent.putExtra("outputFormat", "PNG");
-                //cropIntent.putExtra("return-data", true);
-                System.out.println("about to call crop");
-
 
                 List<ResolveInfo> resInfoList = OpenCamera.this.getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
                 for (ResolveInfo resolveInfo : resInfoList) {
                     String packageName = resolveInfo.activityInfo.packageName;
                     OpenCamera.this.grantUriPermission(packageName, croppedUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
-
 
                 cropIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 cropIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -269,7 +270,6 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
-
         if (storageDir.exists())
             System.out.println("the file/directory exists!");
         else {
@@ -338,25 +338,25 @@ public class OpenCamera extends AppCompatActivity {
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
             }
 
-            // Convert to ARGB_8888, required by tess
-            bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-
-        } catch (IOException e) {
-            Log.e(TAG, "Couldn't correct orientation: " + e.toString());
-        }
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
 
         //_image.setImageBitmap( bitmap );
         //ImageView imageView = (ImageView) findViewById(R.id.imageview);
         //imageView.setImageBitmap(bitmap);
 
-        Log.v(TAG, "Before baseApi");
-
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
-        recognizedText = baseApi.getUTF8Text();
+        outputText = baseApi.getUTF8Text();
+        if (optimized)
+            recognizedText1 = outputText;
+        else
+            recognizedText0 = outputText;
+        System.out.println("RECOGNIZED TEXT:\n\n\n"+outputText + "\n\n\n");
+
         baseApi.end();
+
         //Log.v(TAG, "Input in OpenCamera:");
         if (test) {
             Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + recognizedText);
@@ -368,10 +368,11 @@ public class OpenCamera extends AppCompatActivity {
             parseResult = parse(recognizedText);
             setFoodAndPrice();
         }
-    }
 
+    }
     /** Called when the user taps the Send button */
     public void sendMessage(View view) {
+
         Intent intent = new Intent(this, MainReceipt.class);
         //EditText editText = (EditText) findViewById(R.id.editText);
         //String message = editText.getText().toString();
