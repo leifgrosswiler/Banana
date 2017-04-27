@@ -56,6 +56,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         private TextView price;
         private View container;
         private View avatar;
+        private View avatar2;
         private CircleImageView circle;
         private TextView letter;
 
@@ -67,6 +68,9 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
             container = itemView.findViewById(R.id.cont_item_root);
             avatar = itemView.findViewById(R.id.avatar);
             avatar.setVisibility(View.GONE);
+
+            avatar2 = itemView.findViewById(R.id.avatar2);
+            avatar2.setVisibility(View.GONE);
 
             circle = (CircleImageView) avatar.findViewById(R.id.circle);
             letter = (TextView) avatar.findViewById(R.id.initial);
@@ -94,6 +98,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 circle.setBackgroundColor(0xff0000ff);
                 int p = getLayoutPosition();
                 if (view.isSelected()) {
+                    // get the number of people who have selected an item
+                    // based on this set the icon
                     view.setSelected(false);
                     avatar.setVisibility(View.GONE);
                     Tracker.isSelected(user, p, false);

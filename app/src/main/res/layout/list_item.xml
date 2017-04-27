@@ -51,6 +51,7 @@
     <!--/>-->
 
     <include layout="@layout/avatar" android:id="@+id/avatar" />
+    <include layout="@layout/avatar2" android:id="@+id/avatar2" />
 
 
 
