@@ -26,6 +26,11 @@ import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,6 +73,12 @@ public class OpenCamera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
+        } else {
+            Log.d(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), working.");
+        }
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
@@ -118,6 +129,15 @@ public class OpenCamera extends AppCompatActivity {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
         }
+    }
+
+    private static void refineImg() {
+        System.out.println("Refining image");
+        Mat image = Imgcodecs.imread(cropFile.getPath());
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
+        Imgcodecs.imwrite(cropFile.getPath(),image);
     }
 
     @Override
@@ -172,6 +192,7 @@ public class OpenCamera extends AppCompatActivity {
             System.out.println("processing crop result");
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
+            refineImg();
             ImageView croppedView = (ImageView) findViewById(R.id.imageview);
             croppedView.setImageURI(croppedUri);
             onPhotoTaken();
