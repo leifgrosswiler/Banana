@@ -99,6 +99,7 @@ public class MyList extends Application {
     public static boolean[] getTracker(String name){
         return tracker.get(name);
     }
+    public static Set<String> getAllUsers() { return tracker.keySet(); }
 
     // TODO: test this
 //    public static void removeItem(int p){

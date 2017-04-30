@@ -1,36 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
-    android:gravity="center_vertical|left"
-    android:orientation="horizontal"
-    android:paddingLeft="16dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:id="@+id/cont_item_root"
-    android:background="@drawable/background_selector"
-    >
+    android:background="@drawable/background_selector">
+    <!--android:paddingLeft="16dp"-->
+    <!--android:gravity="center_vertical|left"-->
 
-<TextView
-    android:id="@+id/list_item"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true"
-    android:layout_alignParentTop="true"
-    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-    android:textColor="@color/colorPrimaryDark"
-    android:fontFamily="sans-serif-medium" />
 
-<TextView
-    android:id="@+id/price"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:layout_below="@+id/list_item"
-    android:text="Android 6.0"
-    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-    android:textColor="@color/colorAccent"
-    android:fontFamily="sans-serif-light"
-    android:textStyle="italic" />
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:layout_margin="8dp"
+        android:id="@+id/card"
+        app:cardBackgroundColor="@android:color/white">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            >
+
+            <TextView
+                android:id="@+id/list_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="25dp"/>
+
+            <TextView
+                android:id="@+id/price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:fontFamily="sans-serif-light"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textColor="@color/colorPrimaryDark"
+                android:textStyle="italic"
+                android:textSize="25dp"/>
+
+            <TextView
+                android:id="@+id/sign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/price"
+                android:paddingLeft="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="$"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textColor="@color/colorPrimaryDark"
+                android:textStyle="italic"
+                android:textSize="25dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/list_item"
+                android:textSize="15dp"
+                android:id="@+id/payer"
+                android:textColor="@color/colorAccent"/>
+
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
 
     <!--<de.hdodenhof.circleimageview.CircleImageView-->
     <!--android:layout_width="30dp"-->
@@ -50,9 +95,5 @@
     <!--android:text="A"-->
     <!--/>-->
 
-    <include layout="@layout/avatar" android:id="@+id/avatar" />
-    <include layout="@layout/avatar2" android:id="@+id/avatar2" />
 
-
-
-</RelativeLayout>
+</LinearLayout>

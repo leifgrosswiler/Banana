@@ -18,8 +18,8 @@ public class TextParser {
     public static List<List<String>> parse(String input) {
         Log.v(TAG, "Here comes the input: ");
         Log.v(TAG, input);
-        String testInput = "Item 3.99 \n poop 3.45 \n peepee 4.00";
-        List<String> lines = new ArrayList<>(Arrays.asList(testInput.split("\n")));
+        //String testInput = "Item 3.99 \n poop 3.45 \n peepee 4.00";
+        List<String> lines = new ArrayList<>(Arrays.asList(input.split("\n")));
         //return realParse(lines);
         Log.v(TAG, "LINES INCOMING");
         Log.v(TAG, lines.toString());

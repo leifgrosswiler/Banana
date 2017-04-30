@@ -28,6 +28,7 @@ public class SelectItems extends AppCompatActivity {
 
     public static final String NAME_ID = "com.banana.nameID";
     public static final String SELECTED_ID = "com.banana.selectedID";
+    public static final String PickItems_ID = "com.banana.pickID";
     ListView listView;
     ArrayList<OrderOld> dataModels;
 
@@ -82,10 +83,15 @@ public class SelectItems extends AppCompatActivity {
                         ((MyList) getApplication()).add(conts.get(position), phNums.get(position), true);
                         MyList.addUser(conts.get(position), OrderData.size());
                     }
-//                cont[1] = conts.get(position);
-//                    newNames.add(conts.get(position));
+
+                    // go to pick items screen
+                    Intent i = new Intent(SelectItems.this, PickItems.class);
+                    i.putExtra(PickItems_ID, conts.get(position));
+                    startActivity(i);
+
                     System.out.println(((MyList) getApplication()).getUsers());
                 }
+                // TODO: print toaster message for user already exist in else
                 System.out.println(conts.get(position));
             }
         });

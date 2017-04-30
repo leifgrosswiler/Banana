@@ -94,8 +94,17 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(spinnerAdapter);
         MyList.addUser("Andrew", OrderData.size());
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
+        // add new user to spinner
+        Intent newIntent = getIntent();
+        String name = newIntent.getStringExtra(PickItems.NEW_ID);
+        if (name != null) {
+            categories.add(name);
+//            payItems(name);
+        }
+
+        // spinner onClick
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             // Spinner OnClick
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -133,7 +142,17 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
+
+
     }
+
+//    private void payItems(String name){
+//        for (int i = 0; i < OrderData.size(); i++){
+//            View thisView = recView.getChildAt(i);
+//            if (MyList.getTracker(name)[i])
+//                ((TextView) thisView.findViewById(R.id.payer)).setText(name);
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -49,7 +49,8 @@
         </provider>
 
         <activity android:name=".MainReceipt" />
-        <activity android:name=".Summary"></activity>
+        <activity android:name=".Summary" />
+        <activity android:name=".PickItems"></activity>
     </application>
 
 </manifest>
