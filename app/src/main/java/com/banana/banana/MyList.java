@@ -129,6 +129,33 @@ public class MyList extends Application {
         return ret;
     }
 
+    public static void notifyTrackerNewOrder(){
+        for (String person : MyList.getAllUsers()) {
+            boolean[] original = MyList.getTracker(person);
+            boolean[] updated = new boolean[original.length + 1];
+            for (int i = 0; i < original.length; i++){
+                updated[i] = original[i];
+            }
+            updated[updated.length-1] = false;
+            tracker.put(person, updated);
+        }
+    }
+
+    public static void notifyTrackerOrderDeleted(int p){
+        for (String person : MyList.getAllUsers()) {
+            boolean[] original = MyList.getTracker(person);
+            boolean[] updated = new boolean[original.length - 1];
+            for (int i = 0; i < updated.length; i++){
+                if (i < p)
+                    updated[i] = original[i];
+                else{
+                    updated[i] = original[i+1];
+                }
+            }
+            tracker.put(person, updated);
+        }
+    }
+
 
 
 }

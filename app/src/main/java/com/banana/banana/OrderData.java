@@ -26,10 +26,15 @@ public class OrderData {
 
     public static Order getAt(int p){ return data.get(p); };
 
+    public static void set(int p, Order updated){ data.set(p, updated); }
+
     public static void delete(int p) {
 
         data.remove(p);
         // Might need to add NotifyItemRemoved()
+        MainReceipt.adapter.notifyItemRemoved(p);
+
+        MyList.notifyTrackerOrderDeleted(p);
     }
 
     public static void setFoodAndPrice() {
@@ -61,7 +66,11 @@ public class OrderData {
         Order order = new Order(item, price);
         data.add(order);
 
+        // update trackers
+        MyList.notifyTrackerNewOrder();
+
         MainReceipt.adapter.notifyItemInserted(tmp);
+
     }
 
 }

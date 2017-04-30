@@ -16,6 +16,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.banana.banana.MainReceipt.ITEM_ID;
 import static com.banana.banana.MainReceipt.PRICE_ID;
+import static com.banana.banana.MainReceipt.P_ID;
 
 /**
  * Created by andrewjayzhou on 4/14/17.
@@ -48,7 +49,10 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         holder.price.setText(item.getPrice());
         for (String person : MyList.getAllUsers()) {
             if (MyList.getTracker(person)[position])
-                holder.payer.setText(person);
+                if (holder.payer.getText() == "")
+                    holder.payer.setText(person);
+                else
+                    holder.payer.setText(holder.payer.getText() + ", " + person);
         }
     }
 
@@ -98,8 +102,9 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
 
                 Intent intent = new Intent(view.getContext(), EditSpecifics.class);
 
-                intent.putExtra(item.getItem(), ITEM_ID);
-                intent.putExtra(item.getPrice(), PRICE_ID);
+                intent.putExtra(ITEM_ID, item.getItem());
+                intent.putExtra(PRICE_ID, item.getPrice());
+                intent.putExtra(P_ID, p);
 
                 view.getContext().startActivity(intent);
             } else if (mode == PICK_ITEMS){
@@ -117,7 +122,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                     card.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
                     System.out.println("2");
                 }
-
 //                if (!view.isSelected()){
 //                    MyList.isSelected(user, p, true);
 ////                    card.setCardBackgroundColor(Color.parseColor("#FF8A65"));

@@ -27,9 +27,9 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static final String ITEM_ID = "com.banana.itemID";
     public static final String PRICE_ID = "com.banana.priceID";
     public static final String SPINNER_ID = "com.banana.spinnerID";
+    public static final String P_ID = "com.banana.pID";
 
     public Spinner spinner;
-    public static Tracker tracker;
 
     private RecyclerView recView;
     public static ReceiptAdapter adapter;
@@ -75,7 +75,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 OrderData.delete(viewHolder.getAdapterPosition());
-                adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+//                adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
 //                adapter.notifyItemRangeChanged(viewHolder.getAdapterPosition(), );
             }
 

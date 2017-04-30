@@ -25,7 +25,7 @@ public class EditSpecifics extends AppCompatActivity {
         Intent intent = getIntent();
         String item = intent.getStringExtra(ITEM_ID);
         String price = intent.getStringExtra(PRICE_ID);
-        position = (int) intent.getIntExtra(EditReceipt.POSITION_ID, -1);
+        position = intent.getIntExtra(MainReceipt.P_ID, -1);
 
         // set views
         editName = (EditText) findViewById(R.id.editName);
@@ -48,10 +48,16 @@ public class EditSpecifics extends AppCompatActivity {
     public void updateInfo(Button done){
         String newItem = editName.getText().toString();
         String newPrice = editPrice.getText().toString();
-        EditReceipt.food[position] = newItem;
-        EditReceipt.price[position] = newPrice;
 
-        Intent intentUpdate = new Intent(EditSpecifics.this, EditReceipt.class);
+        Order updated = new Order(newItem, newPrice);
+        try {
+            OrderData.set(position, updated);
+        } catch(Exception e) {
+            System.out.println("position is fucked up");
+        }
+
+
+        Intent intentUpdate = new Intent(EditSpecifics.this, MainReceipt.class);
         startActivity(intentUpdate);
     }
 }
