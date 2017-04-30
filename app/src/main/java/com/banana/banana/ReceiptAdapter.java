@@ -33,6 +33,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     private LayoutInflater inflater;
     private int mode = DEFAULT;
     private MyList app;
+    private String user;
 
 
     @Override
@@ -53,6 +54,14 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                     holder.payer.setText(person);
                 else
                     holder.payer.setText(holder.payer.getText() + ", " + person);
+        }
+
+        // set background color in PickItems
+        if (mode == PICK_ITEMS){
+            if (MyList.getTracker(user)[position]){
+                holder.card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
+            }
+            holder.payer.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -89,6 +98,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
 //            letter = (TextView) avatar.findViewById(R.id.initial);
 
             itemView.setOnClickListener(this);
+
+
         }
 
         @Override
@@ -164,6 +175,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     public void setMode(int mode) {
         this.mode = mode;
     }
+
+    public void setUser(String user) {this.user = user; }
 
 
     public ReceiptAdapter(List<Order> listData, Context c, MyList application) {

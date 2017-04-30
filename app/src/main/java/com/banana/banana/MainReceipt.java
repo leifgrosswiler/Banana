@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,21 +86,24 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         // TODO: remove hardcorded cateogires
         spinner = (Spinner) findViewById(R.id.spinner);
         categories = new ArrayList<String>();
-        categories.add("Master");
-        categories.add("Andrew");
+        categories.add("Select Payer: ");
         spinnerAdapter = new ArrayAdapter<String>(MainReceipt.this,
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        spinner.setAdapter(spinnerAdapter);
-        MyList.addUser("Andrew", OrderData.size());
 
         // add new user to spinner
-        Intent newIntent = getIntent();
-        String name = newIntent.getStringExtra(PickItems.NEW_ID);
-        if (name != null) {
-            categories.add(name);
-//            payItems(name);
+//        Intent newIntent = getIntent();
+//        String name = newIntent.getStringExtra(PickItems.NEW_ID);
+//        if (name != null) {
+//            categories.add(name);
+//        }
+        // add users to spinner
+        for (String person : MyList.getAllUsers()){
+            categories.add(person);
         }
+
+        spinner.setAdapter(spinnerAdapter);
+
 
         // spinner onClick
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -109,32 +111,37 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String user = spinner.getSelectedItem().toString();
-                Toast.makeText(MainReceipt.this, user, Toast.LENGTH_SHORT).show();
-                if (user != "Master") {
-                    ((MyList) getApplication()).setUser(user);
-                    String name = ((MyList) getApplication()).getUser();
-                    adapter.setMode(ReceiptAdapter.USER);
-                    boolean[] andrewTracker = MyList.getTracker(user);
-
-                    for(int p = 0; p < recView.getChildCount(); p++) {
-                        System.out.println("Main: " + MyList.getTracker(user)[p]);
-                        try {
-                            recView.getChildAt(p).setSelected(andrewTracker[p]);
-                        } catch (Exception e) {
-                            System.out.println("WTF" + andrewTracker.length);
-                        }
-                    }
-                }
-                else {
-                    adapter.setMode(ReceiptAdapter.DEFAULT);
-                    // change all background color back to normal in Master
-                    for(int p = 0; p < recView.getChildCount(); p++) {
-//                        System.out.println("Master: " + ((MyList) getApplication()).getTracker(user)[p]);
-                        recView.getChildAt(p).setSelected(false);
-                        if (MyList.getTracker(user) != null)
-                            System.out.println("Tracker: " + MyList.getTracker(user)[p]);
-                    }
-
+//                Toast.makeText(MainReceipt.this, user, Toast.LENGTH_SHORT).show();
+//                if (user != "Master") {
+//                    ((MyList) getApplication()).setUser(user);
+//                    String name = ((MyList) getApplication()).getUser();
+//                    adapter.setMode(ReceiptAdapter.USER);
+//                    boolean[] andrewTracker = MyList.getTracker(user);
+//
+//                    for(int p = 0; p < recView.getChildCount(); p++) {
+//                        System.out.println("Main: " + MyList.getTracker(user)[p]);
+//                        try {
+//                            recView.getChildAt(p).setSelected(andrewTracker[p]);
+//                        } catch (Exception e) {
+//                            System.out.println("WTF" + andrewTracker.length);
+//                        }
+//                    }
+//                }
+//                else {
+//                    adapter.setMode(ReceiptAdapter.DEFAULT);
+//                    // change all background color back to normal in Master
+//                    for(int p = 0; p < recView.getChildCount(); p++) {
+////                        System.out.println("Master: " + ((MyList) getApplication()).getTracker(user)[p]);
+//                        recView.getChildAt(p).setSelected(false);
+//                        if (MyList.getTracker(user) != null)
+//                            System.out.println("Tracker: " + MyList.getTracker(user)[p]);
+//                    }
+//
+//                }
+                if (user != "Select Payer: ") {
+                    Intent spinnerIntent = new Intent(MainReceipt.this, PickItems.class);
+                    spinnerIntent.putExtra(SelectItems.PickItems_ID, user);
+                    MainReceipt.this.startActivity(spinnerIntent);
                 }
             }
 

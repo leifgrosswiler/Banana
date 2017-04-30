@@ -35,13 +35,16 @@ public class PickItems extends AppCompatActivity {
         recView = (RecyclerView) findViewById(R.id.rec_list);
         recView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new ReceiptAdapter(OrderData.getListData(), this, (MyList) getApplication());
-        recView.setAdapter(adapter);
-        adapter.setMode(ReceiptAdapter.PICK_ITEMS);
-
-        // pull intent, set header
         Intent i = getIntent();
         name = i.getStringExtra(SelectItems.PickItems_ID);
+
+        adapter = new ReceiptAdapter(OrderData.getListData(), this, (MyList) getApplication());
+        adapter.setMode(ReceiptAdapter.PICK_ITEMS);
+        adapter.setUser(name);
+        recView.setAdapter(adapter);
+
+
+        // pull intent, set header
         ((MyList) getApplication()).setUser(name);
         TextView header = (TextView) findViewById(R.id.name);
         header.setText(name);
@@ -61,7 +64,7 @@ public class PickItems extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.check:
                 Intent intent = new Intent(PickItems.this, MainReceipt.class);
-                intent.putExtra(NEW_ID, name);
+//                intent.putExtra(NEW_ID, name);
                 startActivity(intent);
 
             default:
