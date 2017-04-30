@@ -4,7 +4,7 @@ import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,18 +15,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
-import android.text.TextUtils;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -47,7 +42,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -60,90 +54,90 @@ import javax.mail.internet.MimeMessage;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-
 public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
+
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
+    private Button mSendRequests;
     private ListView mFinalList;
-    ProgressDialog mProgress;
+    private PackageManager pm;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
-    private static final String BUTTON_TEXT = "Call Gmail API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { GmailScopes.MAIL_GOOGLE_COM };
+    private static final String[] SCOPES = {GmailScopes.MAIL_GOOGLE_COM};
 
-    private String phoneNo;
-    private String txtMessage;
-
-    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
     /**
      * Create the final activity.
+     *
      * @param savedInstanceState previously saved instance data.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LinearLayout activityLayout = new LinearLayout(this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        activityLayout.setLayoutParams(lp);
-        activityLayout.setOrientation(LinearLayout.VERTICAL);
-        activityLayout.setPadding(16, 16, 16, 16);
 
-        ViewGroup.LayoutParams tlp = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        // Check SMS Permissions in beginning
+        pm = this.getPackageManager();
+        int hasPerm = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.SEND_SMS},
+                    MY_PERMISSIONS_REQUEST_SEND_SMS);
+        }
 
-        mCallApiButton = (Button)findViewById(R.id.callApi);
-        mCallApiButton.setOnClickListener(new View.OnClickListener() {
+        // Set up the message sending button
+        mSendRequests = (Button) findViewById(R.id.callApi);
+        mSendRequests.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallApiButton.setEnabled(false);
-                getResultsFromApi();
-                mCallApiButton.setEnabled(true);
+                mSendRequests.setEnabled(false);
+                PerformTextOperation();
+                PerformEmailOperation();
+                mSendRequests.setEnabled(true);
             }
         });
-        //activityLayout.addView(mCallApiButton);
 
-        mFinalList = (ListView)findViewById(R.id.finalList);
+        // Set up the overview list
+        mFinalList = (ListView) findViewById(R.id.finalList);
         Set<String> userSet = ((MyList) getApplication()).getUsers();
         List<String> userList = new ArrayList<String>();
-        for (String s: userSet) {
+        for (String s : userSet) {
             StringBuilder sb = new StringBuilder("");
             sb.append(s + "   ");
             sb.append(((MyList) getApplication()).getMethod(s));
             List<Order> orders = ((MyList) getApplication()).getUserOrders(s);
-            for (Order order: orders)
+            for (Order order : orders)
                 sb.append("\n" + order.getItem() + " " + order.getPrice());
             userList.add(sb.toString());
         }
+
+        // Create unique list heights for overview list
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_selectable_list_item, userList);
+                android.R.layout.simple_selectable_list_item, userList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                // Get the current item from ListView
+                View view = super.getView(position, convertView, parent);
+
+                // Get the Layout Parameters for ListView Current Item View
+                ViewGroup.LayoutParams params = view.getLayoutParams();
+
+                // Set the height of the Item View
+                params.height = 0;
+                view.setLayoutParams(params);
+
+                return view;
+            }
+        };
         mFinalList.setAdapter(adapter);
-
-        mOutputText = new TextView(this);
-        mOutputText.setLayoutParams(tlp);
-        mOutputText.setPadding(16, 16, 16, 16);
-        mOutputText.setVerticalScrollBarEnabled(true);
-        mOutputText.setMovementMethod(new ScrollingMovementMethod());
-        mOutputText.setText(
-                "Click the \'" + BUTTON_TEXT +"\' button to test the API.");
-        activityLayout.addView(mOutputText);
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Calling Gmail API ...");
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
@@ -153,7 +147,41 @@ public class MainActivity extends Activity
 
     }
 
+    // Function for finding text contacts and sending messages
+    private void PerformTextOperation() {
+        Set<String> names = ((MyList) getApplication()).getUsers();
+        List<Order> list;
 
+        // Check for SMS permissions
+        int hasPerm = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPerm == PackageManager.PERMISSION_GRANTED) {
+            // Search through and find text Contacts, then send texts
+            for (String name : names) {
+                if (((MyList) getApplication()).isNumber(name)) {
+                    String phoneNo = ((MyList) getApplication()).getMethod(name);
+                    list = ((MyList) getApplication()).getUserOrders(name);
+                    if (list.size() == 0)
+                        continue;
+                    String header = ("You owe me for the following items!");
+                    SmsManager sms = SmsManager.getDefault();
+                    sms.sendTextMessage(phoneNo, null, header.toString(), null, null);
+                    for (Order order : list) {
+                        String body = order.getItem().toString() + ": $" + order.getPrice().toString();
+                        sms.sendTextMessage(phoneNo, null, body, null, null);
+                    }
+                }
+            }
+            if (names.size() != 0) {
+                Toast.makeText(getApplicationContext(), "SMS sent.",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Need SMS Permissions.",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
@@ -162,14 +190,14 @@ public class MainActivity extends Activity
      * of the preconditions are not satisfied, the app will prompt the user as
      * appropriate.
      */
-    private void getResultsFromApi() {
-        if (! isGooglePlayServicesAvailable()) {
+    private void PerformEmailOperation() {
+        if (!isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
-        } else if (! isDeviceOnline()) {
-//            mOutputText.setText("No network connection available.");
-            System.out.println("No network connection available.");
+        } else if (!isDeviceOnline()) {
+            Toast.makeText(getApplicationContext(), "No network connection available.",
+                    Toast.LENGTH_LONG).show();
         } else {
             new MakeRequestTask(mCredential).execute();
         }
@@ -193,7 +221,7 @@ public class MainActivity extends Activity
                     .getString(PREF_ACCOUNT_NAME, null);
             if (accountName != null) {
                 mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
+                PerformEmailOperation();
             } else {
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
@@ -214,24 +242,24 @@ public class MainActivity extends Activity
      * Called when an activity launched here (specifically, AccountPicker
      * and authorization) exits, giving you the requestCode you started it with,
      * the resultCode it returned, and any additional data from it.
+     *
      * @param requestCode code indicating which activity result is incoming.
-     * @param resultCode code indicating the result of the incoming
-     *     activity result.
-     * @param data Intent (containing result data) returned by incoming
-     *     activity result.
+     * @param resultCode  code indicating the result of the incoming
+     *                    activity result.
+     * @param data        Intent (containing result data) returned by incoming
+     *                    activity result.
      */
     @Override
     protected void onActivityResult(
             int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
+        switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mOutputText.setText(
-                            "This app requires Google Play Services. Please install " +
-                                    "Google Play Services on your device and relaunch this app.");
+                    Toast.makeText(getApplicationContext(), "This app requires Google Play Services",
+                            Toast.LENGTH_LONG).show();
                 } else {
-                    getResultsFromApi();
+                    PerformEmailOperation();
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -246,13 +274,13 @@ public class MainActivity extends Activity
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
-                        getResultsFromApi();
+                        PerformEmailOperation();
                     }
                 }
                 break;
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
-                    getResultsFromApi();
+                    PerformEmailOperation();
                 }
                 break;
         }
@@ -260,46 +288,29 @@ public class MainActivity extends Activity
 
     /**
      * Respond to requests for permissions at runtime for API 23 and above.
-     * @param requestCode The request code passed in
-     *     requestPermissions(android.app.Activity, String, int, String[])
-     * @param permissions The requested permissions. Never null.
+     *
+     * @param requestCode  The request code passed in
+     *                     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions  The requested permissions. Never null.
      * @param grantResults The grant results for the corresponding permissions
-     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     *                     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_SEND_SMS: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    System.out.println(phoneNo);
-                    smsManager.sendTextMessage(phoneNo, null, txtMessage, null, null);
-                    Toast.makeText(getApplicationContext(), "SMS sent.",
-                            Toast.LENGTH_LONG).show();
-                    return;
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            "SMS failed, please try again.", Toast.LENGTH_LONG).show();
-                    return;
-                }
-            }
-            default: {
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                EasyPermissions.onRequestPermissionsResult(
-                        requestCode, permissions, grantResults, this);
-            }
-        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
     }
 
     /**
      * Callback for when a permission is granted using the EasyPermissions
      * library.
+     *
      * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
+     *                    permission
+     * @param list        The requested permission list. Never null.
      */
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
@@ -309,9 +320,10 @@ public class MainActivity extends Activity
     /**
      * Callback for when a permission is denied using the EasyPermissions
      * library.
+     *
      * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
+     *                    permission
+     * @param list        The requested permission list. Never null.
      */
     @Override
     public void onPermissionsDenied(int requestCode, List<String> list) {
@@ -320,6 +332,7 @@ public class MainActivity extends Activity
 
     /**
      * Checks whether the device currently has a network connection.
+     *
      * @return true if the device has a network connection, false otherwise.
      */
     private boolean isDeviceOnline() {
@@ -331,8 +344,9 @@ public class MainActivity extends Activity
 
     /**
      * Check that Google Play services APK is installed and up to date.
+     *
      * @return true if Google Play Services is available and up to
-     *     date on this device; false otherwise.
+     * date on this device; false otherwise.
      */
     private boolean isGooglePlayServicesAvailable() {
         GoogleApiAvailability apiAvailability =
@@ -360,8 +374,9 @@ public class MainActivity extends Activity
     /**
      * Display an error dialog showing that Google Play Services is missing
      * or out of date.
+     *
      * @param connectionStatusCode code describing the presence (or lack of)
-     *     Google Play Services on this device.
+     *                             Google Play Services on this device.
      */
     void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
@@ -392,12 +407,14 @@ public class MainActivity extends Activity
 
         /**
          * Background task to call Gmail API.
+         *
          * @param params no parameters needed for this task.
          */
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
-                return getDataFromApi();
+                CreateAndSendEmail(mService);
+                return null;
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -405,51 +422,19 @@ public class MainActivity extends Activity
             }
         }
 
-        /**
-         * Fetch a list of Gmail labels attached to the specified account.
-         * @return List of Strings labels.
-         * @throws IOException
-         */
-        private List<String> getDataFromApi() throws IOException {
-            // Get the labels in the user's account.
-            String user = "me";
-            //List<String> labels = new ArrayList<String>();
-//            ListLabelsResponse listResponse =
-//                    mService.users().labels().list(user).execute();
-//            for (Label label : listResponse.getLabels()) {
-//                labels.add(label.getName());
-//            }
-
-            try {
-                CreateAndSend(mService);
-            } catch (Exception e) {
-                System.out.println("SHiiit");
-            }
-
-            return null;
-        }
-
-
         @Override
         protected void onPreExecute() {
-            mOutputText.setText("");
-            //mProgress.show();
+            //Do Nothing
         }
 
         @Override
         protected void onPostExecute(List<String> output) {
-           // mProgress.hide();
-            if (output == null || output.size() == 0) {
-                mOutputText.setText("No results returned.");
-            } else {
-                output.add(0, "Data retrieved using the Gmail API:");
-                mOutputText.setText(TextUtils.join("\n", output));
-            }
+            //Do Nothing
         }
 
         @Override
         protected void onCancelled() {
-          //  mProgress.hide();
+            //  mProgress.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
@@ -460,11 +445,12 @@ public class MainActivity extends Activity
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             MainActivity.REQUEST_AUTHORIZATION);
                 } else {
-                    mOutputText.setText("The following error occurred:\n"
-                            + mLastError.getMessage());
+                    Toast.makeText(getApplicationContext(), "The following error occurred: \n"
+                            + mLastError, Toast.LENGTH_LONG).show();
                 }
             } else {
-                mOutputText.setText("Request cancelled.");
+                Toast.makeText(getApplicationContext(), "Request Cancelled",
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -472,9 +458,9 @@ public class MainActivity extends Activity
     /**
      * Create a MimeMessage using the parameters provided.
      *
-     * @param to email address of the receiver
-     * @param from email address of the sender, the mailbox account
-     * @param subject subject of the email
+     * @param to       email address of the receiver
+     * @param from     email address of the sender, the mailbox account
+     * @param subject  subject of the email
      * @param bodyText body text of the email
      * @return the MimeMessage to be used to send email
      * @throws MessagingException
@@ -519,67 +505,42 @@ public class MainActivity extends Activity
     /**
      * Send an email from the user's mailbox to its recipient.
      *
-     * @param service Authorized Gmail API instance.
-     * @param userId User's email address. The special value "me"
-     * can be used to indicate the authenticated user.
+     * @param service      Authorized Gmail API instance.
+     * @param userId       User's email address. The special value "me"
+     *                     can be used to indicate the authenticated user.
      * @param emailContent Email to be sent.
      * @return The sent message
      * @throws MessagingException
      * @throws IOException
      */
     public static com.google.api.services.gmail.model.Message sendMessage(Gmail service,
-                                      String userId,
-                                      MimeMessage emailContent)
+                                                                          String userId,
+                                                                          MimeMessage emailContent)
             throws MessagingException, IOException {
         com.google.api.services.gmail.model.Message message = createMessageWithEmail(emailContent);
         message = service.users().messages().send(userId, message).execute();
-
-        System.out.println("Message id: " + message.getId());
-        System.out.println(message.toPrettyString());
         return message;
     }
 
-
-    public void CreateAndSend(Gmail service) throws MessagingException {
+    // Function responsible for constructing each email to be sent
+    private void CreateAndSendEmail(Gmail service) throws MessagingException {
 
         //HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
         Set<String> names = ((MyList) getApplication()).getUsers();
         List<Order> list;
 
+        // Search through names and create and send emails
         for (String name : names) {
-
-            if (((MyList) getApplication()).isNumber(name)) {
-                // Do texting stuff
-                phoneNo = ((MyList) getApplication()).getMethod(name);
-                list = ((MyList) getApplication()).getUserOrders(name);
-                if (list.size() == 0)
-                    continue;
-                StringBuilder body = new StringBuilder();
-                body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
-                for (Order order: list)
-                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
-                txtMessage = body.toString();
-                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.SEND_SMS)) {
-                    System.out.println("2a");
-                } else {
-                    System.out.println("2b");
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.SEND_SMS},
-                            MY_PERMISSIONS_REQUEST_SEND_SMS);
-                }
-            } else {
-                // Do email stuff
+            if (!((MyList) getApplication()).isNumber(name)) {
                 list = ((MyList) getApplication()).getUserOrders(name);
                 if (list.size() == 0) {
                     continue;
                 }
                 String email = ((MyList) getApplication()).getMethod(name);
                 StringBuilder body = new StringBuilder();
-                body.append("You owe " + mCredential.getSelectedAccountName() + " for the following items!\n");
-                for (Order order: list)
-                    body.append(order.getItem() + "\t" + order.getPrice() + "\n");
+                body.append("You owe me for the following items!\n");
+                for (Order order : list)
+                    body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
 
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
@@ -590,10 +551,9 @@ public class MainActivity extends Activity
                 } catch (UserRecoverableAuthIOException e) {
                     startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
                 } catch (Exception e) {
-                    System.out.println("YA DONE FUCKED UP NAO");
+                    System.out.println("Exception caught: " + e.toString());
                 }
             }
         }
     }
-
 }
