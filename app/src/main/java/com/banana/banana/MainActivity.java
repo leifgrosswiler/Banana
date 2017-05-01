@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -138,6 +139,21 @@ public class MainActivity extends Activity
             }
         };
         mFinalList.setAdapter(adapter);
+
+        mFinalList.setOnItemClickListener(new ListView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> a, View v, int i, long l) {
+                // handle click here
+                Intent intent = new Intent();
+                System.out.println("hey");
+
+                Object o = mFinalList.getItemAtPosition(i);
+                List userList = (List)o;
+
+                System.out.println(userList);
+
+            }
+        });
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
