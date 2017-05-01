@@ -136,11 +136,11 @@ public class OpenCamera extends AppCompatActivity {
         System.out.println("Refining image");
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
+        Mat dest = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
-        Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
-        Imgcodecs.imwrite(fileUri.getPath(), gray);
+        Imgproc.GaussianBlur(gray, dest, new Size(0, 0), 3);
+        Core.addWeighted(gray, 1.5, dest, -0.5, 0, gray);
+        Imgcodecs.imwrite(fileUri.getPath(), dest);
         ImageView croppedView = (ImageView) findViewById(R.id.imageview_proc);
         croppedView.setImageURI(fileUri);
     }
