@@ -144,13 +144,16 @@ public class MainActivity extends Activity
             @Override
             public void onItemClick(AdapterView<?> a, View v, int i, long l) {
                 // handle click here
-                Intent intent = new Intent();
+                //Intent intent = new Intent(this, PersonalOverview.class);
                 System.out.println("hey");
 
                 Object o = mFinalList.getItemAtPosition(i);
                 List userList = (List)o;
 
                 System.out.println(userList);
+
+                //startActivity(intent);
+
 
             }
         });
