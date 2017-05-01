@@ -52,8 +52,8 @@ public class OpenCamera extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
-    private String recognizedText1 = "";
-    private String recognizedText0 = "";
+    private String rawText = "";
+    private String processedText = "";
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
@@ -137,10 +137,11 @@ public class OpenCamera extends AppCompatActivity {
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,8);
+//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
+        Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
-        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+        ImageView croppedView = (ImageView) findViewById(R.id.imageview_proc);
         croppedView.setImageURI(fileUri);
     }
 
@@ -202,8 +203,9 @@ public class OpenCamera extends AppCompatActivity {
             croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
-
             onPhotoTaken(true);
+            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
+            Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + processedText);
         }
     }
 
@@ -352,22 +354,21 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
-        System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
+        //System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
 
         baseApi.end();
 
         //Log.v(TAG, "Input in OpenCamera:");
         if (test) {
-            Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + recognizedText);
+            processedText = recognizedText;
         } else {
-            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + recognizedText);
+            rawText = recognizedText;
         }
         //Log.v(TAG, parse(recognizedText).toString());
         if (!test) {
             parseResult = parse(recognizedText);
             setFoodAndPrice();
         }
-
     }
 
     /** Called when the user taps the Send button */
