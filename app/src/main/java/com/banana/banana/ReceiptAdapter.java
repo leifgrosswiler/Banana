@@ -35,7 +35,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     private MyList app;
     private String user;
 
-
     @Override
     public ReceiptHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -109,6 +108,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
 
             if (mode == DEFAULT) {
                 int p = getLayoutPosition();
+
                 Order item = (Order) OrderData.getListData().get(p);
 
                 Intent intent = new Intent(view.getContext(), EditSpecifics.class);
@@ -119,8 +119,12 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
 
                 view.getContext().startActivity(intent);
             } else if (mode == PICK_ITEMS){
-                System.out.println("IM HEREEEEEE");
+
+                // count number of people that have picked p
                 int p = getLayoutPosition();
+                Order item = (Order) OrderData.getListData().get(p);
+
+                System.out.println("IM HEREEEEEE");
                 boolean[] tracker = MyList.getTracker(user);
 
                 if (!tracker[p]){

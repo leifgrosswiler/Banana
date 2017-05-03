@@ -1,34 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.banana.banana.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingLeft="5pt"
+    android:paddingRight="5pt"
+    android:paddingTop="5pt"
+    android:paddingBottom="5pt"
+    tools:context=".MainActivity">
+
+    <ExpandableListView
+        android:id="@+id/finalList"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp" />
 
     <Button
         android:id="@+id/callApi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Finish Request!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_alignParentBottom="true"
         android:onClick="sendMessage"
-        app:layout_constraintVertical_bias="0.992" />
+        app:layout_constraintVertical_bias="0.992"
+        android:layout_centerHorizontal="true" />
 
-    <ListView
-        android:clickable="true"
-        android:id="@+id/finalList"
-        android:layout_width="368dp"
-        android:layout_height="500dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
-        app:layout_constraintVertical_bias="0.0">
-    </ListView>
-
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>

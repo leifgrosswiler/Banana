@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -60,7 +62,7 @@ public class MainActivity extends Activity
 
     GoogleAccountCredential mCredential;
     private Button mSendRequests;
-    private ListView mFinalList;
+    //private ListView mFinalList;
     private PackageManager pm;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -72,6 +74,11 @@ public class MainActivity extends Activity
     private static final String[] SCOPES = {GmailScopes.MAIL_GOOGLE_COM};
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
+
+    ExpandableListView expandableListView;
+    ExpandableListAdapter expandableListAdapter;
+    List<String> expandableListTitle;
+    HashMap<String, List<String>> expandableListDetail;
 
     /**
      * Create the final activity.
@@ -107,54 +114,49 @@ public class MainActivity extends Activity
         });
 
         // Set up the overview list
-        mFinalList = (ListView) findViewById(R.id.finalList);
+        expandableListView = (ExpandableListView) findViewById(R.id.finalList);
+
         Set<String> userSet = ((MyList) getApplication()).getUsers();
-        List<String> userList = new ArrayList<String>();
-        for (String s : userSet) {
-            StringBuilder sb = new StringBuilder("");
-            sb.append(s + "   ");
-            sb.append(((MyList) getApplication()).getMethod(s));
-            List<Order> orders = ((MyList) getApplication()).getUserOrders(s);
-            for (Order order : orders)
-                sb.append("\n" + order.getItem() + " " + order.getPrice());
-            userList.add(sb.toString());
-        }
 
-        // Create unique list heights for overview list
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_selectable_list_item, userList) {
+        ExpandableListDataPump pump = new ExpandableListDataPump(this);
+        expandableListDetail = pump.getData(userSet);
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
+        expandableListView.setAdapter(expandableListAdapter);
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                // Get the current item from ListView
-                View view = super.getView(position, convertView, parent);
-
-                // Get the Layout Parameters for ListView Current Item View
-                ViewGroup.LayoutParams params = view.getLayoutParams();
-
-                // Set the height of the Item View
-                params.height = 0;
-                view.setLayoutParams(params);
-
-                return view;
+            public void onGroupExpand(int groupPosition) {
+                Toast.makeText(getApplicationContext(),
+                        expandableListTitle.get(groupPosition) + " List Expanded.",
+                        Toast.LENGTH_SHORT).show();
             }
-        };
-        mFinalList.setAdapter(adapter);
+        });
 
-        mFinalList.setOnItemClickListener(new ListView.OnItemClickListener() {
+        expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+
             @Override
-            public void onItemClick(AdapterView<?> a, View v, int i, long l) {
-                // handle click here
-                //Intent intent = new Intent(this, PersonalOverview.class);
-                System.out.println("hey");
+            public void onGroupCollapse(int groupPosition) {
+                Toast.makeText(getApplicationContext(),
+                        expandableListTitle.get(groupPosition) + " List Collapsed.",
+                        Toast.LENGTH_SHORT).show();
 
-                Object o = mFinalList.getItemAtPosition(i);
-                List userList = (List)o;
+            }
+        });
 
-                System.out.println(userList);
-
-                //startActivity(intent);
-
-
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        expandableListTitle.get(groupPosition)
+                                + " -> "
+                                + expandableListDetail.get(
+                                expandableListTitle.get(groupPosition)).get(
+                                childPosition), Toast.LENGTH_SHORT
+                ).show();
+                return false;
             }
         });
 

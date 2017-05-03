@@ -96,6 +96,14 @@ public class MyList extends Application {
 
     }
 
+    public static int numSelected(int p) {
+        int count = 0;
+        for (String name : tracker.keySet()) {
+            if (tracker.get(name)[p]) count++;
+        }
+        return count;
+    }
+
     public static boolean[] getTracker(String name){
         return tracker.get(name);
     }
