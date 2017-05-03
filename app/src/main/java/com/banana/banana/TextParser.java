@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,6 @@ public class TextParser {
     public static List<List<String>> parse(String input) {
         Log.v(TAG, "Here comes the input: ");
         Log.v(TAG, input);
-        //String testInput = "Item 3.99 \n poop 3.45 \n peepee 4.00";
         List<String> lines = new ArrayList<>(Arrays.asList(input.split("\n")));
         //return realParse(lines);
         Log.v(TAG, "LINES INCOMING");
@@ -31,7 +31,7 @@ public class TextParser {
     private static List<List<String>> fakeParse(List<String> lines) {
         List<List<String>> checklistOutput = new ArrayList<>();
         for(String line: lines) {
-            List<String> words = new ArrayList<>(Arrays.asList(line.split(" "))); // SHIT ASSUMPTION: ITEMS SEPARATED BY 1 SPACE
+            List<String> words = new ArrayList<>(Arrays.asList(line.split(" "))); // ASSUMPTION: ITEMS SEPARATED BY 1 SPACE
             if(words.size() >= 3) {
                 List<String> outputLine = new ArrayList<>();
                 outputLine.add(0, words.get(0));
@@ -50,13 +50,13 @@ public class TextParser {
 
         // Get the set of words in each line of the receipt
         for(String line: lines) {
-            List<String> words = new ArrayList<>(Arrays.asList(line.split(" "))); // ASSUMPTION: ITEMS SEPARATED BY 2 OR MORE SPACES
+            List<String> words = new ArrayList<>(Arrays.asList(line.split(" "))); // ASSUMPTION: ITEMS SEPARATED BY 1 SPACE
 
             // Determine and store the type of each of those words (price, title, or amount)
-            Map<String, String> curTypes = new HashMap<>();
+            Map<String, String> curTypes = new LinkedHashMap<>();
             for(String word : words) {
                 String category = categorizeWord(word);
-                curTypes.put(word, category);
+                curTypes.put(word.replaceAll("," , "."), category);
             }
 
             // For each line, store type counts in larger-scoped variable
@@ -67,14 +67,14 @@ public class TextParser {
         for(Map<String, String> typeSet : wordTypes){
 
             // Only use lines that have a price in them
-            if (typeSet.values().contains("Price")) {
+            //if (typeSet.values().contains("Price")) {
 
                 // Take the elements of a valid line and store them in the following order:
                 // 1: Title  2: Quantity  3: Price
                 List<String> outputLine = new ArrayList<>();
                 outputLine.add(0, "");
                 outputLine.add(1, "1");
-                outputLine.add(2, "NULL");
+                outputLine.add(2, "0.00");
                 for (String word : typeSet.keySet()) {
                     if(typeSet.get(word).equals("Title")) {
                         outputLine.set(0, outputLine.get(0) + " " + word);
@@ -88,14 +88,14 @@ public class TextParser {
                     }
                 }
                 checklistOutput.add(outputLine);
-            }
+            //}
         }
 
         return checklistOutput;
     }
 
     private static String categorizeWord(String word) {
-        if(word.contains(String.valueOf('$')) || word.contains(String.valueOf('.'))) {
+        if(word.contains(String.valueOf('$')) || word.contains(String.valueOf('.')) || word.contains(String.valueOf(','))) {
             return "Price";
         }
         else if (isNumeric(word)) {
