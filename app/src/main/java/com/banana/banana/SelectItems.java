@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,6 +39,9 @@ public class SelectItems extends AppCompatActivity {
     private List<String> addrs;
     private List<String> phNums;
     private List<String> both;
+
+    private ArrayAdapter<String> adapter;
+    private SearchView sv;
 //    private ArrayList<String> newNames = new ArrayList<>();
 
 
@@ -61,6 +65,8 @@ public class SelectItems extends AppCompatActivity {
 
         // Find the list view
         this.contNames = (ListView) findViewById(R.id.contNames);
+
+        sv = (SearchView) findViewById(R.id.search);
 
         // Read and show the contacts
         showContacts();
@@ -93,6 +99,7 @@ public class SelectItems extends AppCompatActivity {
                 }
                 // TODO: print toaster message for user already exist in else
                 System.out.println(conts.get(position));
+
             }
         });
 
@@ -161,8 +168,24 @@ public class SelectItems extends AppCompatActivity {
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
             getContactNames();
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_selectable_list_item, both);
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_selectable_list_item, both);
             contNames.setAdapter(adapter);
+
+            // implement search function
+            sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    adapter.getFilter().filter(newText);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+            });
         }
     }
 
