@@ -16,12 +16,21 @@ public class MyList extends Application {
     private HashMap<String, List<String> > split = new HashMap<>();
     private String currentUser = "Master";
     private int dataLength;
+    private HashMap<String,Integer> items = new HashMap<>();
 
     public HashMap<String, List<String>> getList() {
         return split;
     }
     public void addPair(String name, List<String> stuff) {
+
         split.put(name, stuff);
+        for (String menu : stuff) {
+            if (items.containsKey(menu)) {
+                int val = items.get(menu);
+                items.put(menu,val+1);
+            }
+            else items.put(menu,1);
+        }
     }
 
     public void printList() {
@@ -71,6 +80,26 @@ public class MyList extends Application {
         return currentUser;
     }
 
+    private static HashMap<String, Integer> itemTracker = new HashMap<>();
+    public static void addBuyer(String item) {
+        if (itemTracker.containsKey(item)) {
+            int val = itemTracker.get(item);
+            itemTracker.put(item, val+1);
+        }
+        else itemTracker.put(item, 1);
+    }
+
+    public static void removeBuyer(String item) {
+        if (itemTracker.containsKey(item)) {
+            int val = itemTracker.get(item);
+            itemTracker.put(item, val-1);
+        }
+        else System.out.println("Error: item not in menu");
+    }
+
+    public static int numBuyers(String item) {
+        return itemTracker.get(item);
+    }
 
     // **Tracker**
 
@@ -94,6 +123,14 @@ public class MyList extends Application {
             System.out.println("shitt" + tracker.get(name).length);
         }
 
+    }
+
+    public static int numSelected(int p) {
+        int count = 0;
+        for (String name : tracker.keySet()) {
+            if (tracker.get(name)[p]) count++;
+        }
+        return count;
     }
 
     public static boolean[] getTracker(String name){
