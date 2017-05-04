@@ -120,22 +120,28 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 view.getContext().startActivity(intent);
             } else if (mode == PICK_ITEMS){
 
-                // count number of people that have picked p
+                // count number of people that have picked p??
                 int p = getLayoutPosition();
                 Order item = (Order) OrderData.getListData().get(p);
 
-                System.out.println("IM HEREEEEEE");
+                System.out.println("IM HEREEEEEE ");
                 boolean[] tracker = MyList.getTracker(user);
 
                 if (!tracker[p]){
                     MyList.isSelected(user, p, true);
                     card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
                     System.out.println("1");
+                    MyList.addBuyer(item.getItem());
+                    int buyers = MyList.numBuyers(item.getItem());
+                    System.out.println("NUMBER     "+ buyers);
                 }
                 else{
                     MyList.isSelected(user, p, false);
                     card.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
                     System.out.println("2");
+                    MyList.removeBuyer(item.getItem());
+                    int buyers = MyList.numBuyers(item.getItem());
+                    System.out.println("NUMBER     "+ buyers);
                 }
 //                if (!view.isSelected()){
 //                    MyList.isSelected(user, p, true);

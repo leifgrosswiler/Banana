@@ -8,7 +8,7 @@ public class Order {
 
     private String item;
     private String price;
-//    private ArrayList<String> users;
+    //private ArrayList<String> users;
 
 
     public Order(String item, String price) {
@@ -32,8 +32,13 @@ public class Order {
     public String getPrice() {
         return price;
     }
-//
-//    public void add(String name){ users.add(name); }
+
+    public String getPricePP(int num) {
+        double intPrice = Double.parseDouble(price);
+        double pricePP = intPrice/(double)num;
+        return Double.toString(pricePP);
+    }
+
 //    public void remove(String name) {users.remove(name); }
 //    public boolean isSelected(String name){ return users.contains(name);}
 

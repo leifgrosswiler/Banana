@@ -31,8 +31,8 @@ public class ExpandableListDataPump {
             List<Order> orders = ((MyList) activity.getApplication()).getUserOrders(s);
             for (Order order : orders) {
                 StringBuilder sb = new StringBuilder("");
-                sb.append("\n" + order.getItem() + "\t$" + order.getPrice());
-                totalprice += Double.parseDouble(order.getPrice());
+                sb.append("\n" + order.getItem() + "\t$" + order.getPricePP(MyList.numBuyers(order.getItem())));
+                totalprice += Double.parseDouble(order.getPricePP(MyList.numBuyers(order.getItem())));
                 user.add(sb.toString());
 
                 user.add("Total:\t$" + totalprice);
