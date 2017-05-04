@@ -52,6 +52,7 @@ public class OpenCamera extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
+
     private String rawText = "";
     private String processedText = "";
     final int REQUEST_TAKE_PHOTO = 1;
