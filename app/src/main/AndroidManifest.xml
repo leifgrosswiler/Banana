@@ -51,6 +51,7 @@
         <activity android:name=".MainReceipt" />
         <activity android:name=".Summary" />
         <activity android:name=".PickItems"></activity>
+        <activity android:name=".TextMain"></activity>
     </application>
 
 </manifest>

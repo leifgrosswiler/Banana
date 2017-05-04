@@ -2,6 +2,7 @@ package com.banana.banana;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -9,6 +10,8 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.hardware.Camera;
+import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,8 +21,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -34,11 +42,13 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +69,16 @@ public class OpenCamera extends AppCompatActivity {
     private static String mCurrentPhotoPath;
     private Uri photoURI;
 
+    private SurfaceView preview=null;
+    private SurfaceHolder previewHolder=null;
+    private Camera camera=null;
+    private boolean inPreview=false;
+    private boolean cameraConfigured=false;
+    private Camera.PictureCallback jpegCallback;
+    private PackageManager pm;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+
+
     public static final String DATA_PATH = Environment
             .getExternalStorageDirectory().toString() + "/SimpleAndroidOCR/";
     // You should have the trained data file in assets folder
@@ -74,6 +94,28 @@ public class OpenCamera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
+        preview=(SurfaceView)findViewById(R.id.cameraView);
+
+        // Get proper permissions
+        pm = this.getPackageManager();
+        int hasPerm = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        } else {
+            setThingsUp();
+        }
+
+    }
+
+    private void setThingsUp() {
+
+        previewHolder=preview.getHolder();
+        previewHolder.addCallback(surfaceCallback);
+        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -130,6 +172,113 @@ public class OpenCamera extends AppCompatActivity {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
         }
+
+        jpegCallback = new Camera.PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {
+                FileOutputStream outStream = null;
+                try {
+//                    File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+//                            Environment.DIRECTORY_DCIM), "Camera");
+//                    storageDir.mkdir();
+//                    mCurrentPhotoPath = storageDir.getAbsolutePath() + "/Data.jpg";
+//                    Log.d("Log", "onPictureTaken - wrote bytes: " + data.length);
+//                    mCurrentPhotoPath = "file:" + mCurrentPhotoPath;
+//                    Uri imageUri = Uri.parse(mCurrentPhotoPath);
+//                    File mFile = new File(imageUri.getPath());
+                    File photoFile = createImageFile();
+                    System.out.println(photoFile.exists() + " " + photoFile.toString());
+//                    outStream = new FileOutputStream(mCurrentPhotoPath);
+                    outStream = new FileOutputStream(photoFile.getAbsoluteFile());
+                    outStream.write(data);
+                    outStream.close();
+                    Log.v(TAG, "entering crop");
+                    photoURI = FileProvider.getUriForFile(OpenCamera.this,
+                            BuildConfig.APPLICATION_ID + ".provider",
+                            photoFile);
+                    performCrop(photoFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                }
+                Toast.makeText(getApplicationContext(), "Picture Saved", Toast.LENGTH_SHORT).show();
+    //                refreshCamera();
+            }
+        };
+
+        preview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (camera != null) {
+                    camera.cancelAutoFocus();
+//                    Rect focusRect = calculateTapArea(event.getX(), event.getY(), 1f);
+                    android.graphics.Rect focusRect = new android.graphics.Rect((int)event.getX(), (int)event.getY(), 30, 30);
+
+                    Camera.Parameters parameters = camera.getParameters();
+                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    }
+                    if (parameters.getMaxNumFocusAreas() > 0) {
+                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
+                        mylist.add(new Camera.Area(focusRect, 1000));
+                        parameters.setFocusAreas(mylist);
+                    }
+
+                    try {
+                        camera.cancelAutoFocus();
+                        camera.setParameters(parameters);
+                        camera.startPreview();
+                        camera.autoFocus(new Camera.AutoFocusCallback() {
+                            @Override
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                    Camera.Parameters parameters = camera.getParameters();
+                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                    if (parameters.getMaxNumFocusAreas() > 0) {
+                                        parameters.setFocusAreas(null);
+                                    }
+                                    camera.setParameters(parameters);
+                                    camera.startPreview();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            }
+        });
+    }
+
+    public void captureImage(View v) throws IOException {
+        //take the picture
+        camera.takePicture(null, null, jpegCallback);
+    }
+
+    public void refreshCamera() {
+        if (previewHolder.getSurface() == null) {
+            // preview surface does not exist
+            return;
+        }
+        // stop preview before making changes
+        try {
+            camera.stopPreview();
+        } catch (Exception e) {
+            // ignore: tried to stop a non-existent preview
+        }
+
+        // set preview size and make any resize, rotate or
+        // reformatting changes here
+        // start preview with new settings
+        try {
+            camera.setPreviewDisplay(previewHolder);
+            camera.startPreview();
+        } catch (Exception e) {
+
+        }
     }
 
     private void refineImg(Uri fileUri) {
@@ -140,8 +289,9 @@ public class OpenCamera extends AppCompatActivity {
         Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
         Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,8);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
-        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-        croppedView.setImageURI(fileUri);
+//        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+//        croppedView.setImageURI(fileUri);
+        sendMessage(takePictureButton);
     }
 
     @Override
@@ -150,6 +300,16 @@ public class OpenCamera extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 takePictureButton.setEnabled(true);
+            }
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
+            int hasPerm = pm.checkPermission(
+                    Manifest.permission.CAMERA,
+                    this.getPackageName());
+            if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Requires Camera Permission", Toast.LENGTH_SHORT).show();
+            } else {
+                setContentView(R.layout.activity_open_camera);
+                setThingsUp();
             }
         }
     }
@@ -188,6 +348,7 @@ public class OpenCamera extends AppCompatActivity {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
             Log.v(TAG, "entering crop");
+            System.out.println("Hi " + mFile.getAbsolutePath());
             performCrop(mFile);
 
         }
@@ -198,8 +359,11 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-            croppedView.setImageURI(imageUri);
+
+            // If photo is discarded, return to home screen
+            if (data == null) return;
+//            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+//            croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
 
@@ -223,9 +387,10 @@ public class OpenCamera extends AppCompatActivity {
 
         Log.v(TAG, mCurrentPhotoPath);
         Log.v(TAG, imageFile.getPath());
+//        mCurrentPhotoPath = "file:" + imageFile.getAbsolutePath();
 
-        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-        croppedView.setImageURI(photoURI);
+//        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+//        croppedView.setImageURI(photoURI);
 
         try {
             Log.v(TAG, "in crop");
@@ -297,6 +462,7 @@ public class OpenCamera extends AppCompatActivity {
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         //cropFile.getPath()
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
+        Log.v("ALOS IMPORTANT", mCurrentPhotoPath);
         if (bitmap == null) {
             Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
             return;
@@ -387,4 +553,134 @@ public class OpenCamera extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        camera=Camera.open();
+        camera.
+        startPreview();
+    }
+
+    @Override
+    public void onPause() {
+        if (inPreview) {
+            camera.stopPreview();
+        }
+
+        camera.release();
+        camera=null;
+        inPreview=false;
+
+        super.onPause();
+    }
+
+    private Camera.Size getBestPreviewSize(int width, int height,
+                                           Camera.Parameters parameters) {
+        Camera.Size result=null;
+
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            if (size.width<=width && size.height<=height) {
+                if (result==null) {
+                    result=size;
+                }
+                else {
+                    int resultArea=result.width*result.height;
+                    int newArea=size.width*size.height;
+
+                    if (newArea>resultArea) {
+                        result=size;
+                    }
+                }
+            }
+        }
+
+        return(result);
+    }
+
+    private void initPreview(int width, int height) {
+        if (camera!=null && previewHolder.getSurface()!=null) {
+            try {
+                camera.setPreviewDisplay(previewHolder);
+            }
+            catch (Throwable t) {
+                Log.e("CD-surfaceCallback",
+                        "Exception in setPreviewDisplay()", t);
+                Toast
+                        .makeText(OpenCamera.this, t.getMessage(), Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            if (!cameraConfigured) {
+                Camera.Parameters parameters=camera.getParameters();
+//                Camera.Size size=getBestPreviewSize(width, height,
+//                        parameters);
+                List<Camera.Size> sizes=parameters.getSupportedPreviewSizes();
+                Camera.Size size = sizes.get(0);
+
+                if (size!=null) {
+                    parameters.setPreviewSize(size.width, size.height);
+                    camera.setParameters(parameters);
+                    cameraConfigured=true;
+                }
+            }
+        }
+    }
+
+    private void startPreview() {
+        if (cameraConfigured && camera!=null) {
+            camera.startPreview();
+            camera.setDisplayOrientation(0);
+            inPreview=true;
+        }
+    }
+
+    SurfaceHolder.Callback surfaceCallback=new SurfaceHolder.Callback() {
+        public void surfaceCreated(SurfaceHolder holder) {
+            // no-op -- wait until surfaceChanged()
+        }
+
+        public void surfaceChanged(SurfaceHolder holder,
+                                   int format, int width,
+                                   int height) {
+            initPreview(width, height);
+            startPreview();
+        }
+
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            // no-op
+        }
+    };
+
+//    Camera.AutoFocusCallback autoFocus=new Camera.AutoFocusCallback() {
+//        Camera.ShutterCallback shutterCallback =new Camera.ShutterCallback() {
+//
+//            @Override
+//            public void onShutter() {
+//                AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//                mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
+//
+//            }
+//        };
+//        Camera.PictureCallback photoCallback = new Camera.PictureCallback() {
+//            @Override
+//            public void onPictureTaken(final byte[] data, final Camera camera) {
+//                new Thread() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            Thread.sleep(1000);
+//                        } catch (Exception ex) {}
+//                    }
+//                }.start();
+//            }
+//        };
+//
+//        @Override
+//        public void onAutoFocus(boolean success, Camera camera) {
+//            camera.takePicture(shutterCallback,null, null, photoCallback);
+//        }
+//    };
+
 }
