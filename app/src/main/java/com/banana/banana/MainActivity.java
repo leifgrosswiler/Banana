@@ -124,6 +124,10 @@ public class MainActivity extends Activity
         expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
 
+        int count = expandableListAdapter.getGroupCount();
+        for ( int i = 0; i < count; i++ )
+            expandableListView.expandGroup(i);
+
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
@@ -144,8 +148,6 @@ public class MainActivity extends Activity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-
-
     }
 
     // Function for finding text contacts and sending messages

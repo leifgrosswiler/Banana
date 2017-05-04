@@ -203,4 +203,14 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        startActivity(new Intent(this, OpenCamera.class));
+        finish();
+
+    }
+
 }
