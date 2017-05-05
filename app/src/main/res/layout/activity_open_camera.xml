@@ -7,6 +7,21 @@
     android:layout_height="match_parent"
     tools:context="com.banana.banana.OpenCamera">
 
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_width="65dp"
+        android:layout_height="551dp"
+        android:gravity="center"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"/>
+    </RelativeLayout>
+
 
     <Button
         android:id="@+id/button_image"
@@ -22,13 +37,15 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
-        android:layout_marginTop="36dp" />
+        android:layout_marginTop="36dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
 
     <ImageView
         android:id="@+id/imageview"
-        android:layout_width="223dp"
-        android:layout_height="164dp"
+        android:layout_width="407dp"
+        android:layout_height="692dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
         android:visibility="visible"
@@ -62,7 +79,9 @@
         android:text="Next"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_image" />
+        app:layout_constraintTop_toBottomOf="@+id/button_image"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
 
 </android.support.constraint.ConstraintLayout>

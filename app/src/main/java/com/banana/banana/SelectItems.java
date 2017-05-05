@@ -35,7 +35,7 @@ public class SelectItems extends AppCompatActivity {
 
     //Contacts stuff
     private ListView contNames;
-    private List<CoolList> everything;
+    public static List<CoolList> everything;
 
     private ArrayAdapter<CoolList> adapter;
     private SearchView sv;
@@ -117,7 +117,7 @@ public class SelectItems extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            getContactNames();
+            //getContactNames();
             adapter = new ArrayAdapter<CoolList>(this, android.R.layout.simple_selectable_list_item, everything);
             contNames.setAdapter(adapter);
 
@@ -159,90 +159,90 @@ public class SelectItems extends AppCompatActivity {
      *
      * @return a list of names.
      */
-    private void getContactNames() {
-        List<CoolList> all = new ArrayList<>();
-
-        // Get the ContentResolver
-        ContentResolver cr = getContentResolver();
-        // Get the Cursor of all the contacts
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-
-        // Move the cursor to first. Also check whether the cursor is empty or not.
-        if (cursor.moveToFirst()) {
-            // Iterate through the cursor
-            int i = 0;
-            do {
-                // Get the contacts name
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-
-                // Get the contacts email
-                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                //Only adds contact if an email address or phone numbers is associated with it
-                if (phoneCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
-                    if (emailCursor.moveToNext()) {
-                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        all.get(i).add(email);
-                        all.get(i).add(number);
-                    } else {
-                        all.get(i).add(null);
-                        all.get(i).add(number);
-                    }
-                    i++;
-                } else if (emailCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                    all.get(i).add(email);
-                    i++;
-                }
-            } while (cursor.moveToNext());
-        }
-        // Close the cursor
-        cursor.close();
-
-        everything = all;
-    }
+//    private void getContactNames() {
+//        List<CoolList> all = new ArrayList<>();
+//
+//        // Get the ContentResolver
+//        ContentResolver cr = getContentResolver();
+//        // Get the Cursor of all the contacts
+//        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+//
+//        // Move the cursor to first. Also check whether the cursor is empty or not.
+//        if (cursor.moveToFirst()) {
+//            // Iterate through the cursor
+//            int i = 0;
+//            do {
+//                // Get the contacts name
+//                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//
+//                // Get the contacts email
+//                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+//                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
+//
+//                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+//                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
+//
+//                //Only adds contact if an email address or phone numbers is associated with it
+//                if (phoneCursor.moveToNext()) {
+//                    all.add(new CoolList());
+//                    all.get(i).add(name);
+//                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+//                    if (emailCursor.moveToNext()) {
+//                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                        all.get(i).add(email);
+//                        all.get(i).add(number);
+//                    } else {
+//                        all.get(i).add(null);
+//                        all.get(i).add(number);
+//                    }
+//                    i++;
+//                } else if (emailCursor.moveToNext()) {
+//                    all.add(new CoolList());
+//                    all.get(i).add(name);
+//                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                    all.get(i).add(email);
+//                    i++;
+//                }
+//            } while (cursor.moveToNext());
+//        }
+//        // Close the cursor
+//        cursor.close();
+//
+//        everything = all;
+//    }
 
     // Specific String List built for this class to use in the list view (uses specific toString method)
-    private class CoolList extends ArrayList {
-
-        ArrayList<String> alist;
-
-        public CoolList() {
-            alist = new ArrayList<String>();
-        }
-
-        // Special toString function for this class
-        @Override
-        public String toString() {
-            String s = "";
-            for (int i = 0; i < alist.size(); i++) {
-                // Doesn't add if the item is null (this could only be the email address currently)
-                if (alist.get(i) != null)
-                    s = s + alist.get(i) + "\n";
-            }
-            return s;
-        }
-
-        public void add(String e) {
-            alist.add(e);
-        }
-
-        @Override
-        public String get(int ind) {
-            return alist.get(ind);
-        }
-
-    }
+//    public class CoolList extends ArrayList {
+//
+//        ArrayList<String> alist;
+//
+//        public CoolList() {
+//            alist = new ArrayList<String>();
+//        }
+//
+//        // Special toString function for this class
+//        @Override
+//        public String toString() {
+//            String s = "";
+//            for (int i = 0; i < alist.size(); i++) {
+//                // Doesn't add if the item is null (this could only be the email address currently)
+//                if (alist.get(i) != null)
+//                    s = s + alist.get(i) + "\n";
+//            }
+//            return s;
+//        }
+//
+//        public void add(String e) {
+//            alist.add(e);
+//        }
+//
+//        @Override
+//        public String get(int ind) {
+//            return alist.get(ind);
+//        }
+//
+//    }
 
 }
 
