@@ -1,12 +1,15 @@
 package com.banana.banana;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -16,6 +19,8 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -23,7 +28,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -56,14 +63,17 @@ import java.util.List;
 import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
+import static com.banana.banana.SelectItems.everything;
+
 public class OpenCamera extends AppCompatActivity {
 
     public static final String PACKAGE_NAME = "com.datumdroid.android.ocr.simple";
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     private Button takePictureButton;
-    private String recognizedText1 = "";
-    private String recognizedText0 = "";
+
+    private String rawText = "";
+    private String processedText = "";
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
@@ -116,6 +126,10 @@ public class OpenCamera extends AppCompatActivity {
         previewHolder=preview.getHolder();
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        if (everything == null)
+            getContactNames();
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
 
 
@@ -190,6 +204,7 @@ public class OpenCamera extends AppCompatActivity {
                     File photoFile = createImageFile();
                     System.out.println(photoFile.exists() + " " + photoFile.toString());
 //                    outStream = new FileOutputStream(mCurrentPhotoPath);
+
                     outStream = new FileOutputStream(photoFile.getAbsoluteFile());
                     outStream.write(data);
                     outStream.close();
@@ -209,54 +224,51 @@ public class OpenCamera extends AppCompatActivity {
             }
         };
 
-        preview.requestFocusFromTouch();
-//        preview.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//
-////                if (camera != null) {
-////                    camera.cancelAutoFocus();
-//////                    Rect focusRect = calculateTapArea(event.getX(), event.getY(), 1f);
-////                    android.graphics.Rect focusRect = new android.graphics.Rect((int)event.getX(), (int)event.getY(), 30, 30);
-////
-////                    Camera.Parameters parameters = camera.getParameters();
-////                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
-////                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-////                    }
-////                    if (parameters.getMaxNumFocusAreas() > 0) {
-////                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
-////                        mylist.add(new Camera.Area(focusRect, 1000));
-////                        parameters.setFocusAreas(mylist);
-////                    }
-////
-////                    try {
-////                        camera.cancelAutoFocus();
-////                        camera.setParameters(parameters);
-////                        camera.startPreview();
-////                        camera.autoFocus(new Camera.AutoFocusCallback() {
-////                            @Override
-////                            public void onAutoFocus(boolean success, Camera camera) {
-////                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
-////                                    Camera.Parameters parameters = camera.getParameters();
-////                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-////                                    if (parameters.getMaxNumFocusAreas() > 0) {
-////                                        parameters.setFocusAreas(null);
-////                                    }
-////                                    camera.setParameters(parameters);
-////                                    camera.startPreview();
-////                                }
-////                            }
-////                        });
-////                    } catch (Exception e) {
-////                        e.printStackTrace();
-////                    }
-////                }
-////                preview.setFocusableInTouchMode(true);
-////                preview.setFocusable(true);
-////                System.out.println(preview.requestFocus());
-//                return true;
-//            }
-//        });
+        preview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (camera != null) {
+                    camera.cancelAutoFocus();
+//                    Rect focusRect = calculateTapArea(event.getX(), event.getY(), 1f);
+                    System.out.println(event.getX() + " " + event.getY());
+                    android.graphics.Rect focusRect = new android.graphics.Rect((int)event.getX()-15, (int)event.getY()-15, (int)event.getX()+15, (int)event.getY()+15);
+
+                    Camera.Parameters parameters = camera.getParameters();
+                    List<String> focusModes = parameters.getSupportedFocusModes();
+                    System.out.println(parameters);
+                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    }
+                    if (parameters.getMaxNumFocusAreas() > 0) {
+                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
+                        mylist.add(new Camera.Area(focusRect, 1000));
+                        parameters.setFocusAreas(mylist);
+                    }
+                    try {
+                        camera.cancelAutoFocus();
+                        camera.setParameters(parameters);
+                        camera.startPreview();
+                        camera.autoFocus(new Camera.AutoFocusCallback() {
+                            @Override
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                    Camera.Parameters parameters = camera.getParameters();
+                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                    if (parameters.getMaxNumFocusAreas() > 0) {
+                                        parameters.setFocusAreas(null);
+                                    }
+                                    camera.setParameters(parameters);
+                                    camera.startPreview();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            }
+        });
     }
 
     public void captureImage(View v) throws IOException {
@@ -292,8 +304,9 @@ public class OpenCamera extends AppCompatActivity {
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,8);
+//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
+        Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
 //        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
 //        croppedView.setImageURI(fileUri);
@@ -372,8 +385,9 @@ public class OpenCamera extends AppCompatActivity {
 //            croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
-
             onPhotoTaken(true);
+            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
+            Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + processedText);
         }
     }
 
@@ -481,23 +495,23 @@ public class OpenCamera extends AppCompatActivity {
 
             Log.v(TAG, "Orient: " + exifOrientation);
 
-            int rotate = 0;
+            int rotate = 90;
 
             switch (exifOrientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
                     rotate = 180;
                     break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
+                case ExifInterface.ORIENTATION_ROTATE_180:
                     rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 0;
                     break;
             }
 
             Log.v(TAG, "Rotation: " + rotate);
 
-            if (rotate != 0) {
+            if (rotate != 90) {
 
                 // Getting width & height of the given image.
                 int w = bitmap.getWidth();
@@ -513,7 +527,7 @@ public class OpenCamera extends AppCompatActivity {
 
         }
         catch (Exception e) {
-            System.out.println("FUckme");
+            System.out.println(e.toString());
         }
         //_image.setImageBitmap( bitmap );
         //ImageView imageView = (ImageView) findViewById(R.id.imageview);
@@ -524,22 +538,21 @@ public class OpenCamera extends AppCompatActivity {
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
-        System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
+        //System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
 
         baseApi.end();
 
         //Log.v(TAG, "Input in OpenCamera:");
         if (test) {
-            Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + recognizedText);
+            processedText = recognizedText;
         } else {
-            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + recognizedText);
+            rawText = recognizedText;
         }
         //Log.v(TAG, parse(recognizedText).toString());
         if (!test) {
             parseResult = parse(recognizedText);
             setFoodAndPrice();
         }
-
     }
 
     /** Called when the user taps the Send button */
@@ -637,9 +650,53 @@ public class OpenCamera extends AppCompatActivity {
     private void startPreview() {
         if (cameraConfigured && camera!=null) {
             camera.startPreview();
-            camera.setDisplayOrientation(0);
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+            int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+            int degrees = 0;
+            switch (rotation) {
+                case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
+                case Surface.ROTATION_90: degrees = 90; break; //Landscape left
+                case Surface.ROTATION_180: degrees = 180; break;//Upside down
+                case Surface.ROTATION_270: degrees = 270; break;//Landscape right
+            }
+            int rotate = (info.orientation - degrees + 360) % 360;
+
+//STEP #2: Set the 'rotation' parameter
+            Camera.Parameters params = camera.getParameters();
+            params.setRotation(rotate);
+            camera.setParameters(params);
+            setCameraDisplayOrientation(this, 0, camera);
             inPreview=true;
         }
+    }
+
+    public static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        int degrees = 0;
+
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
     }
 
     SurfaceHolder.Callback surfaceCallback=new SurfaceHolder.Callback() {
@@ -689,4 +746,58 @@ public class OpenCamera extends AppCompatActivity {
 //        }
 //    };
 
+    private void getContactNames() {
+        List<CoolList> all = new ArrayList<>();
+
+        // Get the ContentResolver
+        ContentResolver cr = getContentResolver();
+        // Get the Cursor of all the contacts
+        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+
+        // Move the cursor to first. Also check whether the cursor is empty or not.
+        if (cursor.moveToFirst()) {
+            // Iterate through the cursor
+            int i = 0;
+            do {
+                // Get the contacts name
+                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+
+                // Get the contacts email
+                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
+
+                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
+
+                //Only adds contact if an email address or phone numbers is associated with it
+                if (phoneCursor.moveToNext()) {
+                    all.add(new CoolList());
+                    all.get(i).add(name);
+                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+                    if (emailCursor.moveToNext()) {
+                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                        all.get(i).add(email);
+                        all.get(i).add(number);
+                    } else {
+                        all.get(i).add(null);
+                        all.get(i).add(number);
+                    }
+                    i++;
+                } else if (emailCursor.moveToNext()) {
+                    all.add(new CoolList());
+                    all.get(i).add(name);
+                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                    all.get(i).add(email);
+                    i++;
+                }
+                emailCursor.close();
+                phoneCursor.close();
+            } while (cursor.moveToNext());
+        }
+        // Close the cursor
+        cursor.close();
+
+        everything = all;
+    }
 }

@@ -18,8 +18,10 @@ import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -42,6 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -59,7 +62,7 @@ public class MainActivity extends Activity
 
     GoogleAccountCredential mCredential;
     private Button mSendRequests;
-    private ListView mFinalList;
+    //private ListView mFinalList;
     private PackageManager pm;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -71,6 +74,11 @@ public class MainActivity extends Activity
     private static final String[] SCOPES = {GmailScopes.MAIL_GOOGLE_COM};
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
+
+    ExpandableListView expandableListView;
+    ExpandableListAdapter expandableListAdapter;
+    List<String> expandableListTitle;
+    HashMap<String, List<String>> expandableListDetail;
 
     /**
      * Create the final activity.
@@ -101,50 +109,47 @@ public class MainActivity extends Activity
                 mSendRequests.setEnabled(false);
                 PerformTextOperation();
                 PerformEmailOperation();
+                Toast.makeText(getApplicationContext(), "Requests Sent",
+                        Toast.LENGTH_LONG).show();
                 mSendRequests.setEnabled(true);
             }
         });
 
         // Set up the overview list
-        mFinalList = (ListView) findViewById(R.id.finalList);
+        expandableListView = (ExpandableListView) findViewById(R.id.finalList);
+
         Set<String> userSet = ((MyList) getApplication()).getUsers();
-        List<String> userList = new ArrayList<String>();
-        for (String s : userSet) {
-            StringBuilder sb = new StringBuilder("");
-            sb.append(s + "   ");
-            sb.append(((MyList) getApplication()).getMethod(s));
-            List<Order> orders = ((MyList) getApplication()).getUserOrders(s);
-            for (Order order : orders)
-                sb.append("\n" + order.getItem() + " " + order.getPrice());
-            userList.add(sb.toString());
-        }
 
-        // Create unique list heights for overview list
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_selectable_list_item, userList) {
+        ExpandableListDataPump pump = new ExpandableListDataPump(this);
+        expandableListDetail = pump.getData(userSet);
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
+        expandableListView.setAdapter(expandableListAdapter);
+
+        int count = expandableListAdapter.getGroupCount();
+        for ( int i = 0; i < count; i++ )
+            expandableListView.expandGroup(i);
+
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                // Get the current item from ListView
-                View view = super.getView(position, convertView, parent);
-
-                // Get the Layout Parameters for ListView Current Item View
-                ViewGroup.LayoutParams params = view.getLayoutParams();
-
-                // Set the height of the Item View
-                params.height = 0;
-                view.setLayoutParams(params);
-
-                return view;
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        expandableListTitle.get(groupPosition)
+                                + " -> "
+                                + expandableListDetail.get(
+                                expandableListTitle.get(groupPosition)).get(
+                                childPosition), Toast.LENGTH_SHORT
+                ).show();
+                return false;
             }
-        };
-        mFinalList.setAdapter(adapter);
+        });
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-
-
     }
 
     // Function for finding text contacts and sending messages
@@ -164,7 +169,7 @@ public class MainActivity extends Activity
                     list = ((MyList) getApplication()).getUserOrders(name);
                     if (list.size() == 0)
                         continue;
-                    String header = ("You owe me for the following items!");
+                    String header = ("You owe me for:");
                     SmsManager sms = SmsManager.getDefault();
                     sms.sendTextMessage(phoneNo, null, header.toString(), null, null);
                     for (Order order : list) {
@@ -172,10 +177,6 @@ public class MainActivity extends Activity
                         sms.sendTextMessage(phoneNo, null, body, null, null);
                     }
                 }
-            }
-            if (names.size() != 0) {
-                Toast.makeText(getApplicationContext(), "SMS sent.",
-                        Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(getApplicationContext(), "Need SMS Permissions.",
@@ -538,7 +539,7 @@ public class MainActivity extends Activity
                 }
                 String email = ((MyList) getApplication()).getMethod(name);
                 StringBuilder body = new StringBuilder();
-                body.append("You owe me for the following items!\n");
+                body.append("You owe me for:\n");
                 for (Order order : list)
                     body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
@@ -546,8 +547,6 @@ public class MainActivity extends Activity
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
                 try {
                     sendMessage(service, "me", mimeMessage);
-                    Toast.makeText(getApplicationContext(), "Gmail sent.",
-                            Toast.LENGTH_LONG).show();
                 } catch (UserRecoverableAuthIOException e) {
                     startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
                 } catch (Exception e) {

@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -34,10 +35,10 @@ public class SelectItems extends AppCompatActivity {
 
     //Contacts stuff
     private ListView contNames;
-    private List<String> conts;
-    private List<String> addrs;
-    private List<String> phNums;
-    private List<String> both;
+    public static List<CoolList> everything;
+
+    private ArrayAdapter<CoolList> adapter;
+    private SearchView sv;
 //    private ArrayList<String> newNames = new ArrayList<>();
 
 
@@ -50,49 +51,37 @@ public class SelectItems extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_items);
 
-//        Intent intentReceive = getIntent();
-//        //String tmp = (String) intentReceive.getStringExtra(EditRecepit.DATAMODELS_ID);
-//        dataModels = (ArrayList<OrderOld>) intentReceive.getSerializableExtra(EditReceipt.DATAMODELS_ID);
-
-//        // LISTVIEW
-//        listView = (ListView) findViewById(R.id.checkList);
-//        SelectItemsListAdapter adapter = new SelectItemsListAdapter(dataModels, getApplicationContext());
-//        listView.setAdapter(adapter);
-
         // Find the list view
         this.contNames = (ListView) findViewById(R.id.contNames);
+
+        sv = (SearchView) findViewById(R.id.search);
 
         // Read and show the contacts
         showContacts();
 
-        // Array for keeping track of names and emails
-        final String[] cont = {"", ""};
-
         // Click on contact so it shows up in text view
         contNames.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if(!((MyList) getApplication()).contains(conts.get(position))) {
-                    if (addrs.get(position).length() != 0) {
-//                    cont[0] = addrs.get(position);
+                if(!((MyList) getApplication()).contains(adapter.getItem(position).get(0))) {
+                    if (adapter.getItem(position).get(1) != null) {
                         System.out.println("Email adding");
-                        ((MyList) getApplication()).add(conts.get(position), addrs.get(position), false);
-                        MyList.addUser(conts.get(position), OrderData.size());
+                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(1), false);
                     } else {
-//                    cont[0] = phNums.get(position);
                         System.out.println("Number adding");
-                        ((MyList) getApplication()).add(conts.get(position), phNums.get(position), true);
-                        MyList.addUser(conts.get(position), OrderData.size());
+                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(2), true);
                     }
+                    MyList.addUser(adapter.getItem(position).get(0), OrderData.size());
 
                     // go to pick items screen
                     Intent i = new Intent(SelectItems.this, PickItems.class);
-                    i.putExtra(PickItems_ID, conts.get(position));
+                    i.putExtra(PickItems_ID, adapter.getItem(position).get(0));
                     startActivity(i);
 
                     System.out.println(((MyList) getApplication()).getUsers());
                 }
                 // TODO: print toaster message for user already exist in else
-                System.out.println(conts.get(position));
+                System.out.println(adapter.getItem(position));
+
             }
         });
 
@@ -101,37 +90,6 @@ public class SelectItems extends AppCompatActivity {
         finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // get user's name
-
-//                String email = cont[0];
-//                String name = cont[1];
-
-
-//
-//                ArrayList<String> emailAndItems = new ArrayList<>(Arrays.asList(email));
-//
-//                // create boolean[] to store positions of checked items
-//                View v;
-//                CheckBox cb;
-//                boolean[] checked = new boolean[listView.getCount()];
-//                for (int i = 0; i < listView.getCount(); i++) {
-//                    v = listView.getChildAt(i);
-//                    cb = (CheckBox) v.findViewById(R.id.checkBox);
-//                    if(cb.isChecked()) {
-//                        checked[i] = true;
-//                        String selected = ((TextView) v.findViewById(R.id.list_item_select)).getText().toString();
-//                        String price = ((TextView) v.findViewById(R.id.price_select)).getText().toString();
-//                        //System.out.println(selected + " " + price);
-//                        emailAndItems.add(selected);
-//                        emailAndItems.add(price);
-//                    }
-//                    else {
-//                        checked[i] = false;
-//                    }
-//                }
-//
-//                ((MyList) getApplication()).addPair(name, emailAndItems);
-
                 Intent resultIntent = new Intent();
 //                resultIntent.putExtra(SELECTED_ID, checked);
 //                resultIntent.putExtra(NAME_ID, name);
@@ -145,7 +103,6 @@ public class SelectItems extends AppCompatActivity {
                 }
                 spinnerAdapter.notifyDataSetChanged();
                 finish();
-
             }
         });
     }
@@ -160,9 +117,26 @@ public class SelectItems extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            getContactNames();
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_selectable_list_item, both);
+            //getContactNames();
+            adapter = new ArrayAdapter<CoolList>(this, android.R.layout.simple_selectable_list_item, everything);
             contNames.setAdapter(adapter);
+
+            // implement search function
+            sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    adapter.getFilter().filter(newText);
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+            });
         }
     }
 
@@ -185,66 +159,90 @@ public class SelectItems extends AppCompatActivity {
      *
      * @return a list of names.
      */
-    private void getContactNames() {
-        List<String> contacts = new ArrayList<>();
-        List<String> emails = new ArrayList<>();
-        List<String> numbers = new ArrayList<>();
-        List<String> together = new ArrayList<>();
+//    private void getContactNames() {
+//        List<CoolList> all = new ArrayList<>();
+//
+//        // Get the ContentResolver
+//        ContentResolver cr = getContentResolver();
+//        // Get the Cursor of all the contacts
+//        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+//
+//        // Move the cursor to first. Also check whether the cursor is empty or not.
+//        if (cursor.moveToFirst()) {
+//            // Iterate through the cursor
+//            int i = 0;
+//            do {
+//                // Get the contacts name
+//                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//
+//                // Get the contacts email
+//                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+//                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
+//
+//                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+//                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
+//
+//                //Only adds contact if an email address or phone numbers is associated with it
+//                if (phoneCursor.moveToNext()) {
+//                    all.add(new CoolList());
+//                    all.get(i).add(name);
+//                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+//                    if (emailCursor.moveToNext()) {
+//                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                        all.get(i).add(email);
+//                        all.get(i).add(number);
+//                    } else {
+//                        all.get(i).add(null);
+//                        all.get(i).add(number);
+//                    }
+//                    i++;
+//                } else if (emailCursor.moveToNext()) {
+//                    all.add(new CoolList());
+//                    all.get(i).add(name);
+//                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                    all.get(i).add(email);
+//                    i++;
+//                }
+//            } while (cursor.moveToNext());
+//        }
+//        // Close the cursor
+//        cursor.close();
+//
+//        everything = all;
+//    }
 
-        // Get the ContentResolver
-        ContentResolver cr = getContentResolver();
-        // Get the Cursor of all the contacts
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-
-        // Move the cursor to first. Also check whether the cursor is empty or not.
-        if (cursor.moveToFirst()) {
-            // Iterate through the cursor
-            do {
-                // Get the contacts name
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-
-                // Get the contacts email
-                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                //Only adds contact if an email address or phone numbers is associated with it
-                if (phoneCursor.moveToNext()) {
-                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
-                    if (emailCursor.moveToNext()) {
-                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        together.add(name + "\n" + number + "\n" + email);
-                        emails.add(email);
-                    } else {
-                        together.add(name + "\n" + number);
-                        emails.add("");
-                    }
-                    contacts.add(name);
-                    numbers.add(number);
-                } else if (emailCursor.moveToNext()) {
-                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                    together.add(name + "\n" + email);
-                    contacts.add(name);
-                    numbers.add("");
-                    emails.add(email);
-                }
-            } while (cursor.moveToNext());
-        }
-        // Close the cursor
-        cursor.close();
-
-        //List with all contact names
-        conts = contacts;
-        //List with all contact email addresses
-        addrs = emails;
-        //List with all contact phone numbers
-        phNums = numbers;
-        //List with both of the above for all contacts
-        both = together;
-    }
+    // Specific String List built for this class to use in the list view (uses specific toString method)
+//    public class CoolList extends ArrayList {
+//
+//        ArrayList<String> alist;
+//
+//        public CoolList() {
+//            alist = new ArrayList<String>();
+//        }
+//
+//        // Special toString function for this class
+//        @Override
+//        public String toString() {
+//            String s = "";
+//            for (int i = 0; i < alist.size(); i++) {
+//                // Doesn't add if the item is null (this could only be the email address currently)
+//                if (alist.get(i) != null)
+//                    s = s + alist.get(i) + "\n";
+//            }
+//            return s;
+//        }
+//
+//        public void add(String e) {
+//            alist.add(e);
+//        }
+//
+//        @Override
+//        public String get(int ind) {
+//            return alist.get(ind);
+//        }
+//
+//    }
 
 }
 

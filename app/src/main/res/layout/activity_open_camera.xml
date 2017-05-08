@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <SurfaceView
         android:id="@+id/cameraView"
         android:layout_width="wrap_content"
@@ -16,14 +17,28 @@
         android:layout_height="match_parent"
         tools:context="com.banana.banana.OpenCamera">
 
+        <RelativeLayout
+            android:id="@+id/loadingPanel"
+            android:layout_width="65dp"
+            android:layout_height="551dp"
+            android:gravity="center"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"/>
+        </RelativeLayout>
+
         <Button
             android:id="@+id/button_image"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:onClick="captureImage"
-            android:text="@string/take_picture"
             android:layout_marginRight="8dp"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginLeft="8dp"
@@ -31,7 +46,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="25dp"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/circle"/>
 
 
         <!--<ImageView-->
@@ -60,7 +76,6 @@
             <!--app:layout_constraintTop_toBottomOf="@+id/button_image"-->
             <!--android:layout_marginStart="8dp"-->
             <!--android:layout_marginEnd="8dp" />-->
-
 
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>
