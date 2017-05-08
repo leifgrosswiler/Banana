@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.*;
+
 
 import static android.content.ContentValues.TAG;
 
@@ -56,7 +58,14 @@ public class TextParser {
             Map<String, String> curTypes = new LinkedHashMap<>();
             for(String word : words) {
                 String category = categorizeWord(word);
-                curTypes.put(word.replaceAll("," , "."), category);
+
+                // Replace all incorrect, guessable characters for prices
+                if(category.equals("Price")) {
+                    String newWord = correctErrors(word);
+                    curTypes.put(newWord, category);
+                }
+
+
             }
 
             // For each line, store type counts in larger-scoped variable
@@ -84,6 +93,7 @@ public class TextParser {
                         outputLine.set(0, outputLine.get(0) + " " + word);
                     }
                     else if (typeSet.get(word).equals("Price")) {
+                        // o/O -> 0, i/I -> 1, s/S-> 5
                         outputLine.set(2, word);
                     }
                 }
@@ -108,6 +118,28 @@ public class TextParser {
 
     private static boolean isNumeric(String s) {
         return s.matches("[-+]?\\d*\\.?\\d+");
+    }
+
+    private static String correctErrors(String word) {
+        String newWord = word;
+        newWord = newWord.replaceAll(",", ".");
+        newWord = newWord.replaceAll("'", ".");
+        newWord = newWord.replaceAll("$", "");
+        newWord = newWord.replaceAll("o", "0");
+        newWord = newWord.replaceAll("O", "0");
+        newWord = newWord.replaceAll("s", "5");
+        newWord = newWord.replaceAll("S", "5");
+        newWord = newWord.replaceAll("i", "1");
+        newWord = newWord.replaceAll("I", "1");
+        newWord = newWord.replaceAll("l", "1");
+
+        for (int i = 0; i < newWord.length(); i++){
+            char c = newWord.charAt(i);
+            if(!Character.isDigit(c) && c != '.') {
+                newWord = newWord.replaceAll(String.valueOf(c), "");
+            }
+        }
+        return newWord;
     }
 }
 
