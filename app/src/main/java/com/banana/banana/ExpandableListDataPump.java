@@ -25,6 +25,7 @@ public class ExpandableListDataPump {
         DecimalFormat df = new DecimalFormat("###.##");
 
         HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
+        List<Double> totalPrices = new ArrayList<>();
 
         for (String s : userSet) {
 
@@ -40,6 +41,7 @@ public class ExpandableListDataPump {
                 totalprice += Double.parseDouble(priceper);
                 user.add(sb.toString());
             }
+            totalPrices.add(totalprice);
             String tp = df.format(totalprice);
             user.add("\nTotal:\t$" + tp);
             expandableListDetail.put(s, user);
