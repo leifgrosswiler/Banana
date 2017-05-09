@@ -73,4 +73,10 @@ public class OrderData {
 
     }
 
+    public static void DeleteWholeOrder() {
+        data = new ArrayList<>();
+        food = null;
+        price = null;
+    }
+
 }
