@@ -32,8 +32,8 @@ public class TaxAddition extends AppCompatActivity  {
         // set views
         editTax = (EditText) findViewById(R.id.editTax);
         editTip = (EditText) findViewById(R.id.editTip);
-        editTax.setText("15", TextView.BufferType.EDITABLE);
-        editTip.setText("20", TextView.BufferType.EDITABLE);
+        editTax.setText("", TextView.BufferType.EDITABLE);
+        editTip.setText("", TextView.BufferType.EDITABLE);
 
 
         // button
@@ -50,6 +50,8 @@ public class TaxAddition extends AppCompatActivity  {
                 HashMap<String, Double> finalPrices = pump.getTotalPrices();
                 double total = pump.getTotal();
 
+                double tax = Double.parseDouble(editTax.getText().toString())/100.*total;
+
                 // get list of perc
                 // add tip tax proportionately to each
                 HashMap<String, Double> perc = new HashMap<String, Double>();
@@ -57,10 +59,11 @@ public class TaxAddition extends AppCompatActivity  {
                     perc.put(name, finalPrices.get(name)/total);
                 }
 
-                pump.addTipTax(editTip.getText().toString(), editTax.getText().toString(), perc);
+                pump.addTipTax(editTip.getText().toString(), tax, perc);
 
                 Intent finalIntent = new Intent(TaxAddition.this, MainActivity.class);
                 startActivity(finalIntent);
+
 
             }
         });

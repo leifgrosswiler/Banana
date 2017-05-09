@@ -7,24 +7,24 @@
         android:id="@+id/editTax"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="155dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Tax" />
+        android:text=""
+        android:layout_marginTop="155dp"
+        android:layout_alignEnd="@+id/editTip"
+        android:layout_alignStart="@+id/editTip" />
 
     <EditText
         android:id="@+id/editTip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editTax"
-        android:layout_alignStart="@+id/editTax"
-        android:layout_below="@+id/editTax"
-        android:layout_marginTop="74dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Tip" />
+        android:text=""
+        android:layout_below="@+id/editTax"
+        android:layout_marginTop="74dp"
+        android:layout_alignEnd="@+id/editDone"
+        android:layout_alignStart="@+id/editDone" />
 
     <Button
         android:id="@+id/editDone"
@@ -34,4 +34,40 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="29dp"
         android:text="@string/button_done" />
+
+    <TextView
+        android:id="@+id/textTax"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/editTax"
+        android:layout_marginEnd="20dp"
+        android:layout_toStartOf="@+id/editTax"
+        android:layout_marginTop="155dp"
+        android:text="Tax" />
+
+    <TextView
+        android:id="@+id/textTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textTax"
+        android:layout_marginTop="74dp"
+        android:layout_below="@+id/textTax"
+        android:text="Tip" />
+
+    <TextView
+        android:id="@+id/percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/editTax"
+        android:layout_alignRight="@+id/editTax"
+        android:layout_alignTop="@+id/editTax"
+        android:text="%" />
+
+    <TextView
+        android:id="@+id/dollar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/editTip"
+        android:layout_alignLeft="@+id/editTip"
+        android:text="$" />
 </RelativeLayout>

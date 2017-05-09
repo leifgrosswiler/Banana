@@ -56,13 +56,13 @@ public class ExpandableListDataPump extends Application {
     }
 
 
-    public void addTipTax(String tip, String tax, HashMap<String,Double> perc) {
+    public void addTipTax(String tip, double tax, HashMap<String,Double> perc) {
 
         DecimalFormat df = new DecimalFormat("###.##");
         for (String user : MyList.getAllUsers()) {
             double p = perc.get(user);
             double tipprop = p* Integer.parseInt(tip);
-            double taxprop = p* Integer.parseInt(tax);
+            double taxprop = p*tax;
 
             List<String> userOrder = expandableListDetail.get(user);
             expandableListDetail.remove(user);
