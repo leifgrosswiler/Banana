@@ -126,8 +126,7 @@ public class MainActivity extends Activity
 
         Set<String> userSet = ((MyList) getApplication()).getUsers();
 
-        ExpandableListDataPump pump = new ExpandableListDataPump(this);
-        expandableListDetail = pump.getData(userSet);
+        expandableListDetail = ((MyList) getApplication()).getPumpData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
@@ -182,8 +181,8 @@ public class MainActivity extends Activity
                         String body = order.getItem().toString() + ": $" + order.getPrice().toString();
                         sms.sendTextMessage(phoneNo, null, body, null, null);
                     }
-                    ExpandableListDataPump pump = new ExpandableListDataPump(this);
-                    String total = pump.getTotal(name);
+                    Double amt = ((MyList) getApplication()).getUserTotal(name);
+                    String total = Double.toString(amt);
                     String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
                 }
@@ -553,8 +552,9 @@ public class MainActivity extends Activity
                 for (Order order : list)
                     body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
-                ExpandableListDataPump pump = new ExpandableListDataPump(this);
-                String total = pump.getTotal(name);
+
+                Double amt = ((MyList) getApplication()).getUserTotal(name);
+                String total = Double.toString(amt);
                 String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
                 body.append(link + "\n");

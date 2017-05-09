@@ -193,9 +193,14 @@ public class MyList extends Application {
         }
     }
 
+    private static HashMap<String, List<String>> savePump;
 
+    public static void putPumpData(HashMap<String, List<String>> pump) {savePump = pump;}
+    public static HashMap<String, List<String>> getPumpData() {return savePump;}
 
-
+    private static HashMap<String, Double> userTotals;
+    public static void putUserTotals(HashMap<String, Double> map) {userTotals = map;}
+    public static Double getUserTotal(String name) {return userTotals.get(name);}
 
 }
 
