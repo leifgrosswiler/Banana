@@ -82,9 +82,9 @@ public class TextParser {
             outputLine.add(2, "0.00");
             for (String word : typeSet.keySet()) {
                 if (typeSet.get(word).equals("Title")) {
-                    outputLine.set(0, outputLine.get(0) + " " + word);
+                    outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
                 } else if (typeSet.get(word).equals("Quantity")) {
-                    outputLine.set(0, outputLine.get(0) + " " + word);
+                    outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
                 } else if (typeSet.get(word).equals("Price")) {
                     outputLine.set(2, word);
                 }
