@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.api.gbase.client.Tax;
 
@@ -30,6 +31,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static final String PRICE_ID = "com.banana.priceID";
     public static final String SPINNER_ID = "com.banana.spinnerID";
     public static final String P_ID = "com.banana.pID";
+    private static TextView totalPrice;
 
     public Spinner spinner;
 
@@ -55,6 +57,11 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
         adapter = new ReceiptAdapter(OrderData.getListData(), this, (MyList) getApplication());
         recView.setAdapter(adapter);
+
+        //Get the total price and set
+        double total = OrderData.getTotal();
+        totalPrice = (TextView)findViewById(R.id.totalView);
+        totalPrice.setText("Total: " + total);
 
         // floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -154,6 +161,14 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
 
 
+    }
+
+
+
+    public static void updateTotal() {
+        double total = OrderData.getTotal();
+        totalPrice.setText("Total: " + total);
+        System.out.println("TRYING TO UPDATE THE TOTAL. PLZ PLZ CHANGE: " + total);
     }
 
 //    private void payItems(String name){
