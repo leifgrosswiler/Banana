@@ -3,6 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar2" />
+
     <EditText
         android:id="@+id/editName"
         android:layout_width="wrap_content"
@@ -18,20 +22,19 @@
         android:id="@+id/editPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editName"
-        android:layout_alignStart="@+id/editName"
-        android:layout_below="@+id/editName"
-        android:layout_marginTop="74dp"
+        android:layout_marginTop="90dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name" />
+        android:text="Name"
+        android:layout_below="@+id/editName"
+        android:layout_alignStart="@+id/editName" />
 
-    <Button
-        android:id="@+id/editDone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="29dp"
-        android:text="@string/button_done" />
+    <!--<Button-->
+        <!--android:id="@+id/editDone"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_marginBottom="29dp"-->
+        <!--android:text="@string/button_done" />-->
 </RelativeLayout>
