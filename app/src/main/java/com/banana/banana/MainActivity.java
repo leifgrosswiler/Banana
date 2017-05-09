@@ -119,9 +119,7 @@ public class MainActivity extends Activity
         expandableListView = (ExpandableListView) findViewById(R.id.finalList);
 
         Set<String> userSet = ((MyList) getApplication()).getUsers();
-
-        ExpandableListDataPump pump = new ExpandableListDataPump(this);
-        expandableListDetail = pump.getData(userSet);
+        expandableListDetail = ((MyList) getApplication()).getPumpData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
