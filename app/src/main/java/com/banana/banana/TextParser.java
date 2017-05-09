@@ -66,7 +66,6 @@ public class TextParser {
                 } else {
                     curTypes.put(word, category);
                 }
-
             }
 
             // For each line, store type counts in larger-scoped variable

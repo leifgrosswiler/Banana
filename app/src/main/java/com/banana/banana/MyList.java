@@ -104,6 +104,7 @@ public class MyList extends Application {
     // **Tracker**
 
     private static HashMap<String, boolean[]> tracker = new HashMap<>();
+
     //private static int length = OrderData.size();
 
 
@@ -193,9 +194,10 @@ public class MyList extends Application {
         }
     }
 
+    private static HashMap<String, List<String>> savePump;
 
-
-
+    public static void putPumpData(HashMap<String, List<String>> pump) {savePump = pump;}
+    public HashMap<String, List<String>> getPumpData() {return savePump;}
 
 }
 
