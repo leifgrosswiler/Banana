@@ -64,6 +64,7 @@ import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
 import static com.banana.banana.SelectItems.everything;
+import static java.security.AccessController.getContext;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -107,17 +108,18 @@ public class OpenCamera extends AppCompatActivity {
         preview=(SurfaceView)findViewById(R.id.cameraView);
 
         // Get proper permissions
-        pm = this.getPackageManager();
-        int hasPerm = pm.checkPermission(
-                Manifest.permission.CAMERA,
-                this.getPackageName());
-        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
-                    MY_PERMISSIONS_REQUEST_CAMERA);
-        } else {
-            setThingsUp();
-        }
+//        pm = this.getPackageManager();
+//        int hasPerm = pm.checkPermission(
+//                Manifest.permission.CAMERA,
+//                this.getPackageName());
+//        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.CAMERA},
+//                    MY_PERMISSIONS_REQUEST_CAMERA);
+//        } else {
+//            setThingsUp();
+//        }
+        setThingsUp();
 
     }
 
@@ -129,9 +131,6 @@ public class OpenCamera extends AppCompatActivity {
 
         if (everything == null)
             getContactNames();
-        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-
-
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -166,12 +165,10 @@ public class OpenCamera extends AppCompatActivity {
                 // Transfer bytes from in to out
                 byte[] buf = new byte[1024];
                 int len;
-                //while ((lenf = gin.read(buff)) > 0) {
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
                 }
                 in.close();
-                //gin.close();
                 out.close();
 
                 Log.v(TAG, "Copied " + lang + " traineddata");
@@ -186,25 +183,20 @@ public class OpenCamera extends AppCompatActivity {
         Log.v(TAG, "HERE");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             takePictureButton.setEnabled(false);
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, 0);
         }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            takePictureButton.setEnabled(false);
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
+        }
+        takePictureButton.setEnabled(true);
 
         jpegCallback = new Camera.PictureCallback() {
             public void onPictureTaken(byte[] data, Camera camera) {
                 FileOutputStream outStream = null;
                 try {
-//                    File storageDir = new File(Environment.getExternalStoragePublicDirectory(
-//                            Environment.DIRECTORY_DCIM), "Camera");
-//                    storageDir.mkdir();
-//                    mCurrentPhotoPath = storageDir.getAbsolutePath() + "/Data.jpg";
-//                    Log.d("Log", "onPictureTaken - wrote bytes: " + data.length);
-//                    mCurrentPhotoPath = "file:" + mCurrentPhotoPath;
-//                    Uri imageUri = Uri.parse(mCurrentPhotoPath);
-//                    File mFile = new File(imageUri.getPath());
                     File photoFile = createImageFile();
                     System.out.println(photoFile.exists() + " " + photoFile.toString());
-//                    outStream = new FileOutputStream(mCurrentPhotoPath);
-
                     outStream = new FileOutputStream(photoFile.getAbsoluteFile());
                     outStream.write(data);
                     outStream.close();
@@ -220,7 +212,6 @@ public class OpenCamera extends AppCompatActivity {
                 } finally {
                 }
                 Toast.makeText(getApplicationContext(), "Picture Saved", Toast.LENGTH_SHORT).show();
-    //                refreshCamera();
             }
         };
 
@@ -229,23 +220,14 @@ public class OpenCamera extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (camera != null) {
                     camera.cancelAutoFocus();
-//                    Rect focusRect = calculateTapArea(event.getX(), event.getY(), 1f);
-                    System.out.println(event.getX() + " " + event.getY());
-                    android.graphics.Rect focusRect = new android.graphics.Rect((int)event.getX()-15, (int)event.getY()-15, (int)event.getX()+15, (int)event.getY()+15);
-
                     Camera.Parameters parameters = camera.getParameters();
-                    List<String> focusModes = parameters.getSupportedFocusModes();
-                    System.out.println(parameters);
                     if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
                         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
                     }
                     if (parameters.getMaxNumFocusAreas() > 0) {
-                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
-                        mylist.add(new Camera.Area(focusRect, 1000));
-                        parameters.setFocusAreas(mylist);
+                        parameters.setFocusAreas(null);
                     }
                     try {
-                        camera.cancelAutoFocus();
                         camera.setParameters(parameters);
                         camera.startPreview();
                         camera.autoFocus(new Camera.AutoFocusCallback() {
@@ -273,6 +255,7 @@ public class OpenCamera extends AppCompatActivity {
 
     public void captureImage(View v) throws IOException {
         //take the picture
+        takePictureButton.setEnabled(false);
         camera.takePicture(null, null, jpegCallback);
     }
 
@@ -294,6 +277,25 @@ public class OpenCamera extends AppCompatActivity {
         try {
             camera.setPreviewDisplay(previewHolder);
             camera.startPreview();
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+            int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+            int degrees = 0;
+            switch (rotation) {
+                case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
+                case Surface.ROTATION_90: degrees = 90; break; //Landscape left
+                case Surface.ROTATION_180: degrees = 180; break;//Upside down
+                case Surface.ROTATION_270: degrees = 270; break;//Landscape right
+            }
+            int rotate = (info.orientation - degrees + 360) % 360;
+
+//STEP #2: Set the 'rotation' parameter
+            Camera.Parameters params = camera.getParameters();
+            params.setRotation(rotate);
+            camera.setParameters(params);
+            setCameraDisplayOrientation(this, 0, camera);
+            takePictureButton.setEnabled(true);
+
         } catch (Exception e) {
 
         }
@@ -304,12 +306,8 @@ public class OpenCamera extends AppCompatActivity {
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
         Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
-//        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-//        croppedView.setImageURI(fileUri);
         sendMessage(takePictureButton);
     }
 
@@ -480,11 +478,9 @@ public class OpenCamera extends AppCompatActivity {
         options.inScaled = false;
         options.inDither = false;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        //cropFile.getPath()
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
-        Log.v("ALOS IMPORTANT", mCurrentPhotoPath);
         if (bitmap == null) {
-            Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
+            Log.v(TAG, "Bitmap is null");
             return;
         }
         try {
@@ -492,8 +488,6 @@ public class OpenCamera extends AppCompatActivity {
             int exifOrientation = exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
-
-            Log.v(TAG, "Orient: " + exifOrientation);
 
             int rotate = 90;
 
@@ -508,8 +502,6 @@ public class OpenCamera extends AppCompatActivity {
                     rotate = 0;
                     break;
             }
-
-            Log.v(TAG, "Rotation: " + rotate);
 
             if (rotate != 90) {
 
@@ -578,8 +570,8 @@ public class OpenCamera extends AppCompatActivity {
         super.onResume();
 
         camera=Camera.open();
-        camera.
         startPreview();
+        refreshCamera();
     }
 
     @Override
