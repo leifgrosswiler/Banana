@@ -29,6 +29,8 @@ public class MyList extends Application {
         items = new HashMap<>();
         info = new HashMap<>();
         numberOrEmail = new HashMap<>();
+        tracker = new HashMap<>();
+        itemTracker = new HashMap<>();
         savePump = null;
         userTotals = null;
     }
@@ -215,5 +217,3 @@ public class MyList extends Application {
     public static Double getUserTotal(String name) {return userTotals.get(name);}
 
 }
-
-

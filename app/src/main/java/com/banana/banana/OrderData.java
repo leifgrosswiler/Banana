@@ -17,16 +17,12 @@ public class OrderData {
 
 
     private static int length;
-
     public static List<Order> getListData() { return data; }
-
     public static int size() {
         return data.size();
     }
-
-    public static Order getAt(int p){ return data.get(p); };
-
-    public static void set(int p, Order updated){ data.set(p, updated); }
+    public static Order getAt(int p){return data.get(p); };
+    public static void set(int p, Order updated){ data.set(p, updated); MainReceipt.updateTotal();}
 
     public static void delete(int p) {
 
@@ -35,8 +31,8 @@ public class OrderData {
         MainReceipt.adapter.notifyItemRemoved(p);
 
         MyList.notifyTrackerOrderDeleted(p);
+        MainReceipt.updateTotal();
     }
-
     public static void setFoodAndPrice() {
         ArrayList<String> tempFood = new ArrayList<>();
         ArrayList<String> tempPrice = new ArrayList<>();
@@ -58,9 +54,7 @@ public class OrderData {
 
         System.out.println("ATTENTION: " + data.size());
 
-
     }
-
     public static void add(String item, String price){
         int tmp = data.size();
         Order order = new Order(item, price);
@@ -70,13 +64,19 @@ public class OrderData {
         MyList.notifyTrackerNewOrder();
 
         MainReceipt.adapter.notifyItemInserted(tmp);
-
+        MainReceipt.updateTotal();
     }
-
     public static void DeleteWholeOrder() {
         data = new ArrayList<>();
         food = null;
         price = null;
+        MainReceipt.updateTotal();
     }
-
+    public static double getTotal() {
+        double total = 0;
+        for(Order order : data) {
+            total += Double.parseDouble(order.getPrice());
+        }
+        return total;
+    }
 }

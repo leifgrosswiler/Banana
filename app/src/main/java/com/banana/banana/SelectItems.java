@@ -95,7 +95,8 @@ public class SelectItems extends AppCompatActivity {
                         popup.getMenu().add(adapter.getItem(position).get(1));
                     }
                     if (adapter.getItem(position).size() > 2) {
-                        popup.getMenu().add(adapter.getItem(position).get(2));
+                        if (adapter.getItem(position).get(2) != null)
+                            popup.getMenu().add(adapter.getItem(position).get(2));
                     }
 
                     //registering popup with OnMenuItemClickListener

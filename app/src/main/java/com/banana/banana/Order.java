@@ -41,7 +41,5 @@ public class Order {
         return Double.toString(pricePP);
     }
 
-//    public void remove(String name) {users.remove(name); }
-//    public boolean isSelected(String name){ return users.contains(name);}
 
 }
