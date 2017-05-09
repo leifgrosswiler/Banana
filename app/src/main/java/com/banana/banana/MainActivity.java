@@ -109,6 +109,8 @@ public class MainActivity extends Activity
                 mSendRequests.setEnabled(false);
                 PerformTextOperation();
                 PerformEmailOperation();
+                Toast.makeText(getApplicationContext(), "Requests Sent",
+                        Toast.LENGTH_LONG).show();
                 mSendRequests.setEnabled(true);
             }
         });
@@ -165,7 +167,7 @@ public class MainActivity extends Activity
                     list = ((MyList) getApplication()).getUserOrders(name);
                     if (list.size() == 0)
                         continue;
-                    String header = ("You owe me for the following items!");
+                    String header = ("You owe me for:");
                     SmsManager sms = SmsManager.getDefault();
                     sms.sendTextMessage(phoneNo, null, header.toString(), null, null);
                     for (Order order : list) {
@@ -173,10 +175,6 @@ public class MainActivity extends Activity
                         sms.sendTextMessage(phoneNo, null, body, null, null);
                     }
                 }
-            }
-            if (names.size() != 0) {
-                Toast.makeText(getApplicationContext(), "SMS sent.",
-                        Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(getApplicationContext(), "Need SMS Permissions.",
@@ -539,7 +537,7 @@ public class MainActivity extends Activity
                 }
                 String email = ((MyList) getApplication()).getMethod(name);
                 StringBuilder body = new StringBuilder();
-                body.append("You owe me for the following items!\n");
+                body.append("You owe me for:\n");
                 for (Order order : list)
                     body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
@@ -547,8 +545,6 @@ public class MainActivity extends Activity
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
                 try {
                     sendMessage(service, "me", mimeMessage);
-                    Toast.makeText(getApplicationContext(), "Gmail sent.",
-                            Toast.LENGTH_LONG).show();
                 } catch (UserRecoverableAuthIOException e) {
                     startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
                 } catch (Exception e) {

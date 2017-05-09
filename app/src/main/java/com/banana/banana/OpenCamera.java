@@ -2,10 +2,12 @@ package com.banana.banana;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -13,6 +15,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -39,12 +42,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
+
+import static com.banana.banana.SelectItems.everything;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -131,6 +137,10 @@ public class OpenCamera extends AppCompatActivity {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
         }
+
+        if (everything == null)
+            getContactNames();
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
     }
 
     private void refineImg(Uri fileUri) {
@@ -388,5 +398,60 @@ public class OpenCamera extends AppCompatActivity {
         intent.putExtra(EXTRA_MESSAGE, recognizedText);
 
         startActivity(intent);
+    }
+
+    private void getContactNames() {
+        List<CoolList> all = new ArrayList<>();
+
+        // Get the ContentResolver
+        ContentResolver cr = getContentResolver();
+        // Get the Cursor of all the contacts
+        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+
+        // Move the cursor to first. Also check whether the cursor is empty or not.
+        if (cursor.moveToFirst()) {
+            // Iterate through the cursor
+            int i = 0;
+            do {
+                // Get the contacts name
+                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+
+                // Get the contacts email
+                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
+
+                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
+
+                //Only adds contact if an email address or phone numbers is associated with it
+                if (phoneCursor.moveToNext()) {
+                    all.add(new CoolList());
+                    all.get(i).add(name);
+                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
+                    if (emailCursor.moveToNext()) {
+                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                        all.get(i).add(email);
+                        all.get(i).add(number);
+                    } else {
+                        all.get(i).add(null);
+                        all.get(i).add(number);
+                    }
+                    i++;
+                } else if (emailCursor.moveToNext()) {
+                    all.add(new CoolList());
+                    all.get(i).add(name);
+                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                    all.get(i).add(email);
+                    i++;
+                }
+                emailCursor.close();
+                phoneCursor.close();
+            } while (cursor.moveToNext());
+        }
+        // Close the cursor
+        cursor.close();
+
+        everything = all;
     }
 }
