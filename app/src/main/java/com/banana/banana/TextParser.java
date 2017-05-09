@@ -136,12 +136,12 @@ public class TextParser {
         newWord = newWord.replaceAll("I", "1");
         newWord = newWord.replaceAll("l", "1");
 
-        for (int i = 0; i < newWord.length(); i++){
-            char c = newWord.charAt(i);
-            if(!Character.isDigit(c) && c != '.') {
-                newWord = newWord.replaceAll(String.valueOf(c), "");
-            }
-        }
+//        for (int i = 0; i < newWord.length(); i++){
+//            char c = newWord.charAt(i);
+//            if(!Character.isDigit(c) && c != '.') {
+//                newWord = newWord.replaceAll(String.valueOf(c), "");
+//            }
+//        }
         return newWord;
     }
 }
