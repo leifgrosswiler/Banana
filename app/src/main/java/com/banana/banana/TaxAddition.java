@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.CharArrayReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +52,13 @@ public class TaxAddition extends AppCompatActivity  {
                 HashMap<String, Double> finalPrices = pump.getTotalPrices();
                 double total = pump.getTotal();
 
-                double tax = Double.parseDouble(editTax.getText().toString())/100.*total;
+                String taxStr = editTax.getText().toString();
+                if (!isValid(taxStr)) {
+                    Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_LONG).show();
+                    taxStr = "0";
+                }
+                if (taxStr.isEmpty()) taxStr = "0";
+                double tax = Double.parseDouble(taxStr)/100.*total;
 
                 // get list of perc
                 // add tip tax proportionately to each
@@ -59,14 +67,34 @@ public class TaxAddition extends AppCompatActivity  {
                     perc.put(name, finalPrices.get(name)/total);
                 }
 
-                pump.addTipTax(editTip.getText().toString(), tax, perc);
+                String tipStr = editTip.getText().toString();
+                if (!isValid(tipStr)) {
+                    Toast.makeText(getApplicationContext(),"Invalid Tip Value!", Toast.LENGTH_LONG).show();
+                    tipStr = "0";
+                }
+                if (tipStr.isEmpty()) tipStr = "0";
+                pump.addTipTax(tipStr, tax, perc);
 
                 Intent finalIntent = new Intent(TaxAddition.this, MainActivity.class);
-                startActivity(finalIntent);
+                if (isValid(editTip.getText().toString()) && isValid(editTax.getText().toString()))
+                    startActivity(finalIntent);
 
             }
         });
 
+    }
+
+    public boolean isValid(String str) {
+
+        for (char c : str.toCharArray()) {
+            // if any c is not a digit
+            if (!Character.isDigit(c)) {
+                // and not a proper punctuation mark, return false
+                if (c != '.' && c != ',') return false;
+            }
+        }
+        // otherwise return true
+        return true;
     }
 
 }
