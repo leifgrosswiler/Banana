@@ -203,5 +203,3 @@ public class MyList extends Application {
     public static Double getUserTotal(String name) {return userTotals.get(name);}
 
 }
-
-

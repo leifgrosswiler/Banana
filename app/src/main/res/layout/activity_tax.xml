@@ -70,4 +70,5 @@
         android:layout_alignTop="@+id/editTip"
         android:layout_alignLeft="@+id/editTip"
         android:text="$" />
+
 </RelativeLayout>

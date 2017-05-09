@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.CharArrayReader;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class TaxAddition extends AppCompatActivity  {
 
     private EditText editTax;
     private EditText editTip;
+    private TextView subtotal;
     int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class TaxAddition extends AppCompatActivity  {
         final Button done =(Button) findViewById(R.id.editDone);
         Set<String> names = ((MyList) getApplication()).getUsers();
         final ExpandableListDataPump pump = new ExpandableListDataPump(this, names);
+
         done.setOnClickListener(new View.OnClickListener() {
 
             @Override
