@@ -21,6 +21,18 @@ public class MyList extends Application {
     public HashMap<String, List<String>> getList() {
         return split;
     }
+
+    // Restarts myList when going back to camera
+    public void Restart() {
+        split = new HashMap<>();
+        currentUser = "Master";
+        items = new HashMap<>();
+        info = new HashMap<>();
+        numberOrEmail = new HashMap<>();
+        savePump = null;
+        userTotals = null;
+    }
+
     public void addPair(String name, List<String> stuff) {
 
         split.put(name, stuff);
