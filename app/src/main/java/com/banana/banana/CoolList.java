@@ -35,9 +35,4 @@ public class CoolList extends ArrayList {
         return alist.get(ind);
     }
 
-    @Override
-    public int size() {
-        return alist.size();
-    }
-
 }
