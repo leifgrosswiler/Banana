@@ -46,6 +46,9 @@
         <activity
             android:name=".SelectItems"
             android:parentActivityName=".MainReceipt" />
+        <activity
+            android:name=".TaxAddition"
+            android:parentActivityName=".MainReceipt" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

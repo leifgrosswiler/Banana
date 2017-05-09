@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.google.api.gbase.client.Tax;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,8 +60,8 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intentGmail = new Intent(MainReceipt.this, MainActivity.class);
-                startActivity(intentGmail);
+                Intent intentTax = new Intent(MainReceipt.this, TaxAddition.class);
+                startActivity(intentTax);
             }
         });
 
