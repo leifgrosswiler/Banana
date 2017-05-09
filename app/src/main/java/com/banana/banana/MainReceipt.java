@@ -249,6 +249,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         OrderData.DeleteWholeOrder();
         ((MyList) getApplication()).Restart();
         startActivity(new Intent(this, OpenCamera.class));
+        recView.setAdapter(null);
         finish();
 
     }
