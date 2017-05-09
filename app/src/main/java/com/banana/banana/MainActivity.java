@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -126,8 +127,7 @@ public class MainActivity extends Activity
 
         Set<String> userSet = ((MyList) getApplication()).getUsers();
 
-        ExpandableListDataPump pump = new ExpandableListDataPump(this);
-        expandableListDetail = pump.getData(userSet);
+        expandableListDetail = ((MyList) getApplication()).getPumpData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
@@ -167,6 +167,7 @@ public class MainActivity extends Activity
         int hasPerm = pm.checkPermission(
                 Manifest.permission.SEND_SMS,
                 this.getPackageName());
+        CheckBox useVenmo = (CheckBox)findViewById(R.id.useVenmo);
         if (hasPerm == PackageManager.PERMISSION_GRANTED) {
             // Search through and find text Contacts, then send texts
             for (String name : names) {
@@ -182,10 +183,12 @@ public class MainActivity extends Activity
                         String body = order.getItem().toString() + ": $" + order.getPrice().toString();
                         sms.sendTextMessage(phoneNo, null, body, null, null);
                     }
-                    ExpandableListDataPump pump = new ExpandableListDataPump(this);
-                    String total = pump.getTotal(name);
+                    Double amt = ((MyList) getApplication()).getUserTotal(name);
+                    String total = Double.toString(amt);
                     String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
+                    if (useVenmo.isChecked())
+                        sms.sendTextMessage(phoneNo, null, link, null, null);
                 }
             }
         } else {
@@ -539,7 +542,7 @@ public class MainActivity extends Activity
         //HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
         Set<String> names = ((MyList) getApplication()).getUsers();
         List<Order> list;
-
+        CheckBox useVenmo = (CheckBox)findViewById(R.id.useVenmo);
         // Search through names and create and send emails
         for (String name : names) {
             if (!((MyList) getApplication()).isNumber(name)) {
@@ -553,11 +556,13 @@ public class MainActivity extends Activity
                 for (Order order : list)
                     body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
-                ExpandableListDataPump pump = new ExpandableListDataPump(this);
-                String total = pump.getTotal(name);
+
+                Double amt = ((MyList) getApplication()).getUserTotal(name);
+                String total = Double.toString(amt);
                 String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
-                body.append(link + "\n");
+                if (useVenmo.isChecked())
+                    body.append(link + "\n");
 
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
                 try {

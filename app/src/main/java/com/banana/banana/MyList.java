@@ -21,6 +21,18 @@ public class MyList extends Application {
     public HashMap<String, List<String>> getList() {
         return split;
     }
+
+    // Restarts myList when going back to camera
+    public void Restart() {
+        split = new HashMap<>();
+        currentUser = "Master";
+        items = new HashMap<>();
+        info = new HashMap<>();
+        numberOrEmail = new HashMap<>();
+        savePump = null;
+        userTotals = null;
+    }
+
     public void addPair(String name, List<String> stuff) {
 
         split.put(name, stuff);
@@ -193,9 +205,14 @@ public class MyList extends Application {
         }
     }
 
+    private static HashMap<String, List<String>> savePump;
 
+    public static void putPumpData(HashMap<String, List<String>> pump) {savePump = pump;}
+    public static HashMap<String, List<String>> getPumpData() {return savePump;}
 
-
+    private static HashMap<String, Double> userTotals;
+    public static void putUserTotals(HashMap<String, Double> map) {userTotals = map;}
+    public static Double getUserTotal(String name) {return userTotals.get(name);}
 
 }
 
