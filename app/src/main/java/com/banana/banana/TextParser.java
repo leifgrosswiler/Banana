@@ -63,9 +63,9 @@ public class TextParser {
                 if(category.equals("Price")) {
                     String newWord = correctErrors(word);
                     curTypes.put(newWord, category);
+                } else {
+                    curTypes.put(word, category);
                 }
-
-
             }
 
             // For each line, store type counts in larger-scoped variable
@@ -78,26 +78,26 @@ public class TextParser {
             // Only use lines that have a price in them
             //if (typeSet.values().contains("Price")) {
 
-                // Take the elements of a valid line and store them in the following order:
-                // 1: Title  2: Quantity  3: Price
-                List<String> outputLine = new ArrayList<>();
-                outputLine.add(0, "");
-                outputLine.add(1, "1");
-                outputLine.add(2, "0.00");
-                for (String word : typeSet.keySet()) {
-                    if(typeSet.get(word).equals("Title")) {
-                        outputLine.set(0, outputLine.get(0) + " " + word);
-                    }
-                    else if (typeSet.get(word).equals("Quantity")) {
-                        //outputLine.set(1, word);
-                        outputLine.set(0, outputLine.get(0) + " " + word);
-                    }
-                    else if (typeSet.get(word).equals("Price")) {
-                        // o/O -> 0, i/I -> 1, s/S-> 5
-                        outputLine.set(2, word);
-                    }
+            // Take the elements of a valid line and store them in the following order:
+            // 1: Title  2: Quantity  3: Price
+            List<String> outputLine = new ArrayList<>();
+            outputLine.add(0, "");
+            outputLine.add(1, "1");
+            outputLine.add(2, "0.00");
+            for (String word : typeSet.keySet()) {
+                if(typeSet.get(word).equals("Title")) {
+                    outputLine.set(0, outputLine.get(0) + " " + word);
                 }
-                checklistOutput.add(outputLine);
+                else if (typeSet.get(word).equals("Quantity")) {
+                    //outputLine.set(1, word);
+                    outputLine.set(0, outputLine.get(0) + " " + word);
+                }
+                else if (typeSet.get(word).equals("Price")) {
+                    // o/O -> 0, i/I -> 1, s/S-> 5
+                    outputLine.set(2, word);
+                }
+            }
+            checklistOutput.add(outputLine);
             //}
         }
 
@@ -105,7 +105,8 @@ public class TextParser {
     }
 
     private static String categorizeWord(String word) {
-        if(word.contains(String.valueOf('$')) || word.contains(String.valueOf('.')) || word.contains(String.valueOf(','))) {
+        if(word.contains(String.valueOf('$')) || word.contains(String.valueOf('.')) || word.contains(String.valueOf(','))
+                || word.contains(String.valueOf("'")) || word.contains(String.valueOf("-"))) {
             return "Price";
         }
         else if (isNumeric(word)) {
@@ -124,6 +125,7 @@ public class TextParser {
         String newWord = word;
         newWord = newWord.replaceAll(",", ".");
         newWord = newWord.replaceAll("'", ".");
+        newWord = newWord.replaceAll("-", ".");
         newWord = newWord.replaceAll("$", "");
         newWord = newWord.replaceAll("o", "0");
         newWord = newWord.replaceAll("O", "0");
@@ -133,13 +135,14 @@ public class TextParser {
         newWord = newWord.replaceAll("I", "1");
         newWord = newWord.replaceAll("l", "1");
 
-        for (int i = 0; i < newWord.length(); i++){
-            char c = newWord.charAt(i);
-            if(!Character.isDigit(c) && c != '.') {
-                newWord = newWord.replaceAll(String.valueOf(c), "");
-            }
-        }
+//        for (int i = 0; i < newWord.length(); i++){
+//            char c = newWord.charAt(i);
+//            if(!Character.isDigit(c) && c != '.') {
+//                newWord = newWord.replaceAll(String.valueOf(c), "");
+//            }
+//        }
         return newWord;
     }
 }
+
 

@@ -1,7 +1,9 @@
 package com.banana.banana;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,18 +13,28 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.hardware.Camera;
+import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -37,6 +49,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,13 +57,16 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
 import static com.banana.banana.SelectItems.everything;
+import static java.security.AccessController.getContext;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -65,6 +81,16 @@ public class OpenCamera extends AppCompatActivity {
     final int CROP_PIC = 2;
     private static String mCurrentPhotoPath;
     private Uri photoURI;
+
+    private SurfaceView preview=null;
+    private SurfaceHolder previewHolder=null;
+    private Camera camera=null;
+    private boolean inPreview=false;
+    private boolean cameraConfigured=false;
+    private Camera.PictureCallback jpegCallback;
+    private PackageManager pm;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+
 
     public static final String DATA_PATH = Environment
             .getExternalStorageDirectory().toString() + "/SimpleAndroidOCR/";
@@ -81,6 +107,32 @@ public class OpenCamera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
+        preview=(SurfaceView)findViewById(R.id.cameraView);
+
+        // Get proper permissions
+//        pm = this.getPackageManager();
+//        int hasPerm = pm.checkPermission(
+//                Manifest.permission.CAMERA,
+//                this.getPackageName());
+//        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.CAMERA},
+//                    MY_PERMISSIONS_REQUEST_CAMERA);
+//        } else {
+//            setThingsUp();
+//        }
+        setThingsUp();
+
+    }
+
+    private void setThingsUp() {
+
+        previewHolder=preview.getHolder();
+        previewHolder.addCallback(surfaceCallback);
+        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        if (everything == null)
+            getContactNames();
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -115,12 +167,10 @@ public class OpenCamera extends AppCompatActivity {
                 // Transfer bytes from in to out
                 byte[] buf = new byte[1024];
                 int len;
-                //while ((lenf = gin.read(buff)) > 0) {
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
                 }
                 in.close();
-                //gin.close();
                 out.close();
 
                 Log.v(TAG, "Copied " + lang + " traineddata");
@@ -135,12 +185,122 @@ public class OpenCamera extends AppCompatActivity {
         Log.v(TAG, "HERE");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             takePictureButton.setEnabled(false);
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, 0);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            takePictureButton.setEnabled(false);
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
+        }
+        takePictureButton.setEnabled(true);
+
+        jpegCallback = new Camera.PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {
+                FileOutputStream outStream = null;
+                try {
+                    File photoFile = createImageFile();
+                    System.out.println(photoFile.exists() + " " + photoFile.toString());
+                    outStream = new FileOutputStream(photoFile.getAbsoluteFile());
+                    outStream.write(data);
+                    outStream.close();
+                    Log.v(TAG, "entering crop");
+                    photoURI = FileProvider.getUriForFile(OpenCamera.this,
+                            BuildConfig.APPLICATION_ID + ".provider",
+                            photoFile);
+                    performCrop(photoFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                }
+                Toast.makeText(getApplicationContext(), "Picture Saved", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        preview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (camera != null) {
+                    camera.cancelAutoFocus();
+                    Camera.Parameters parameters = camera.getParameters();
+                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    }
+                    if (parameters.getMaxNumFocusAreas() > 0) {
+                        parameters.setFocusAreas(null);
+                    }
+                    try {
+                        camera.setParameters(parameters);
+                        camera.startPreview();
+                        camera.autoFocus(new Camera.AutoFocusCallback() {
+                            @Override
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                    Camera.Parameters parameters = camera.getParameters();
+                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                    if (parameters.getMaxNumFocusAreas() > 0) {
+                                        parameters.setFocusAreas(null);
+                                    }
+                                    camera.setParameters(parameters);
+                                    camera.startPreview();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            }
+        });
+    }
+
+    public void captureImage(View v) throws IOException {
+        //take the picture
+        takePictureButton.setEnabled(false);
+        camera.takePicture(null, null, jpegCallback);
+    }
+
+    public void refreshCamera() {
+        if (previewHolder.getSurface() == null) {
+            // preview surface does not exist
+            return;
+        }
+        // stop preview before making changes
+        try {
+            camera.stopPreview();
+        } catch (Exception e) {
+            // ignore: tried to stop a non-existent preview
         }
 
-        if (everything == null)
-            getContactNames();
-        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+        // set preview size and make any resize, rotate or
+        // reformatting changes here
+        // start preview with new settings
+        try {
+            camera.setPreviewDisplay(previewHolder);
+            camera.startPreview();
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+            int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+            int degrees = 0;
+            switch (rotation) {
+                case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
+                case Surface.ROTATION_90: degrees = 90; break; //Landscape left
+                case Surface.ROTATION_180: degrees = 180; break;//Upside down
+                case Surface.ROTATION_270: degrees = 270; break;//Landscape right
+            }
+            int rotate = (info.orientation - degrees + 360) % 360;
+
+//STEP #2: Set the 'rotation' parameter
+            Camera.Parameters params = camera.getParameters();
+            params.setRotation(rotate);
+            camera.setParameters(params);
+            setCameraDisplayOrientation(this, 0, camera);
+            takePictureButton.setEnabled(true);
+
+        } catch (Exception e) {
+
+        }
     }
 
     private void refineImg(Uri fileUri) {
@@ -148,12 +308,9 @@ public class OpenCamera extends AppCompatActivity {
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
         Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
-        ImageView croppedView = (ImageView) findViewById(R.id.imageview_proc);
-        croppedView.setImageURI(fileUri);
+        sendMessage(takePictureButton);
     }
 
     @Override
@@ -162,6 +319,16 @@ public class OpenCamera extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 takePictureButton.setEnabled(true);
+            }
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
+            int hasPerm = pm.checkPermission(
+                    Manifest.permission.CAMERA,
+                    this.getPackageName());
+            if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Requires Camera Permission", Toast.LENGTH_SHORT).show();
+            } else {
+                setContentView(R.layout.activity_open_camera);
+                setThingsUp();
             }
         }
     }
@@ -200,6 +367,7 @@ public class OpenCamera extends AppCompatActivity {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
             Log.v(TAG, "entering crop");
+            System.out.println("Hi " + mFile.getAbsolutePath());
             performCrop(mFile);
 
         }
@@ -210,8 +378,11 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
-            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-            croppedView.setImageURI(imageUri);
+
+            // If photo is discarded, return to home screen
+            if (data == null) return;
+//            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+//            croppedView.setImageURI(imageUri);
 
             refineImg(imageUri);
             onPhotoTaken(true);
@@ -236,9 +407,10 @@ public class OpenCamera extends AppCompatActivity {
 
         Log.v(TAG, mCurrentPhotoPath);
         Log.v(TAG, imageFile.getPath());
+//        mCurrentPhotoPath = "file:" + imageFile.getAbsolutePath();
 
-        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-        croppedView.setImageURI(photoURI);
+//        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
+//        croppedView.setImageURI(photoURI);
 
         try {
             Log.v(TAG, "in crop");
@@ -308,10 +480,9 @@ public class OpenCamera extends AppCompatActivity {
         options.inScaled = false;
         options.inDither = false;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        //cropFile.getPath()
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath.replaceFirst("file:", ""), options);
         if (bitmap == null) {
-            Log.v(TAG, "BITMAP IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BAD BAD BAD");
+            Log.v(TAG, "Bitmap is null");
             return;
         }
         try {
@@ -320,25 +491,21 @@ public class OpenCamera extends AppCompatActivity {
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
 
-            Log.v(TAG, "Orient: " + exifOrientation);
-
-            int rotate = 0;
+            int rotate = 90;
 
             switch (exifOrientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
                     rotate = 180;
                     break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
+                case ExifInterface.ORIENTATION_ROTATE_180:
                     rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 0;
                     break;
             }
 
-            Log.v(TAG, "Rotation: " + rotate);
-
-            if (rotate != 0) {
+            if (rotate != 90) {
 
                 // Getting width & height of the given image.
                 int w = bitmap.getWidth();
@@ -354,7 +521,7 @@ public class OpenCamera extends AppCompatActivity {
 
         }
         catch (Exception e) {
-            System.out.println("FUckme");
+            System.out.println(e.toString());
         }
         //_image.setImageBitmap( bitmap );
         //ImageView imageView = (ImageView) findViewById(R.id.imageview);
@@ -400,57 +567,251 @@ public class OpenCamera extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void getContactNames() {
-        List<CoolList> all = new ArrayList<>();
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        // Get the ContentResolver
-        ContentResolver cr = getContentResolver();
-        // Get the Cursor of all the contacts
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        camera=Camera.open();
+        startPreview();
+        refreshCamera();
+    }
 
-        // Move the cursor to first. Also check whether the cursor is empty or not.
-        if (cursor.moveToFirst()) {
-            // Iterate through the cursor
-            int i = 0;
-            do {
-                // Get the contacts name
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-
-                // Get the contacts email
-                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                //Only adds contact if an email address or phone numbers is associated with it
-                if (phoneCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
-                    if (emailCursor.moveToNext()) {
-                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        all.get(i).add(email);
-                        all.get(i).add(number);
-                    } else {
-                        all.get(i).add(null);
-                        all.get(i).add(number);
-                    }
-                    i++;
-                } else if (emailCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                    all.get(i).add(email);
-                    i++;
-                }
-                emailCursor.close();
-                phoneCursor.close();
-            } while (cursor.moveToNext());
+    @Override
+    public void onPause() {
+        if (inPreview) {
+            camera.stopPreview();
         }
-        // Close the cursor
-        cursor.close();
+
+        camera.release();
+        camera=null;
+        inPreview=false;
+
+        super.onPause();
+    }
+
+    private Camera.Size getBestPreviewSize(int width, int height,
+                                           Camera.Parameters parameters) {
+        Camera.Size result=null;
+
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            if (size.width<=width && size.height<=height) {
+                if (result==null) {
+                    result=size;
+                }
+                else {
+                    int resultArea=result.width*result.height;
+                    int newArea=size.width*size.height;
+
+                    if (newArea>resultArea) {
+                        result=size;
+                    }
+                }
+            }
+        }
+
+        return(result);
+    }
+
+    private void initPreview(int width, int height) {
+        if (camera!=null && previewHolder.getSurface()!=null) {
+            try {
+                camera.setPreviewDisplay(previewHolder);
+            }
+            catch (Throwable t) {
+                Log.e("CD-surfaceCallback",
+                        "Exception in setPreviewDisplay()", t);
+                Toast
+                        .makeText(OpenCamera.this, t.getMessage(), Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            if (!cameraConfigured) {
+                Camera.Parameters parameters=camera.getParameters();
+//                Camera.Size size=getBestPreviewSize(width, height,
+//                        parameters);
+                List<Camera.Size> sizes=parameters.getSupportedPreviewSizes();
+                Camera.Size size = sizes.get(0);
+
+                if (size!=null) {
+                    parameters.setPreviewSize(size.width, size.height);
+                    camera.setParameters(parameters);
+                    cameraConfigured=true;
+                }
+            }
+        }
+    }
+
+    private void startPreview() {
+        if (cameraConfigured && camera!=null) {
+            camera.startPreview();
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+            int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+            int degrees = 0;
+            switch (rotation) {
+                case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
+                case Surface.ROTATION_90: degrees = 90; break; //Landscape left
+                case Surface.ROTATION_180: degrees = 180; break;//Upside down
+                case Surface.ROTATION_270: degrees = 270; break;//Landscape right
+            }
+            int rotate = (info.orientation - degrees + 360) % 360;
+
+//STEP #2: Set the 'rotation' parameter
+            Camera.Parameters params = camera.getParameters();
+            params.setRotation(rotate);
+            camera.setParameters(params);
+            setCameraDisplayOrientation(this, 0, camera);
+            inPreview=true;
+        }
+    }
+
+    public static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        int degrees = 0;
+
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
+    }
+
+    SurfaceHolder.Callback surfaceCallback=new SurfaceHolder.Callback() {
+        public void surfaceCreated(SurfaceHolder holder) {
+            // no-op -- wait until surfaceChanged()
+        }
+
+        public void surfaceChanged(SurfaceHolder holder,
+                                   int format, int width,
+                                   int height) {
+            initPreview(width, height);
+            startPreview();
+        }
+
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            // no-op
+        }
+    };
+
+//    Camera.AutoFocusCallback autoFocus=new Camera.AutoFocusCallback() {
+//        Camera.ShutterCallback shutterCallback =new Camera.ShutterCallback() {
+//
+//            @Override
+//            public void onShutter() {
+//                AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//                mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
+//
+//            }
+//        };
+//        Camera.PictureCallback photoCallback = new Camera.PictureCallback() {
+//            @Override
+//            public void onPictureTaken(final byte[] data, final Camera camera) {
+//                new Thread() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            Thread.sleep(1000);
+//                        } catch (Exception ex) {}
+//                    }
+//                }.start();
+//            }
+//        };
+//
+//        @Override
+//        public void onAutoFocus(boolean success, Camera camera) {
+//            camera.takePicture(shutterCallback,null, null, photoCallback);
+//        }
+//    };
+
+    private void getContactNames() {
+
+        List<CoolList> all = new ArrayList<>();
+        Map<String, ArrayList<String>> tempAll = new HashMap<>();
+
+        String[] EMAIL_PROJECTION = new String[] {
+                ContactsContract.CommonDataKinds.Email.CONTACT_ID,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Email.DATA
+        };
+
+        String[] PHONE_PROJECTION = new String[] {
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.DATA
+        };
+
+
+        ContentResolver cr = getContentResolver();
+        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, EMAIL_PROJECTION, null, null, null);
+        Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
+
+        if (cursor != null && phoneCursor != null) {
+            try {
+                final int displayNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int emailIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
+                final int displayNameIndexNum = phoneCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int phoneIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA);
+
+                String displayName, address, displayNameNum, number;
+
+                while (cursor.moveToNext()) {
+                    ArrayList<String> curContact = new ArrayList<>();
+                    displayName = cursor.getString(displayNameIndex);
+                    address = cursor.getString(emailIndex);
+                    curContact.add(0, address);
+                    curContact.add(1, null);
+                    tempAll.put(displayName, curContact);
+                }
+
+                while (phoneCursor.moveToNext()) {
+                    displayNameNum = phoneCursor.getString(displayNameIndexNum);
+                    number = phoneCursor.getString(phoneIndex);
+                    ArrayList<String> curContact = tempAll.get(displayNameNum);
+
+                    if (curContact != null) {
+                        curContact.add(1, number);
+                        tempAll.put(displayNameNum, curContact);
+                    }
+                    else {
+                        curContact = new ArrayList<>();
+                        curContact.add(0, null);
+                        curContact.add(1, number);
+                        tempAll.put(displayNameNum, curContact);
+                    }
+                }
+
+            } finally {
+                cursor.close();
+                phoneCursor.close();
+            }
+        }
+
+        for(String key : tempAll.keySet()) {
+            CoolList curContact = new CoolList();
+            String curEmail = tempAll.get(key).get(0);
+            String curPhone = tempAll.get(key).get(1);
+            curContact.add(key);
+            curContact.add(curEmail); // email
+            curContact.add(curPhone); // number
+            all.add(curContact);
+        }
 
         everything = all;
     }

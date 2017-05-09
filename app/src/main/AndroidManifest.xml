@@ -10,7 +10,11 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
 
     <application
         android:name=".MyList"
@@ -27,6 +31,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".Splash">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity android:name=".EditSpecifics" />
         <activity android:name=".EditReceipt" />
@@ -52,8 +62,8 @@
         </provider>
 
         <activity android:name=".MainReceipt" />
-        <activity android:name=".Summary" />
         <activity android:name=".PickItems"></activity>
+        <activity android:name=".TextMain"></activity>
     </application>
 
 </manifest>

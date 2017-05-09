@@ -7,8 +7,8 @@
     <string name="new_item">Item:</string>
     <string name="new_price">Price:</string>
     <string name="edit_message">Enter a message plz</string>
-    <string name="take_picture">New Receipt</string>
-    <string name="facebook_app_id">152449388620006</string>
-    <string name="fb_login_protocol_scheme">fb152449388620006</string>
+    <!--<string name="take_picture">New Receipt</string>-->
+    <!--<string name="facebook_app_id">152449388620006</string>-->
+    <!--<string name="fb_login_protocol_scheme">fb152449388620006</string>-->
     <string name="button_send">Next</string>
 </resources>

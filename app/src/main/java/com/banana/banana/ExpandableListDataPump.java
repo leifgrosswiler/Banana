@@ -55,7 +55,6 @@ public class ExpandableListDataPump extends Application {
         return expandableListDetail;
     }
 
-
     public void addTipTax(String tip, double tax, HashMap<String,Double> perc) {
 
         DecimalFormat df = new DecimalFormat("###.##");
