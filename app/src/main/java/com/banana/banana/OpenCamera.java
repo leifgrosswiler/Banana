@@ -57,8 +57,10 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
@@ -739,56 +741,77 @@ public class OpenCamera extends AppCompatActivity {
 //    };
 
     private void getContactNames() {
+
         List<CoolList> all = new ArrayList<>();
+        Map<String, ArrayList<String>> tempAll = new HashMap<>();
 
-        // Get the ContentResolver
+        String[] EMAIL_PROJECTION = new String[] {
+                ContactsContract.CommonDataKinds.Email.CONTACT_ID,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Email.DATA
+        };
+
+        String[] PHONE_PROJECTION = new String[] {
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.DATA
+        };
+
+
         ContentResolver cr = getContentResolver();
-        // Get the Cursor of all the contacts
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, EMAIL_PROJECTION, null, null, null);
+        Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
 
-        // Move the cursor to first. Also check whether the cursor is empty or not.
-        if (cursor.moveToFirst()) {
-            // Iterate through the cursor
-            int i = 0;
-            do {
-                // Get the contacts name
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+        if (cursor != null && phoneCursor != null) {
+            try {
+                final int displayNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int emailIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
+                final int displayNameIndexNum = phoneCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                final int phoneIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA);
 
-                // Get the contacts email
-                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
+                String displayName, address, displayNameNum, number;
 
-                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
-
-                //Only adds contact if an email address or phone numbers is associated with it
-                if (phoneCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
-                    if (emailCursor.moveToNext()) {
-                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        all.get(i).add(email);
-                        all.get(i).add(number);
-                    } else {
-                        all.get(i).add(null);
-                        all.get(i).add(number);
-                    }
-                    i++;
-                } else if (emailCursor.moveToNext()) {
-                    all.add(new CoolList());
-                    all.get(i).add(name);
-                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                    all.get(i).add(email);
-                    i++;
+                while (cursor.moveToNext()) {
+                    ArrayList<String> curContact = new ArrayList<>();
+                    displayName = cursor.getString(displayNameIndex);
+                    address = cursor.getString(emailIndex);
+                    curContact.add(0, address);
+                    curContact.add(1, null);
+                    tempAll.put(displayName, curContact);
                 }
-                emailCursor.close();
+
+                while (phoneCursor.moveToNext()) {
+                    displayNameNum = phoneCursor.getString(displayNameIndexNum);
+                    number = phoneCursor.getString(phoneIndex);
+                    ArrayList<String> curContact = tempAll.get(displayNameNum);
+
+                    if (curContact != null) {
+                        curContact.add(1, number);
+                        tempAll.put(displayNameNum, curContact);
+                    }
+                    else {
+                        curContact = new ArrayList<>();
+                        curContact.add(0, null);
+                        curContact.add(1, number);
+                        tempAll.put(displayNameNum, curContact);
+                    }
+                }
+
+            } finally {
+                cursor.close();
                 phoneCursor.close();
-            } while (cursor.moveToNext());
+            }
         }
-        // Close the cursor
-        cursor.close();
+
+        for(String key : tempAll.keySet()) {
+            CoolList curContact = new CoolList();
+            String curEmail = tempAll.get(key).get(0);
+            String curPhone = tempAll.get(key).get(1);
+            curContact.add(key);
+            curContact.add(curEmail); // email
+            curContact.add(curPhone); // number
+            all.add(curContact);
+        }
 
         everything = all;
     }
