@@ -47,4 +47,17 @@ public class ExpandableListDataPump {
 
         return expandableListDetail;
     }
+
+    public String getTotal(String user) {
+        double totalprice = 0;
+        DecimalFormat df = new DecimalFormat("###.##");
+        List<Order> orders = ((MyList) activity.getApplication()).getUserOrders(user);
+        for (Order order : orders) {
+            StringBuilder sb = new StringBuilder("");
+            Double pp = Double.parseDouble(order.getPricePP(MyList.numBuyers(order.getItem())));
+            String priceper = df.format(pp);
+            totalprice += Double.parseDouble(priceper);
+        }
+        return df.format(totalprice);
+    }
 }

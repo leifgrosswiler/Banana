@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -75,6 +76,8 @@ public class MainActivity extends Activity
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
+    private static String myPhoneNo;
+
     ExpandableListView expandableListView;
     ExpandableListAdapter expandableListAdapter;
     List<String> expandableListTitle;
@@ -89,6 +92,9 @@ public class MainActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+        myPhoneNo =  tm.getLine1Number();
 
         // Check SMS Permissions in beginning
         pm = this.getPackageManager();
@@ -176,6 +182,10 @@ public class MainActivity extends Activity
                         String body = order.getItem().toString() + ": $" + order.getPrice().toString();
                         sms.sendTextMessage(phoneNo, null, body, null, null);
                     }
+                    ExpandableListDataPump pump = new ExpandableListDataPump(this);
+                    String total = pump.getTotal(name);
+                    String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
+                        + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
                 }
             }
         } else {
@@ -543,6 +553,11 @@ public class MainActivity extends Activity
                 for (Order order : list)
                     body.append(order.getItem() + ": $" + order.getPrice() + "\n");
                 String subject = "Payment from your group receipt";
+                ExpandableListDataPump pump = new ExpandableListDataPump(this);
+                String total = pump.getTotal(name);
+                String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
+                        + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
+                body.append(link + "\n");
 
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
                 try {
