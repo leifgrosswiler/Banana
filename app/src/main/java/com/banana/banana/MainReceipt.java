@@ -210,6 +210,8 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public void onBackPressed()
     {
         super.onBackPressed();
+        OrderData.DeleteWholeOrder();
+        ((MyList) getApplication()).Restart();
         startActivity(new Intent(this, OpenCamera.class));
         finish();
 
