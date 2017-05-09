@@ -6,16 +6,21 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Path;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.view.Gravity;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -36,6 +41,8 @@ public class SelectItems extends AppCompatActivity {
     //Contacts stuff
     private ListView contNames;
     public static List<CoolList> everything;
+    private static String person;
+    private static Intent i;
 
     private ArrayAdapter<CoolList> adapter;
     private SearchView sv;
@@ -63,6 +70,7 @@ public class SelectItems extends AppCompatActivity {
         contNames.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if(!((MyList) getApplication()).contains(adapter.getItem(position).get(0))) {
+                    System.out.println(v.toString());
                     if (adapter.getItem(position).get(1) != null) {
                         System.out.println("Email adding");
                         ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(1), false);
@@ -73,9 +81,44 @@ public class SelectItems extends AppCompatActivity {
                     MyList.addUser(adapter.getItem(position).get(0), OrderData.size());
 
                     // go to pick items screen
-                    Intent i = new Intent(SelectItems.this, PickItems.class);
+                    i = new Intent(SelectItems.this, PickItems.class);
                     i.putExtra(PickItems_ID, adapter.getItem(position).get(0));
-                    startActivity(i);
+//                    startActivity(i);
+
+                    person = adapter.getItem(position).get(0);
+                    PopupMenu popup = new PopupMenu(SelectItems.this, v);
+                    //Inflating the Popup using xml file
+                    MenuInflater MI = popup.getMenuInflater();
+                    MI.inflate(R.menu.popup, popup.getMenu());
+
+                    if (adapter.getItem(position).get(1) != null) {
+                        popup.getMenu().add(adapter.getItem(position).get(1));
+                    }
+                    if (adapter.getItem(position).size() > 2) {
+                        popup.getMenu().add(adapter.getItem(position).get(2));
+                    }
+
+                    //registering popup with OnMenuItemClickListener
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        public boolean onMenuItemClick(MenuItem item) {
+                            Toast.makeText(
+                                    SelectItems.this,
+                                    "You Clicked : " + item.getTitle(),
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                            System.out.println(person);
+//                            if (item.getTitle().toString().contains("@"))
+//                                ((MyList) getApplication()).add(person, item.getTitle().toString(), false);
+//                            else
+//                                ((MyList) getApplication()).add(person, item.getTitle().toString(), true);
+//                            Intent i = new Intent(SelectItems.this, PickItems.class);
+//                            i.putExtra(PickItems_ID, item.getTitle().toString());
+                            startActivity(i);
+                            return true;
+                        }
+                    });
+
+                    popup.show(); //showing popup menu
 
                     System.out.println(((MyList) getApplication()).getUsers());
                 }
