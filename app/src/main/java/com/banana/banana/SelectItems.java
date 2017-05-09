@@ -71,14 +71,14 @@ public class SelectItems extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if(!((MyList) getApplication()).contains(adapter.getItem(position).get(0))) {
                     System.out.println(v.toString());
-                    if (adapter.getItem(position).get(1) != null) {
-                        System.out.println("Email adding");
-                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(1), false);
-                    } else {
-                        System.out.println("Number adding");
-                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(2), true);
-                    }
-                    MyList.addUser(adapter.getItem(position).get(0), OrderData.size());
+//                    if (adapter.getItem(position).get(1) != null) {
+//                        System.out.println("Email adding");
+//                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(1), false);
+//                    } else {
+//                        System.out.println("Number adding");
+//                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(2), true);
+//                    }
+//                    MyList.addUser(adapter.getItem(position).get(0), OrderData.size());
 
                     // go to pick items screen
                     i = new Intent(SelectItems.this, PickItems.class);
@@ -107,10 +107,11 @@ public class SelectItems extends AppCompatActivity {
                                     Toast.LENGTH_SHORT
                             ).show();
                             System.out.println(person);
-//                            if (item.getTitle().toString().contains("@"))
-//                                ((MyList) getApplication()).add(person, item.getTitle().toString(), false);
-//                            else
-//                                ((MyList) getApplication()).add(person, item.getTitle().toString(), true);
+                            if (item.getTitle().toString().contains("@"))
+                                ((MyList) getApplication()).add(person, item.getTitle().toString(), false);
+                            else
+                                ((MyList) getApplication()).add(person, item.getTitle().toString(), true);
+                            MyList.addUser(person, OrderData.size());
 //                            Intent i = new Intent(SelectItems.this, PickItems.class);
 //                            i.putExtra(PickItems_ID, item.getTitle().toString());
                             startActivity(i);
