@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -30,6 +31,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static final String PRICE_ID = "com.banana.priceID";
     public static final String SPINNER_ID = "com.banana.spinnerID";
     public static final String P_ID = "com.banana.pID";
+    private static TextView totalPrice;
 
     public Spinner spinner;
 
@@ -56,6 +58,11 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
         adapter = new ReceiptAdapter(OrderData.getListData(), this, (MyList) getApplication());
         recView.setAdapter(adapter);
+
+        //Get the total price and set
+        double total = OrderData.getTotal();
+        totalPrice = (TextView)findViewById(R.id.totalView);
+        totalPrice.setText("Total: " + total);
 
         // floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -130,6 +137,19 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
     }
 
+    public static void updateTotal() {
+        double total = OrderData.getTotal();
+        totalPrice.setText("Total: " + total);
+        System.out.println("TRYING TO UPDATE THE TOTAL. PLZ PLZ CHANGE: " + total);
+    }
+
+//    private void payItems(String name){
+//        for (int i = 0; i < OrderData.size(); i++){
+//            View thisView = recView.getChildAt(i);
+//            if (MyList.getTracker(name)[i])
+//                ((TextView) thisView.findViewById(R.id.payer)).setText(name);
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,8 +164,28 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_user:
-                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
-                startActivityForResult(intentDone, request);
+//                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
+//                startActivityForResult(intentDone, request);
+
+                View vItem = findViewById(R.id.add_user);
+                PopupMenu popup = new PopupMenu(this, vItem);
+                popup.getMenuInflater().inflate(R.menu.pop_menu1, popup.getMenu());
+
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.addNew) {
+                            Intent intentNew = new Intent(MainReceipt.this, AddNewContact.class);
+                            startActivity(intentNew);
+                        } else {
+                            Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
+                            startActivityForResult(intentDone, request);
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();
 //                Set<String> users = ((MyList) getApplication()).getUsers();
 //                System.out.println(users.toString());
 //                for (String user : users){
@@ -178,7 +218,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public void onBackPressed()
     {
         super.onBackPressed();
+        OrderData.DeleteWholeOrder();
+        ((MyList) getApplication()).Restart();
         startActivity(new Intent(this, OpenCamera.class));
+        recView.setAdapter(null);
         finish();
 
     }
