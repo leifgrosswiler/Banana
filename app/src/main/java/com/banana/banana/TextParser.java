@@ -2,6 +2,8 @@ package com.banana.banana;
 
 import android.util.Log;
 
+import com.google.api.client.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -95,7 +97,8 @@ public class TextParser {
 
     private static String categorizeWord(String word) {
         if (word.contains(String.valueOf('$')) || word.contains(String.valueOf('.')) || word.contains(String.valueOf(','))
-                || word.contains(String.valueOf("'")) || word.contains(String.valueOf("-")) || word.contains(String.valueOf("~"))) {
+         || word.contains(String.valueOf("'")) || word.contains(String.valueOf("-")) || word.contains(String.valueOf("~"))
+         || word.contains(String.valueOf("_"))) {
             return "Price";
         } else if (isNumeric(word)) {
             return "Quantity";
@@ -112,9 +115,10 @@ public class TextParser {
         String newWord = word;
         newWord = newWord.replaceAll(",", ".");
         newWord = newWord.replaceAll("'", ".");
-        newWord = newWord.replaceAll("..", ".");
         newWord = newWord.replaceAll("-", ".");
         newWord = newWord.replaceAll("~", ".");
+        newWord = newWord.replaceAll("_", ".");
+        ///newWord = newWord.replaceAll("..", ".");
         newWord = newWord.replaceAll("$", "");
         newWord = newWord.replaceAll("o", "0");
         newWord = newWord.replaceAll("O", "0");
@@ -126,6 +130,12 @@ public class TextParser {
         newWord = newWord.replaceAll("H", "A");
         newWord = newWord.replace("\\", "");
         newWord = newWord.replaceAll("[^\\d.]", "");
+
+        // If there are multiple periods, give up
+        if (newWord.length() - newWord.replace(".", "").length() > 1) {
+            newWord = "0.00";
+        }
+        Log.v(TAG, "Corrected " +  word + " to " + newWord);
         return newWord;
     }
 }
