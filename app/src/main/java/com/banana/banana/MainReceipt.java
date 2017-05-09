@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -174,8 +175,29 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_user:
-                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
-                startActivityForResult(intentDone, request);
+//                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
+//                startActivityForResult(intentDone, request);
+
+                View vItem = findViewById(R.id.add_user);
+                PopupMenu popup = new PopupMenu(this, vItem);
+                popup.getMenuInflater().inflate(R.menu.pop_menu1, popup.getMenu());
+
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item == findViewById(R.id.addNew)) {
+
+
+                        } else
+                        {
+                            Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
+                            startActivityForResult(intentDone, request);
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();
 //                Set<String> users = ((MyList) getApplication()).getUsers();
 //                System.out.println(users.toString());
 //                for (String user : users){
