@@ -51,7 +51,7 @@ public class EditSpecifics extends AppCompatActivity {
         String newPrice = editPrice.getText().toString();
 
         if (!isValid(newPrice)) {
-            Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_SHORT).show();
             return;
         }
 
