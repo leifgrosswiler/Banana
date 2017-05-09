@@ -187,11 +187,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        if (item == findViewById(R.id.addNew)) {
-
-
-                        } else
-                        {
+                        if (item.getItemId() == R.id.addNew) {
+                            Intent intentNew = new Intent(MainReceipt.this, AddNewContact.class);
+                            startActivity(intentNew);
+                        } else {
                             Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
                             startActivityForResult(intentDone, request);
                         }
