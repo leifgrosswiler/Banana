@@ -47,18 +47,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         Order item = listData.get(position);
         holder.item.setText(item.getItem());
         holder.price.setText(item.getPrice());
-        // fix 1
-//        for (String person : MyList.getAllUsers()) {
-//            if (!holder.payer.getText().toString().contains(person)) {
-//                if (MyList.getTracker(person)[position])
-//                    if (holder.payer.getText() == "")
-//                        holder.payer.setText(person);
-//                    else
-//                        holder.payer.setText(holder.payer.getText() + ", " + person);
-//            }
-//        }
-        // fix 2
-        holder.payer.setText("");
         for (String person : MyList.getAllUsers()) {
             if (MyList.getTracker(person)[position])
                 if (holder.payer.getText() == "")
@@ -71,13 +59,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         if (mode == PICK_ITEMS){
             if (MyList.getTracker(user)[position]){
                 holder.card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
-                holder.payer.setTextColor(Color.parseColor("#FFFFFF"));
             }
-//            for (String person : MyList.getAllUsers()){
-//                if (MyList.getTracker(person)[position]){
-//                    holder.payer
-//                }
-//            }
+            holder.payer.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -147,7 +130,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 if (!tracker[p]){
                     MyList.isSelected(user, p, true);
                     card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
-                    payer.setTextColor(Color.parseColor("#FFFFFF"));
                     System.out.println("1");
                     MyList.addBuyer(item.getItem());
                     int buyers = MyList.numBuyers(item.getItem());
@@ -156,7 +138,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 else{
                     MyList.isSelected(user, p, false);
                     card.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
-                    payer.setTextColor(Color.parseColor("#FF8A65"));
                     System.out.println("2");
                     MyList.removeBuyer(item.getItem());
                     int buyers = MyList.numBuyers(item.getItem());

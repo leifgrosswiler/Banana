@@ -10,7 +10,6 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -25,8 +24,6 @@ android {
 }
 
 dependencies {
-
-    compile 'com.android.support:multidex:1.0.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile('com.google.api-client:google-api-client-android:1.22.0') {
         exclude group: 'org.apache.httpcomponents'
@@ -43,11 +40,11 @@ dependencies {
     }
 
 
-//    compile('com.google.gdata:core:1.47.1') {
-//        exclude group: 'com.sun.mail'
-//        exclude group: 'javax.activation'
-//        exclude group: 'javax.mail'
-//    }
+    compile('com.google.gdata:core:1.47.1') {
+        exclude group: 'com.sun.mail'
+        exclude group: 'javax.activation'
+        exclude group: 'javax.mail'
+    }
 
     compile project(':openCVLibrary320')
 
