@@ -26,7 +26,7 @@ public class ExpandableListDataPump {
         this.expandableListDetail = new HashMap<>();
         this.tipTaxAdd = false;
 
-        DecimalFormat df = new DecimalFormat("###.##");
+        DecimalFormat df = new DecimalFormat("##0.00");
 
         for (String s : userSet) {
 
@@ -57,7 +57,7 @@ public class ExpandableListDataPump {
 
     public String getTotal(String user) {
         double totalprice = 0;
-        DecimalFormat df = new DecimalFormat("###.##");
+        DecimalFormat df = new DecimalFormat("##0.00");
         List<Order> orders = ((MyList) activity.getApplication()).getUserOrders(user);
         for (Order order : orders) {
             StringBuilder sb = new StringBuilder("");
@@ -112,7 +112,7 @@ public class ExpandableListDataPump {
 
     public void addTipTax(String tip, double tax, HashMap<String,Double> perc) {
 
-        DecimalFormat df = new DecimalFormat("###.##");
+        DecimalFormat df = new DecimalFormat("##0.00");
         for (String user : MyList.getAllUsers()) {
             double p = perc.get(user);
             double tipprop = p* Integer.parseInt(tip);
