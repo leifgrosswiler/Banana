@@ -22,6 +22,7 @@ import java.util.Set;
 import static com.banana.banana.EditReceipt.ITEM_ID;
 import static com.banana.banana.EditReceipt.PRICE_ID;
 
+
 public class TaxAddition extends AppCompatActivity  {
 
     private EditText editTax;
@@ -33,7 +34,6 @@ public class TaxAddition extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tax);
 
-
         // set views
         editTax = (EditText) findViewById(R.id.editTax);
         editTip = (EditText) findViewById(R.id.editTip);
@@ -44,6 +44,7 @@ public class TaxAddition extends AppCompatActivity  {
         // button
         final Button done =(Button) findViewById(R.id.editDone);
         Set<String> names = ((MyList) getApplication()).getUsers();
+
         final ExpandableListDataPump pump = new ExpandableListDataPump(this, names);
 
         done.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +54,8 @@ public class TaxAddition extends AppCompatActivity  {
                 // get list of final prices and total price
 
                 pump.getData();
+                pump.rmTipTax();
+
                 HashMap<String, Double> finalPrices = pump.getTotalPrices();
                 double total = pump.getTotal();
 
