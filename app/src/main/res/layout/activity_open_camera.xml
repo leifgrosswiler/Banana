@@ -5,33 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<LinearLayout-->
-        <!--android:name="Splash"-->
-        <!--android:theme="@style/splashScreenTheme"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--app:layout_constraintRight_toRightOf="parent"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent">-->
-
-        <!--<RelativeLayout-->
-            <!--android:id="@+id/loadingPanel"-->
-            <!--android:layout_width="65dp"-->
-            <!--android:layout_height="551dp"-->
-            <!--android:gravity="center"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent">-->
-            <!--<ProgressBar-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:indeterminate="true"/>-->
-        <!--</RelativeLayout>-->
-
-    <!--</LinearLayout>-->
-
     <SurfaceView
         android:id="@+id/cameraView"
         android:layout_width="wrap_content"
@@ -44,20 +17,15 @@
         android:layout_height="match_parent"
         tools:context="com.banana.banana.OpenCamera">
 
-        <!--<RelativeLayout-->
-            <!--android:id="@+id/loadingPanel"-->
-            <!--android:layout_width="65dp"-->
-            <!--android:layout_height="551dp"-->
-            <!--android:gravity="center"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent">-->
-        <!--<ProgressBar-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:indeterminate="true"/>-->
-        <!--</RelativeLayout>-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Try to include only the items you wish to parse"
+            android:textColor="#808080"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="30dp"/>
 
         <Button
             android:id="@+id/button_image"
