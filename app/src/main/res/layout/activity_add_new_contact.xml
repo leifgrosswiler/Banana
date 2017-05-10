@@ -14,20 +14,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/contactName"
-        android:layout_above="@+id/contactInfo"
-        android:layout_marginBottom="70dp"
-        android:layout_alignStart="@+id/contactInfo"
-        android:hint="Input Name"
+        android:hint="Contact Name"
         android:gravity="center"
+        android:layout_below="@+id/app_bar"
+        android:layout_alignStart="@+id/contactInfo"
+        android:layout_marginTop="39dp"
         android:layout_alignEnd="@+id/contactInfo" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/contactInfo"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:hint="Input Email or Phone Number"
-        android:gravity="center"/>
+        android:hint="Email or Phone Number"
+        android:gravity="center"
+        android:layout_marginTop="41dp"
+        android:layout_below="@+id/contactName"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

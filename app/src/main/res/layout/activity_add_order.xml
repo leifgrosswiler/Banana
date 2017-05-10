@@ -14,24 +14,22 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
-        android:layout_marginBottom="82dp"
-        android:hint="Input Food"
+        android:hint="Item"
         android:gravity="center"
-        android:layout_above="@+id/addPrice"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/app_bar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="46dp" />
 
     <EditText
         android:id="@+id/addPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:layout_marginBottom="196dp"
-        android:hint="Input Price"
+        android:inputType="number"
+        android:hint="Price"
         android:gravity="center"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="27dp"
+        android:layout_below="@+id/addName"
         android:layout_alignStart="@+id/addName" />
 
     <!--<Button-->
