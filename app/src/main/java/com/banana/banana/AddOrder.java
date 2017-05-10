@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import static com.banana.banana.R.menu.app_bar2_menu;
 
@@ -74,6 +75,11 @@ public class AddOrder extends AppCompatActivity {
                 // temporary way to update original array list
                 String newName = addName.getText().toString();
                 String newPrice = addPrice.getText().toString();
+
+                if (!EditSpecifics.isValid(newPrice)) {
+                    Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
 
                 if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
                 else OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
