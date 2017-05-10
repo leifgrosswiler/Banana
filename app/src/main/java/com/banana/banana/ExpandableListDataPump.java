@@ -68,6 +68,48 @@ public class ExpandableListDataPump {
         return df.format(totalprice);
     }
 
+    public void rmTipTax() {
+        for (String user : MyList.getAllUsers()) {
+
+            List<String> userOrder = expandableListDetail.get(user);
+            List<String> newUserOrder = new ArrayList<>(userOrder);
+            System.out.println("order: " + userOrder);
+            //expandableListDetail.remove(user);
+
+            String tip = "";
+            String tax = "";
+            double tipD = 0.0;
+            double taxD = 0.0;
+//            // remove total entry
+            for (String s : userOrder) {
+                if (s.contains("Tip: $")) {
+                    System.out.println("tip string + "+ s);
+                    newUserOrder.remove(s);
+                    String[] split = s.split("[$]");
+                    tip = split[1];
+                    System.out.println("tip: "+ tip);
+                    tipD = Double.parseDouble(tip);
+                }
+                if (s.contains("Tax: $")) {
+                    System.out.println("tax string + "+ s);
+                    newUserOrder.remove(s);
+                    tax = s.split("[$]")[1];
+                    System.out.println("tax: "+ tax);
+                    taxD = Double.parseDouble(tax);
+                }
+            }
+
+            double total = totalPrices.get(user);
+            total = total - (taxD+tipD);
+            totalPrices.remove(user);
+            totalPrices.put(user,total);
+
+            expandableListDetail.put(user, newUserOrder);
+        }
+
+        tipTaxAdd = false;
+    }
+
     public void addTipTax(String tip, double tax, HashMap<String,Double> perc) {
 
         DecimalFormat df = new DecimalFormat("###.##");

@@ -95,25 +95,6 @@ public class MyList extends Application {
     }
 
     private static HashMap<String, Integer> itemTracker = new HashMap<>();
-    public static void addBuyer(String item) {
-        if (itemTracker.containsKey(item)) {
-            int val = itemTracker.get(item);
-            itemTracker.put(item, val+1);
-        }
-        else itemTracker.put(item, 1);
-    }
-
-    public static void removeBuyer(String item) {
-        if (itemTracker.containsKey(item)) {
-            int val = itemTracker.get(item);
-            itemTracker.put(item, val-1);
-        }
-        else System.out.println("Error: item not in menu");
-    }
-
-    public static int numBuyers(String item) {
-        return itemTracker.get(item);
-    }
 
     // **Tracker**
 

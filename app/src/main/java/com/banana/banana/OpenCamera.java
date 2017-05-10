@@ -256,7 +256,12 @@ public class OpenCamera extends AppCompatActivity {
                                         parameters.setFocusAreas(null);
                                     }
                                     camera.setParameters(parameters);
-                                    camera.startPreview();
+                                    try {
+                                        camera.startPreview();
+                                    } catch (Exception e) {
+                                        System.out.println(e.toString());
+                                    }
+
                                 }
                             }
                         });
@@ -327,9 +332,14 @@ public class OpenCamera extends AppCompatActivity {
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
+//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
+        Mat dest = new Mat();
+        Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.GaussianBlur(gray, dest, new Size(0, 0), 3);
+        Core.addWeighted(gray, 1.5, dest, -0.5, 0, gray);
         Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
         Imgcodecs.imwrite(fileUri.getPath(), gray);
-        sendMessage(takePictureButton);
     }
 
     @Override
@@ -407,6 +417,7 @@ public class OpenCamera extends AppCompatActivity {
             onPhotoTaken(true);
             Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
             Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + processedText);
+            sendMessage(takePictureButton);
         }
     }
 
@@ -562,7 +573,7 @@ public class OpenCamera extends AppCompatActivity {
             rawText = recognizedText;
         }
         //Log.v(TAG, parse(recognizedText).toString());
-        if (!test) {
+        if (test) {
             parseResult = parse(recognizedText);
             setFoodAndPrice();
         }
@@ -579,8 +590,6 @@ public class OpenCamera extends AppCompatActivity {
         //new File(photoFile.getPath()).delete();
         //new File(cropFile.getPath()).delete();
         //getContentResolver().delete(file, null, null);
-
-        Log.v(TAG, "\n\n\n\n\n\n\n\n 2222222!!!!!!!" + recognizedText + "\n\n\n\n\n 33333333");
         intent.putExtra(EXTRA_MESSAGE, recognizedText);
 
         startActivity(intent);
