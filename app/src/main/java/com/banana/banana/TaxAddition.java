@@ -77,7 +77,8 @@ public class TaxAddition extends AppCompatActivity  {
                     tipStr = "0";
                 }
                 if (tipStr.isEmpty()) tipStr = "0";
-                pump.addTipTax(tipStr, tax, perc);
+
+                if (!pump.tipTaxAdd) pump.addTipTax(tipStr, tax, perc);
 
                 Intent finalIntent = new Intent(TaxAddition.this, MainActivity.class);
                 if (isValid(editTip.getText().toString()) && isValid(editTax.getText().toString()))

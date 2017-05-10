@@ -77,6 +77,7 @@ public class OrderData {
         for(Order order : data) {
             total += Double.parseDouble(order.getPrice());
         }
+        total = ((double) Math.round(total * 100)) / 100;
         return total;
     }
 }
