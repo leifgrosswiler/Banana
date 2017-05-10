@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.CharArrayReader;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class TaxAddition extends AppCompatActivity  {
 
     private EditText editTax;
     private EditText editTip;
+    private TextView subtotal;
     int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class TaxAddition extends AppCompatActivity  {
         final Button done =(Button) findViewById(R.id.editDone);
         Set<String> names = ((MyList) getApplication()).getUsers();
         final ExpandableListDataPump pump = new ExpandableListDataPump(this, names);
+
         done.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -54,7 +58,7 @@ public class TaxAddition extends AppCompatActivity  {
 
                 String taxStr = editTax.getText().toString();
                 if (!isValid(taxStr)) {
-                    Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
                     taxStr = "0";
                 }
                 if (taxStr.isEmpty()) taxStr = "0";
@@ -69,7 +73,7 @@ public class TaxAddition extends AppCompatActivity  {
 
                 String tipStr = editTip.getText().toString();
                 if (!isValid(tipStr)) {
-                    Toast.makeText(getApplicationContext(),"Invalid Tip Value!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Invalid Tip Value!", Toast.LENGTH_SHORT).show();
                     tipStr = "0";
                 }
                 if (tipStr.isEmpty()) tipStr = "0";
@@ -82,6 +86,13 @@ public class TaxAddition extends AppCompatActivity  {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainReceipt.class));
     }
 
     public boolean isValid(String str) {

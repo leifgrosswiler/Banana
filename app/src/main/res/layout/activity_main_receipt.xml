@@ -37,8 +37,6 @@
         android:layout_alignBottom="@+id/fab"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="11dp" />
-
-
 </RelativeLayout>
 
 

@@ -48,17 +48,16 @@ public class OrderData {
 
         for (int i = 0; i < food.length; i++) {
 
-            Order order = new Order(food[i], price[i]);
+            Order order = new Order(food[i], price[i],i,0);
             data.add(order);
         }
 
         System.out.println("ATTENTION: " + data.size());
 
-
     }
-    public static void add(String item, String price){
+    public static void add(String item, String price, int p){
         int tmp = data.size();
-        Order order = new Order(item, price);
+        Order order = new Order(item, price, p,0);
         data.add(order);
 
         // update trackers

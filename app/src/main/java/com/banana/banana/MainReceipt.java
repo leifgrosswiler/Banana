@@ -39,6 +39,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static ReceiptAdapter adapter;
     private Toolbar toolbar;
     public static List<String> categories;
+    private static TextView orderTotal;
     public static ArrayAdapter<String> spinnerAdapter;
 
 
@@ -121,33 +122,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String user = spinner.getSelectedItem().toString();
-//                Toast.makeText(MainReceipt.this, user, Toast.LENGTH_SHORT).show();
-//                if (user != "Master") {
-//                    ((MyList) getApplication()).setUser(user);
-//                    String name = ((MyList) getApplication()).getUser();
-//                    adapter.setMode(ReceiptAdapter.USER);
-//                    boolean[] andrewTracker = MyList.getTracker(user);
-//
-//                    for(int p = 0; p < recView.getChildCount(); p++) {
-//                        System.out.println("Main: " + MyList.getTracker(user)[p]);
-//                        try {
-//                            recView.getChildAt(p).setSelected(andrewTracker[p]);
-//                        } catch (Exception e) {
-//                            System.out.println("WTF" + andrewTracker.length);
-//                        }
-//                    }
-//                }
-//                else {
-//                    adapter.setMode(ReceiptAdapter.DEFAULT);
-//                    // change all background color back to normal in Master
-//                    for(int p = 0; p < recView.getChildCount(); p++) {
-////                        System.out.println("Master: " + ((MyList) getApplication()).getTracker(user)[p]);
-//                        recView.getChildAt(p).setSelected(false);
-//                        if (MyList.getTracker(user) != null)
-//                            System.out.println("Tracker: " + MyList.getTracker(user)[p]);
-//                    }
-//
-//                }
                 if (user != "Select Payer: ") {
                     Intent spinnerIntent = new Intent(MainReceipt.this, PickItems.class);
                     spinnerIntent.putExtra(SelectItems.PickItems_ID, user);
@@ -162,8 +136,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
 
     }
-
-
 
     public static void updateTotal() {
         double total = OrderData.getTotal();
@@ -214,14 +186,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 });
 
                 popup.show();
-//                Set<String> users = ((MyList) getApplication()).getUsers();
-//                System.out.println(users.toString());
-//                for (String user : users){
-//                    if (!categories.contains(user)){
-//                        spinnerAdapter.add(user);
-//                    }
-//                }
-//                spinnerAdapter.notifyDataSetChanged();
+
                 return true;
             case R.id.add_item:
                 Intent addOrder = new Intent(this, AddOrder.class);

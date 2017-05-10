@@ -34,7 +34,9 @@ public class ExpandableListDataPump {
             List<Order> orders = ((MyList) activity.getApplication()).getUserOrders(s);
             for (Order order : orders) {
                 StringBuilder sb = new StringBuilder("");
-                Double pp = Double.parseDouble(order.getPricePP(MyList.numBuyers(order.getItem())));
+                int pos = order.getPos();
+                int count = ReceiptAdapter.indexes[pos];
+                Double pp = Double.parseDouble(order.getPricePP());
                 String priceper = df.format(pp);
                 sb.append("\n" + order.getItem() + "\t$" + priceper);
                 totalprice += Double.parseDouble(priceper);
@@ -57,7 +59,7 @@ public class ExpandableListDataPump {
         List<Order> orders = ((MyList) activity.getApplication()).getUserOrders(user);
         for (Order order : orders) {
             StringBuilder sb = new StringBuilder("");
-            Double pp = Double.parseDouble(order.getPricePP(MyList.numBuyers(order.getItem())));
+            Double pp = Double.parseDouble(order.getPricePP());
             String priceper = df.format(pp);
             totalprice += Double.parseDouble(priceper);
         }
