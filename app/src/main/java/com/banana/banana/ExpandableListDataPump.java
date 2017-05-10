@@ -15,6 +15,7 @@ import java.util.Set;
 public class ExpandableListDataPump {
 
     public Activity activity;
+    public boolean tipTaxAdd = false;
     private HashMap<String,Double> totalPrices = new HashMap<>();
     private HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
 
@@ -97,6 +98,8 @@ public class ExpandableListDataPump {
 
         ((MyList) activity.getApplication()).putPumpData(expandableListDetail);
         ((MyList) activity.getApplication()).putUserTotals(totalPrices);
+
+        tipTaxAdd = true;
     }
 
 
