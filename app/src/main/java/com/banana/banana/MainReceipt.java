@@ -186,14 +186,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 });
 
                 popup.show();
-//                Set<String> users = ((MyList) getApplication()).getUsers();
-//                System.out.println(users.toString());
-//                for (String user : users){
-//                    if (!categories.contains(user)){
-//                        spinnerAdapter.add(user);
-//                    }
-//                }
-//                spinnerAdapter.notifyDataSetChanged();
+
                 return true;
             case R.id.add_item:
                 Intent addOrder = new Intent(this, AddOrder.class);

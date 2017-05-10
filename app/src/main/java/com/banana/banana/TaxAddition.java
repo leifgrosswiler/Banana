@@ -58,7 +58,7 @@ public class TaxAddition extends AppCompatActivity  {
 
                 String taxStr = editTax.getText().toString();
                 if (!isValid(taxStr)) {
-                    Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
                     taxStr = "0";
                 }
                 if (taxStr.isEmpty()) taxStr = "0";
@@ -73,7 +73,7 @@ public class TaxAddition extends AppCompatActivity  {
 
                 String tipStr = editTip.getText().toString();
                 if (!isValid(tipStr)) {
-                    Toast.makeText(getApplicationContext(),"Invalid Tip Value!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Invalid Tip Value!", Toast.LENGTH_SHORT).show();
                     tipStr = "0";
                 }
                 if (tipStr.isEmpty()) tipStr = "0";
@@ -86,6 +86,13 @@ public class TaxAddition extends AppCompatActivity  {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainReceipt.class));
     }
 
     public boolean isValid(String str) {

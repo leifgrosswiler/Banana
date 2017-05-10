@@ -152,21 +152,6 @@ public class MyList extends Application {
     }
     public static Set<String> getAllUsers() { return tracker.keySet(); }
 
-    // TODO: test this
-//    public static void removeItem(int p){
-//        for (String name : tracker.keySet()) {
-//            boolean[] tmp = tracker.get(name);
-//            boolean[] tmp2 = new boolean[tmp.length-1];
-//            for (int i = 0; i < tmp2.length; i++){
-//                if (i < p)
-//                    tmp2[i] = tmp[i];
-//                else
-//                    tmp2[i] = tmp[i+1];
-//            }
-//            tracker.put(name, tmp2);
-//        }
-//
-//    }
 
     // Get Orders of Users
     public static ArrayList<Order> getUserOrders(String name){

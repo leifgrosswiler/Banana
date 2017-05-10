@@ -90,6 +90,11 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         return listData.size();
     }
 
+    public final static int[] indexes = new int[100];
+    public static int[] getIndexCounts() {
+        return indexes;
+    }
+
     //    public class ReceiptHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public class ReceiptHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView item;
@@ -110,15 +115,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
             container = itemView.findViewById(R.id.cont_item_root);
             card = (CardView) itemView.findViewById(R.id.card);
             payer = (TextView) itemView.findViewById(R.id.payer);
-//            avatar = itemView.findViewById(R.id.avatar);
-//            avatar.setVisibility(View.GONE);
-//            avatar2 = itemView.findViewById(R.id.avatar2);
-//            avatar2.setVisibility(View.GONE);
-//            circle = (CircleImageView) avatar.findViewById(R.id.circle);
-//            letter = (TextView) avatar.findViewById(R.id.initial);
 
             itemView.setOnClickListener(this);
-
 
         }
 
@@ -148,24 +146,24 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 System.out.println("IM HEREEEEEE ");
                 boolean[] tracker = MyList.getTracker(user);
 
-                if (!tracker[p]){
+                if (!tracker[p]) {
                     MyList.isSelected(user, p, true);
                     card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
                     payer.setTextColor(Color.parseColor("#FFFFFF"));
                     System.out.println("1");
-                    MyList.addBuyer(item.getItem());
-                    int buyers = MyList.numBuyers(item.getItem());
-                    System.out.println("NUMBER     "+ buyers);
+                    item.addUser();
+                    int num = item.getNumPpl();
+                    System.out.println("NUMBER     "+ num);
                 }
-                else{
+                else {
                     MyList.isSelected(user, p, false);
                     card.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
                     payer.setTextColor(Color.parseColor("#FF8A65"));
-                    System.out.println("2");
-                    MyList.removeBuyer(item.getItem());
-                    int buyers = MyList.numBuyers(item.getItem());
-                    System.out.println("NUMBER     "+ buyers);
+                    item.rmUser();
+                    int num = item.getNumPpl();
+                    System.out.println("NUMBER     "+ num);
                 }
+
 //                if (!view.isSelected()){
 //                    MyList.isSelected(user, p, true);
 ////                    card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
