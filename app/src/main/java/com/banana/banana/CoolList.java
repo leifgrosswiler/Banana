@@ -17,13 +17,10 @@ public class CoolList extends ArrayList {
     // Special toString function for this class
     @Override
     public String toString() {
-        String s = "";
-        for (int i = 0; i < alist.size(); i++) {
-            // Doesn't add if the item is null (this could only be the email address currently)
-            if (alist.get(i) != null)
-                s = s + alist.get(i) + "\n";
-        }
-        return s;
+        if (alist.size() > 0)
+            return alist.get(0);
+        else
+            return "";
     }
 
     public void add(String e) {
