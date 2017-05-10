@@ -78,6 +78,8 @@ public class ExpandableListDataPump {
 
             String tip = "";
             String tax = "";
+            double tipD = 0.0;
+            double taxD = 0.0;
 //            // remove total entry
             for (String s : userOrder) {
                 if (s.contains("Tip: $")) {
@@ -86,17 +88,19 @@ public class ExpandableListDataPump {
                     String[] split = s.split("[$]");
                     tip = split[1];
                     System.out.println("tip: "+ tip);
+                    tipD = Double.parseDouble(tip);
                 }
                 if (s.contains("Tax: $")) {
                     System.out.println("tax string + "+ s);
                     newUserOrder.remove(s);
                     tax = s.split("[$]")[1];
                     System.out.println("tax: "+ tax);
+                    taxD = Double.parseDouble(tax);
                 }
             }
 
             double total = totalPrices.get(user);
-            total = total - (Double.parseDouble(tax)+Double.parseDouble(tip));
+            total = total - (taxD+tipD);
             totalPrices.remove(user);
             totalPrices.put(user,total);
 
