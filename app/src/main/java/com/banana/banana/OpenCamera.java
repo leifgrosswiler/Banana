@@ -242,7 +242,12 @@ public class OpenCamera extends AppCompatActivity {
                                         parameters.setFocusAreas(null);
                                     }
                                     camera.setParameters(parameters);
-                                    camera.startPreview();
+                                    try {
+                                        camera.startPreview();
+                                    } catch (Exception e) {
+                                        System.out.println(e.toString());
+                                    }
+
                                 }
                             }
                         });
