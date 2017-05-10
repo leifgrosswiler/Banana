@@ -77,7 +77,7 @@ public class EditSpecifics extends AppCompatActivity {
         startActivity(intentUpdate);
     }
 
-    public boolean isValid(String str) {
+    public static boolean isValid(String str) {
 
         for (char c : str.toCharArray()) {
             // if any c is not a digit
