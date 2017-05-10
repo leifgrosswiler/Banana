@@ -1,10 +1,8 @@
 package com.banana.banana;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,39 +11,26 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
-import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.Pixa;
-import com.googlecode.tesseract.android.ResultIterator;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.android.OpenCVLoader;
@@ -62,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +54,6 @@ import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
 import static com.banana.banana.SelectItems.everything;
-import static java.security.AccessController.getContext;
 
 public class OpenCamera extends AppCompatActivity {
 
@@ -117,21 +100,7 @@ public class OpenCamera extends AppCompatActivity {
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-
-        // Get proper permissions
-//        pm = this.getPackageManager();
-//        int hasPerm = pm.checkPermission(
-//                Manifest.permission.CAMERA,
-//                this.getPackageName());
-//        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.CAMERA},
-//                    MY_PERMISSIONS_REQUEST_CAMERA);
-//        } else {
-//            setThingsUp();
-//        }
         setThingsUp();
-
     }
 
     private void setThingsUp() {
@@ -169,7 +138,6 @@ public class OpenCamera extends AppCompatActivity {
             try {
                 AssetManager assetManager = getAssets();
                 InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
-                //GZIPInputStream gin = new GZIPInputStream(in);
                 OutputStream out = new FileOutputStream(DATA_PATH
                         + "tessdata/" + lang + ".traineddata");
 
@@ -191,7 +159,6 @@ public class OpenCamera extends AppCompatActivity {
         //THIS IS THE PICTURE TAKING CODE//
         takePictureButton = (Button) findViewById(R.id.button_image);
 
-        Log.v(TAG, "HERE");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, 0);
@@ -274,8 +241,8 @@ public class OpenCamera extends AppCompatActivity {
         });
     }
 
+    //take the picture
     public void captureImage(View v) throws IOException {
-        //take the picture
         takePictureButton.setEnabled(false);
         camera.takePicture(null, null, jpegCallback);
     }
@@ -315,7 +282,7 @@ public class OpenCamera extends AppCompatActivity {
             }
             int rotate = (info.orientation - degrees + 360) % 360;
 
-//STEP #2: Set the 'rotation' parameter
+            //STEP #2: Set the 'rotation' parameter
             Camera.Parameters params = camera.getParameters();
             params.setRotation(rotate);
             camera.setParameters(params);
@@ -327,13 +294,12 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    //Preprocess image before giving to Tesseract
     private void refineImg(Uri fileUri) {
         System.out.println("Refining image");
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
-//        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
-//        Imgproc.adaptiveThreshold(gray, gray,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY,15,8);
         Mat dest = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(gray, dest, new Size(0, 0), 3);
@@ -342,6 +308,7 @@ public class OpenCamera extends AppCompatActivity {
         Imgcodecs.imwrite(fileUri.getPath(), gray);
     }
 
+    //Get required permissions
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 0) {
@@ -362,32 +329,6 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
-    public void takePicture(View view) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.v(TAG, "Could not create first file for camera");
-                return;
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                photoURI = FileProvider.getUriForFile(OpenCamera.this,
-                        BuildConfig.APPLICATION_ID + ".provider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore
-                        .EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -396,23 +337,18 @@ public class OpenCamera extends AppCompatActivity {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
             Log.v(TAG, "entering crop");
-            System.out.println("Hi " + mFile.getAbsolutePath());
             performCrop(mFile);
-
         }
+
         // user is returning from cropping the image
         else if (requestCode == CROP_PIC) {
             // get the cropped bitmap
-            System.out.println("processing crop result");
             onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File mFile = new File(imageUri.getPath());
 
             // If photo is discarded, return to home screen
             if (data == null) return;
-//            ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-//            croppedView.setImageURI(imageUri);
-
             refineImg(imageUri);
             onPhotoTaken(true);
             Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
@@ -421,9 +357,8 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    //Crop the photo after picture is taken
     private void performCrop(File imageFile) {
-        Log.v(TAG, "at top of crop");
-
         File cropFile = null;
         try {
             cropFile = createImageFile();
@@ -431,20 +366,11 @@ public class OpenCamera extends AppCompatActivity {
             // Error occurred while creating the File
             return;
         }
-
         Uri croppedUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
 
-        Log.v(TAG, mCurrentPhotoPath);
-        Log.v(TAG, imageFile.getPath());
-//        mCurrentPhotoPath = "file:" + imageFile.getAbsolutePath();
-
-//        ImageView croppedView = (ImageView) findViewById(R.id.imageview);
-//        croppedView.setImageURI(photoURI);
-
+        //initiate crop intent
         try {
-            Log.v(TAG, "in crop");
-
             try {
                 Intent cropIntent = new Intent("com.android.camera.action.CROP");
                 // indicate image type and Uri
@@ -480,6 +406,7 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    //Create file to store image in
     private static File createImageFile() throws IOException{
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -504,6 +431,7 @@ public class OpenCamera extends AppCompatActivity {
         return image;
     }
 
+    //Run Tesseract on photo
     protected void onPhotoTaken(boolean test) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
@@ -515,6 +443,7 @@ public class OpenCamera extends AppCompatActivity {
             Log.v(TAG, "Bitmap is null");
             return;
         }
+        //Rotate image
         try {
             ExifInterface exif = new ExifInterface(mCurrentPhotoPath.replaceFirst("file:", ""));
             int exifOrientation = exif.getAttributeInt(
@@ -553,52 +482,37 @@ public class OpenCamera extends AppCompatActivity {
         catch (Exception e) {
             System.out.println(e.toString());
         }
-        //_image.setImageBitmap( bitmap );
-        //ImageView imageView = (ImageView) findViewById(R.id.imageview);
-        //imageView.setImageBitmap(bitmap);
 
+        //Setup and call Tesseract
         TessBaseAPI baseApi = new TessBaseAPI();
         baseApi.setDebug(true);
         baseApi.init(DATA_PATH, lang);
         baseApi.setImage(bitmap);
         recognizedText = baseApi.getUTF8Text();
-        //System.out.println("RECOGNIZED TEXT:\n\n\n"+recognizedText + "\n\n\n");
-
         baseApi.end();
 
-        //Log.v(TAG, "Input in OpenCamera:");
         if (test) {
             processedText = recognizedText;
         } else {
             rawText = recognizedText;
         }
-        //Log.v(TAG, parse(recognizedText).toString());
+
         if (test) {
             parseResult = parse(recognizedText);
             setFoodAndPrice();
         }
     }
 
-    /** Called when the user taps the Send button */
+    /** Transfers us over to list of receipt items*/
     public void sendMessage(View view) {
-
         Intent intent = new Intent(this, MainReceipt.class);
-        //EditText editText = (EditText) findViewById(R.id.editText);
-        //String message = editText.getText().toString();
-
-        //Delete pics
-        //new File(photoFile.getPath()).delete();
-        //new File(cropFile.getPath()).delete();
-        //getContentResolver().delete(file, null, null);
         intent.putExtra(EXTRA_MESSAGE, recognizedText);
-
         startActivity(intent);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         camera=Camera.open();
         startPreview();
         refreshCamera();
@@ -738,36 +652,6 @@ public class OpenCamera extends AppCompatActivity {
         }
     };
 
-//    Camera.AutoFocusCallback autoFocus=new Camera.AutoFocusCallback() {
-//        Camera.ShutterCallback shutterCallback =new Camera.ShutterCallback() {
-//
-//            @Override
-//            public void onShutter() {
-//                AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//                mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
-//
-//            }
-//        };
-//        Camera.PictureCallback photoCallback = new Camera.PictureCallback() {
-//            @Override
-//            public void onPictureTaken(final byte[] data, final Camera camera) {
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            Thread.sleep(1000);
-//                        } catch (Exception ex) {}
-//                    }
-//                }.start();
-//            }
-//        };
-//
-//        @Override
-//        public void onAutoFocus(boolean success, Camera camera) {
-//            camera.takePicture(shutterCallback,null, null, photoCallback);
-//        }
-//    };
-
     private void getContactNames() {
 
         List<CoolList> all = new ArrayList<>();
@@ -784,7 +668,6 @@ public class OpenCamera extends AppCompatActivity {
                 ContactsContract.Contacts.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.DATA
         };
-
 
         ContentResolver cr = getContentResolver();
         Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, EMAIL_PROJECTION, null, null, null);
