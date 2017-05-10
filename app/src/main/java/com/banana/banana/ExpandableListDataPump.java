@@ -15,7 +15,7 @@ import java.util.Set;
 public class ExpandableListDataPump {
 
     public Activity activity;
-    public boolean tipTaxAdd = false;
+    public boolean tipTaxAdd;
     private HashMap<String,Double> totalPrices = new HashMap<>();
     private HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
 
@@ -24,6 +24,7 @@ public class ExpandableListDataPump {
 
         this.activity = act;
         this.expandableListDetail = new HashMap<>();
+        this.tipTaxAdd = false;
 
         DecimalFormat df = new DecimalFormat("###.##");
 
