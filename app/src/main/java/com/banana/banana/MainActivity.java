@@ -558,6 +558,7 @@ public class MainActivity extends Activity
                 String subject = "Payment from your group receipt";
 
                 Double amt = ((MyList) getApplication()).getUserTotal(name);
+                amt = ((double)Math.round(amt * 100)) / 100;
                 String total = Double.toString(amt);
                 String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
