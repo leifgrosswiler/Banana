@@ -45,7 +45,11 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     @Override
     public void onBindViewHolder(ReceiptHolder holder, int position) {
         Order item = listData.get(position);
-        holder.item.setText(item.getItem());
+        String food = item.getItem();
+        if (food.length() > 20){
+            food = food.substring(0,19) + "...";
+        }
+        holder.item.setText(food);
         holder.price.setText(item.getPrice());
         // fix 1
 //        for (String person : MyList.getAllUsers()) {
