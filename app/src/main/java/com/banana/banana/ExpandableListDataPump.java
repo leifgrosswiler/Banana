@@ -96,7 +96,7 @@ public class ExpandableListDataPump {
             }
 
             double total = totalPrices.get(user);
-            //total = total - (tax+tip);
+            total = total - (Double.parseDouble(tax)+Double.parseDouble(tip));
             totalPrices.remove(user);
             totalPrices.put(user,total);
 
