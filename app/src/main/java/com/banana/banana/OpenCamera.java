@@ -1,6 +1,7 @@
 package com.banana.banana;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -35,6 +37,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -108,6 +112,11 @@ public class OpenCamera extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
         preview=(SurfaceView)findViewById(R.id.cameraView);
+
+        // Hide the status bar.
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
 
         // Get proper permissions
 //        pm = this.getPackageManager();
@@ -235,6 +244,11 @@ public class OpenCamera extends AppCompatActivity {
                         camera.autoFocus(new Camera.AutoFocusCallback() {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
+                                // Hide the status bar.
+                                View decorView = getWindow().getDecorView();
+                                int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+                                decorView.setSystemUiVisibility(uiOptions);
+
                                 if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
                                     Camera.Parameters parameters = camera.getParameters();
                                     parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -242,7 +256,12 @@ public class OpenCamera extends AppCompatActivity {
                                         parameters.setFocusAreas(null);
                                     }
                                     camera.setParameters(parameters);
-                                    camera.startPreview();
+                                    try {
+                                        camera.startPreview();
+                                    } catch (Exception e) {
+                                        System.out.println(e.toString());
+                                    }
+
                                 }
                             }
                         });
@@ -262,6 +281,11 @@ public class OpenCamera extends AppCompatActivity {
     }
 
     public void refreshCamera() {
+        // Hide the status bar.
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+
         if (previewHolder.getSurface() == null) {
             // preview surface does not exist
             return;

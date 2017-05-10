@@ -49,7 +49,7 @@ public class AddNewContact extends AppCompatActivity {
                 EditText contactName = (EditText) findViewById(R.id.contactName);
                 EditText contactInfo = (EditText) findViewById(R.id.contactInfo);
                 String name = contactName.getText().toString();
-                String info = contactInfo.getText().toString();
+                String info = contactInfo.getText().toString().trim();
 
                 String emailCheck = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
                 String phoneCheck = "^\\d{10}$";

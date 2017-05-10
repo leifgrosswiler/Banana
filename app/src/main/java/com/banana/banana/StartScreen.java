@@ -3,10 +3,13 @@ package com.banana.banana;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -27,6 +30,11 @@ public class StartScreen extends AppCompatActivity {
         boolean shouldStay = false;
         List<String> permissionRequests = new ArrayList<>();
         String [] array = new String[5];
+
+        // Set status bar to white
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.WHITE);
 
         // Figure out all of the current permssions granted
         PackageManager pm = this.getPackageManager();
