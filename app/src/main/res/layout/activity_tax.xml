@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,9 +12,14 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text=""
-        android:layout_marginTop="155dp"
         android:layout_alignEnd="@+id/editTip"
-        android:layout_alignStart="@+id/editTip" />
+        android:layout_alignStart="@+id/editTip"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="224dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <EditText
         android:id="@+id/editTip"
@@ -22,52 +29,53 @@
         android:inputType="textPersonName"
         android:text=""
         android:layout_below="@+id/editTax"
-        android:layout_marginTop="74dp"
         android:layout_alignEnd="@+id/editDone"
-        android:layout_alignStart="@+id/editDone" />
+        android:layout_alignStart="@+id/editDone"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="135dp"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/editTax"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <Button
         android:id="@+id/editDone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="92dp"
+        android:layout_height="46dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="29dp"
-        android:text="@string/button_done" />
+        android:text="@string/button_done"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="37dp" />
 
     <TextView
         android:id="@+id/textTax"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/editTax"
         android:layout_marginEnd="20dp"
-        android:layout_toStartOf="@+id/editTax"
-        android:layout_marginTop="155dp"
-        android:text="Tax" />
+        android:text="Tax  %"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="232dp"
+        app:layout_constraintVertical_chainStyle="spread"
+        app:layout_constraintRight_toLeftOf="@+id/editTax"
+        android:layout_marginRight="8dp" />
 
     <TextView
         android:id="@+id/textTip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/textTax"
-        android:layout_marginTop="74dp"
         android:layout_below="@+id/textTax"
-        android:text="Tip" />
+        android:text="Tip  $"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="128dp"
+        app:layout_constraintRight_toLeftOf="@+id/editTip"
+        android:layout_marginRight="14dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/textTax"
+        app:layout_constraintVertical_bias="0.478" />
 
-    <TextView
-        android:id="@+id/percent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/editTax"
-        android:layout_alignRight="@+id/editTax"
-        android:layout_alignTop="@+id/editTax"
-        android:text="%" />
-
-    <TextView
-        android:id="@+id/dollar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/editTip"
-        android:layout_alignLeft="@+id/editTip"
-        android:text="$" />
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
