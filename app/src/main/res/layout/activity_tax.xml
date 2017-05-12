@@ -25,7 +25,7 @@
 
     <EditText
         android:id="@+id/editTip"
-        android:layout_width="wrap_content"
+        android:layout_width="215dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="number"
@@ -36,14 +36,14 @@
         android:layout_alignStart="@+id/editDone"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="32dp"
         android:layout_marginBottom="135dp"
         android:layout_marginTop="0dp"
         app:layout_constraintTop_toBottomOf="@+id/editTax"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="32dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintVertical_bias="0.169" />
+        app:layout_constraintHorizontal_bias="0.53"
+        app:layout_constraintVertical_bias="0.16000003" />
 
     <Button
         android:id="@+id/editDone"
@@ -116,6 +116,19 @@
         android:text="-"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/subTotalT" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="0dp"
+        android:checked="true"
+        android:text="ToggleButton"
+        android:textOff="$"
+        android:textOn="%"
+        app:layout_constraintRight_toLeftOf="@+id/editTax"
+        app:layout_constraintBottom_toBottomOf="@+id/editTax"
+        android:layout_marginBottom="0dp" />
 
     <!--<TextView-->
         <!--android:id="@+id/textTax"-->
