@@ -447,45 +447,45 @@ public class OpenCamera extends AppCompatActivity {
             Log.v(TAG, "Bitmap is null");
             return;
         }
-        //Rotate image
-        try {
-            ExifInterface exif = new ExifInterface(mCurrentPhotoPath.replaceFirst("file:", ""));
-            int exifOrientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            int rotate = 90;
-
-            switch (exifOrientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 0;
-                    break;
-            }
-
-            if (rotate != 90) {
-
-                // Getting width & height of the given image.
-                int w = bitmap.getWidth();
-                int h = bitmap.getHeight();
-
-                // Setting pre rotate
-                Matrix mtx = new Matrix();
-                mtx.preRotate(rotate);
-
-                // Rotating Bitmap
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
-            }
-
-        }
-        catch (Exception e) {
-            System.out.println(e.toString());
-        }
+//        //Rotate image
+//        try {
+//            ExifInterface exif = new ExifInterface(mCurrentPhotoPath.replaceFirst("file:", ""));
+//            int exifOrientation = exif.getAttributeInt(
+//                    ExifInterface.TAG_ORIENTATION,
+//                    ExifInterface.ORIENTATION_NORMAL);
+//
+//            int rotate = 90;
+//
+//            switch (exifOrientation) {
+//                case ExifInterface.ORIENTATION_ROTATE_90:
+//                    rotate = 180;
+//                    break;
+//                case ExifInterface.ORIENTATION_ROTATE_180:
+//                    rotate = 270;
+//                    break;
+//                case ExifInterface.ORIENTATION_ROTATE_270:
+//                    rotate = 0;
+//                    break;
+//            }
+//
+//            if (rotate != 90) {
+//
+//                // Getting width & height of the given image.
+//                int w = bitmap.getWidth();
+//                int h = bitmap.getHeight();
+//
+//                // Setting pre rotate
+//                Matrix mtx = new Matrix();
+//                mtx.preRotate(rotate);
+//
+//                // Rotating Bitmap
+//                bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
+//            }
+//
+//        }
+//        catch (Exception e) {
+//            System.out.println(e.toString());
+//        }
 
         //Setup and call Tesseract
         TessBaseAPI baseApi = new TessBaseAPI();
