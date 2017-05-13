@@ -60,7 +60,10 @@ public class AddNewContact extends AppCompatActivity {
                 Matcher emailMatcher = emailPattern.matcher(info);
                 Matcher phoneMatcher = phonePattern.matcher(info);
 
-                if (emailMatcher.matches()){
+                if (name.isEmpty() || name.trim().isEmpty()) {
+                    Toast.makeText(AddNewContact.this, "Invalid Input", Toast.LENGTH_SHORT).show();
+                }
+                else if (emailMatcher.matches()){
                     ((MyList) getApplication()).add(name, info, false);
                     MyList.addUser(name, OrderData.size());
 
@@ -78,7 +81,6 @@ public class AddNewContact extends AppCompatActivity {
                 }
                 else{
                     Toast.makeText(AddNewContact.this, "Invalid Input", Toast.LENGTH_SHORT).show();
-
                 }
 
             default:
