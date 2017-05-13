@@ -81,6 +81,10 @@ public class AddOrder extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Not a price...", Toast.LENGTH_SHORT).show();
                     return false;
                 }
+                if (newName.isEmpty() || newName.trim().isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Order needs a name...", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
 
                 if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
                 else
