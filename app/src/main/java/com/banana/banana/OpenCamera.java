@@ -516,10 +516,21 @@ public class OpenCamera extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        super.onResume();
-        camera=Camera.open();
-        startPreview();
-        refreshCamera();
+
+        PackageManager pm = getPackageManager();
+        int hasPermCam = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        } else {
+            super.onResume();
+            camera = Camera.open();
+            startPreview();
+            refreshCamera();
+        }
     }
 
     @Override
