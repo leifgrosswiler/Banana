@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -34,29 +32,6 @@ public class AddOrder extends AppCompatActivity {
         addPrice = (EditText) findViewById(R.id.addPrice);
         addName.setText("", EditText.BufferType.EDITABLE);
         addPrice.setText("", EditText.BufferType.EDITABLE);
-
-
-        // return back to EditReceipt
-//        Button done = (Button) findViewById(R.id.addDone);
-//        done.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
-//
-//                // temporary way to update original array list
-//                String newName = addName.getText().toString();
-//                String newPrice = addPrice.getText().toString();
-//
-//                if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
-//                else OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
-//
-//
-//                startActivity(intentDone);
-//                finish();
-//            }
-//        });
-
     }
 
     @Override

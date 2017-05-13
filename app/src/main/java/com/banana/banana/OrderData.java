@@ -11,8 +11,8 @@ import static com.banana.banana.OpenCamera.parseResult;
 
 public class OrderData {
 
-    private static String[] food;// = {"Pepperoni and Sausage Pizza", "Pasta", "Ice Cream Sandwitches", "Cheerios with Honey Oats", "Chicken Nuggets", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup", "Tomato Soup"};
-    private static String[] price;// = {"$15.74", "$1300.02", "$14.00", "$5.99", "$2.33", "$0.99", "$0.99", "$0.99", "$0.99", "$0.99","$0.99"};
+    private static String[] food;
+    private static String[] price;
     private static List<Order> data = new ArrayList<>();
 
 
@@ -38,7 +38,11 @@ public class OrderData {
         ArrayList<String> tempPrice = new ArrayList<>();
 
         for(List<String> parsedLine : parseResult) {
-            tempFood.add(parsedLine.get(0));
+            String tmp = parsedLine.get(0);
+            if (tmp.length() > 20){
+                tmp = tmp.substring(0,19) + "...";
+            }
+            tempFood.add(tmp);
             tempPrice.add(parsedLine.get(2));
         }
         food = new String[tempFood.size()];

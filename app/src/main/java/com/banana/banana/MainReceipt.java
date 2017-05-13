@@ -87,8 +87,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 OrderData.delete(viewHolder.getAdapterPosition());
-//                adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-//                adapter.notifyItemRangeChanged(viewHolder.getAdapterPosition(), );
             }
 
         };
@@ -104,12 +102,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
 
-        // add new user to spinner
-//        Intent newIntent = getIntent();
-//        String name = newIntent.getStringExtra(PickItems.NEW_ID);
-//        if (name != null) {
-//            categories.add(name);
-//        }
+
         // add users to spinner
         for (String person : MyList.getAllUsers()){
             categories.add(person);
@@ -142,16 +135,8 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static void updateTotal() {
         double total = OrderData.getTotal();
         totalPrice.setText("Total: " + total);
-        System.out.println("TRYING TO UPDATE THE TOTAL. PLZ PLZ CHANGE: " + total);
     }
 
-//    private void payItems(String name){
-//        for (int i = 0; i < OrderData.size(); i++){
-//            View thisView = recView.getChildAt(i);
-//            if (MyList.getTracker(name)[i])
-//                ((TextView) thisView.findViewById(R.id.payer)).setText(name);
-//        }
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -166,9 +151,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_user:
-//                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
-//                startActivityForResult(intentDone, request);
-
                 View vItem = findViewById(R.id.add_user);
                 PopupMenu popup = new PopupMenu(this, vItem);
                 popup.getMenuInflater().inflate(R.menu.pop_menu1, popup.getMenu());
