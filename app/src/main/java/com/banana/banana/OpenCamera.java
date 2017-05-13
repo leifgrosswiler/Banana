@@ -189,7 +189,6 @@ public class OpenCamera extends AppCompatActivity {
                     e.printStackTrace();
                 } finally {
                 }
-                Toast.makeText(getApplicationContext(), "Picture Saved", Toast.LENGTH_SHORT).show();
             }
         };
 
