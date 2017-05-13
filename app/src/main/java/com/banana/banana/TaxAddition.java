@@ -71,7 +71,8 @@ public class TaxAddition extends AppCompatActivity  {
                 // add tip tax proportionately to each
                 HashMap<String, Double> perc = new HashMap<String, Double>();
                 for (String name : finalPrices.keySet()) {
-                    perc.put(name, finalPrices.get(name)/total);
+                    if (total == 0) perc.put(name,0.0);
+                    else perc.put(name, finalPrices.get(name)/total);
                 }
 
                 String tipStr = editTip.getText().toString();
