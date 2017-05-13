@@ -4,11 +4,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import org.w3c.dom.Text;
 
@@ -27,7 +31,12 @@ public class TaxAddition extends AppCompatActivity  {
 
     private EditText editTax;
     private EditText editTip;
-    private TextView subtotal;
+    private TextView subtotalS;
+    private TextView taxS;
+    private TextView totalS;
+    private boolean taxByPercent = true;
+    private ToggleButton taxToggle;
+
     int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +46,59 @@ public class TaxAddition extends AppCompatActivity  {
         // set views
         editTax = (EditText) findViewById(R.id.editTax);
         editTip = (EditText) findViewById(R.id.editTip);
+        subtotalS = (TextView) findViewById(R.id.subTotal);
+        taxS = (TextView) findViewById(R.id.tax);
+        totalS = (TextView) findViewById(R.id.total);
+        taxToggle = (ToggleButton) findViewById(R.id.toggleButton);
+
         editTax.setText("", TextView.BufferType.EDITABLE);
         editTip.setText("", TextView.BufferType.EDITABLE);
+        subtotalS.setText("$" + OrderData.getTotal());
 
+        if (taxToggle.isChecked()) {
+            editTax.setHint("Tax (%)");
+            taxByPercent = true;
+        }
+        else {
+            editTax.setHint("Tax ($)");
+            taxByPercent = false;
+        }
+
+        taxToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editTax.setHint("Tax (%)");
+                    taxByPercent = true;
+                } else {
+                    editTax.setHint("Tax ($)");
+                    taxByPercent = false;
+                }
+                updateTotal();
+            }
+        });
 
         // button
         final Button done =(Button) findViewById(R.id.editDone);
         Set<String> names = ((MyList) getApplication()).getUsers();
 
         final ExpandableListDataPump pump = new ExpandableListDataPump(this, names);
+
+        editTax.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateTotal();
+            }
+        });
+
+
 
         done.setOnClickListener(new View.OnClickListener() {
 
@@ -57,15 +110,20 @@ public class TaxAddition extends AppCompatActivity  {
                 pump.rmTipTax();
 
                 HashMap<String, Double> finalPrices = pump.getTotalPrices();
-                double total = pump.getTotal();
-
+                //double total = pump.getTotal();
+                double total = OrderData.getTotal();
                 String taxStr = editTax.getText().toString();
                 if (!isValid(taxStr)) {
                     Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
                     taxStr = "0";
                 }
                 if (taxStr.isEmpty()) taxStr = "0";
-                double tax = Double.parseDouble(taxStr)/100.*total;
+
+                double tax;
+                if (taxByPercent)
+                    tax = ((double)Math.round(Double.parseDouble(taxStr)*total))/100;
+                else
+                    tax = ((double)Math.round(Double.parseDouble(taxStr)*100))/100;
 
                 // get list of perc
                 // add tip tax proportionately to each
@@ -91,6 +149,23 @@ public class TaxAddition extends AppCompatActivity  {
             }
         });
 
+    }
+
+    private void updateTotal() {
+        double tax;
+        double total = OrderData.getTotal();
+        String taxStr = editTax.getText().toString();
+        if (!isValid(taxStr)) {
+            Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
+            taxStr = "0";
+        }
+        if (taxStr.isEmpty()) taxStr = "0";
+        if (taxByPercent)
+            tax = ((double)Math.round(Double.parseDouble(taxStr)*total))/100;
+        else
+            tax = ((double)Math.round(Double.parseDouble(taxStr)*100))/100;
+        taxS.setText("$" + tax);
+        totalS.setText("$" + (tax + total));
     }
 
     @Override

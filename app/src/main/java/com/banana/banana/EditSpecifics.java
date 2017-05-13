@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -21,12 +23,13 @@ public class EditSpecifics extends AppCompatActivity {
     int position;
     private Toolbar toolbar;
     private String price;
+    private Boolean disableCheck = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_specifics);
-
+        System.out.println("---------------------------starting----------------------");
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -43,6 +46,29 @@ public class EditSpecifics extends AppCompatActivity {
         editPrice = (EditText) findViewById(R.id.editPrice);
         editName.setText(item, TextView.BufferType.EDITABLE);
         editPrice.setText(price, TextView.BufferType.EDITABLE);
+
+        editPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals("")) {
+                    disableCheck = false;
+                    System.out.println("-----------------------------------------------ENABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+                else{
+                    disableCheck = true;
+                    System.out.println("-----------------------------------------------DISSABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+            }
+        });
 
         // button
 //        final Button done = (Button) findViewById(R.id.editDone);
@@ -94,6 +120,9 @@ public class EditSpecifics extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(app_bar2_menu, menu);
+        MenuItem item = menu.findItem(R.id.check);
+        if (item == null) System.out.println("AAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHH");
+        item.setEnabled(!disableCheck);
         return true;
     }
 

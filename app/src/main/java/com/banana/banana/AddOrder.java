@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -17,6 +19,7 @@ public class AddOrder extends AppCompatActivity {
     private EditText addName;
     private EditText addPrice;
     private Toolbar toolbar;
+    private Boolean disableCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +30,36 @@ public class AddOrder extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         ((TextView) toolbar.findViewById(R.id.name)).setText("ADD NEW ITEM");
-
+        disableCheck = true;
+        invalidateOptionsMenu();
         addName = (EditText) findViewById(R.id.addName);
         addPrice = (EditText) findViewById(R.id.addPrice);
         addName.setText("", EditText.BufferType.EDITABLE);
         addPrice.setText("", EditText.BufferType.EDITABLE);
 
+        addPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals("")) {
+                    System.out.println("This is s:" + s.toString() + "that's it");
+                    disableCheck = false;
+                    System.out.println("-----------------------------------------------ENABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+                else{
+                    disableCheck = true;
+                    System.out.println("-----------------------------------------------DISSABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+            }
+        });
 
         // return back to EditReceipt
 //        Button done = (Button) findViewById(R.id.addDone);
@@ -61,6 +88,9 @@ public class AddOrder extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(app_bar2_menu, menu);
+        MenuItem item = menu.findItem(R.id.check);
+        if (item == null) System.out.println("AAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHH");
+        item.setEnabled(!disableCheck);
         return true;
     }
 
