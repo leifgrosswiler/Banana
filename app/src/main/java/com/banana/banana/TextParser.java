@@ -2,8 +2,7 @@ package com.banana.banana;
 
 import android.util.Log;
 
-import com.google.api.client.util.StringUtils;
-
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -14,7 +13,6 @@ import static android.content.ContentValues.TAG;
 
 
 /* Created by Leif on 4/19/17. */
-
 public class TextParser {
 
     public static List<List<String>> parse(String input) {
@@ -118,7 +116,6 @@ public class TextParser {
         newWord = newWord.replaceAll("-", ".");
         newWord = newWord.replaceAll("~", ".");
         newWord = newWord.replaceAll("_", ".");
-        ///newWord = newWord.replaceAll("..", ".");
         newWord = newWord.replaceAll("$", "");
         newWord = newWord.replaceAll("o", "0");
         newWord = newWord.replaceAll("O", "0");
@@ -131,11 +128,22 @@ public class TextParser {
         newWord = newWord.replace("\\", "");
         newWord = newWord.replaceAll("[^\\d.]", "");
 
-        // If there are multiple periods, give up
+        // If there are still multiple periods, give up
         if (newWord.length() - newWord.replace(".", "").length() > 1) {
             newWord = "0.00";
         }
-        Log.v(TAG, "Corrected " +  word + " to " + newWord);
-        return newWord;
+
+        // If the string is now empty, give it a price of 0.00
+        if (newWord.equals("")) {
+            newWord = "0.00";
+        }
+
+        // Make sure price is formatted correctly
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedPrice = formatter.format(Double.parseDouble(newWord));
+        formattedPrice = formattedPrice.substring(1);
+
+        Log.v(TAG, "Corrected " +  word + " to " + formattedPrice);
+        return formattedPrice;
     }
 }
