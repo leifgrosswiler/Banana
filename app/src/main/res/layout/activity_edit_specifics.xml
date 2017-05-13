@@ -15,9 +15,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="155dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:hint="Item Name"
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/editPrice"
@@ -28,9 +28,9 @@
         android:layout_below="@+id/editName"
         android:layout_marginTop="74dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:hint="Item Price"
+        android:inputType="numberDecimal" />
 
 
 </RelativeLayout>
