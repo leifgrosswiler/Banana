@@ -80,7 +80,8 @@ public class TextParser {
             outputLine.add(2, "0.00");
             for (String word : typeSet.keySet()) {
                 if (typeSet.get(word).equals("Title")) {
-                    outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
+
+                    outputLine.set(0, outputLine.get(0) + " " + cleanTitle(word)); // (trim removes leading and trailing whitespace)
                 } else if (typeSet.get(word).equals("Quantity")) {
                     outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
                 } else if (typeSet.get(word).equals("Price")) {
@@ -145,5 +146,12 @@ public class TextParser {
 
         Log.v(TAG, "Corrected " +  word + " to " + formattedPrice);
         return formattedPrice;
+    }
+
+    private static String cleanTitle(String title) {
+        if (title.trim().length() == 0) {
+            return "<ITEM MISSING>";
+        }
+        return title.trim();
     }
 }
