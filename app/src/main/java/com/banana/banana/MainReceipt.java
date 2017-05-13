@@ -17,16 +17,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.api.gbase.client.Tax;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.banana.banana.Checkout.request;
-import static com.banana.banana.R.menu.app_bar_menu;
-
-import static com.banana.banana.OpenCamera.photoFile;
 import static com.banana.banana.OpenCamera.cropFile;
+import static com.banana.banana.OpenCamera.photoFile;
+import static com.banana.banana.R.menu.app_bar_menu;
 
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
@@ -67,7 +64,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         //Get the total price and set
         double total = OrderData.getTotal();
         totalPrice = (TextView)findViewById(R.id.totalView);
-        totalPrice.setText("Total: " + total);
+        totalPrice.setText("Total: $" + total);
 
         // floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

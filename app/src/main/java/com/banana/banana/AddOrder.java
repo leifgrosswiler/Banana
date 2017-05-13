@@ -61,26 +61,6 @@ public class AddOrder extends AppCompatActivity {
             }
         });
 
-        // return back to EditReceipt
-//        Button done = (Button) findViewById(R.id.addDone);
-//        done.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
-//
-//                // temporary way to update original array list
-//                String newName = addName.getText().toString();
-//                String newPrice = addPrice.getText().toString();
-//
-//                if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
-//                else OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
-//
-//
-//                startActivity(intentDone);
-//                finish();
-//            }
-//        });
 
     }
 
@@ -89,7 +69,7 @@ public class AddOrder extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(app_bar2_menu, menu);
         MenuItem item = menu.findItem(R.id.check);
-        if (item == null) System.out.println("AAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHH");
+        if (item == null) System.out.println("Item is null");
         item.setEnabled(!disableCheck);
         return true;
     }
