@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,8 +64,17 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
         //Get the total price and set
         double total = OrderData.getTotal();
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedPrice;
+        try {
+            formattedPrice = formatter.format(total);
+        }
+        catch (java.lang.NumberFormatException e) {
+            formattedPrice = "$0.00";
+        }
+        System.out.println("FORMATTED PRICE IS: " + formattedPrice);
         totalPrice = (TextView)findViewById(R.id.totalView);
-        totalPrice.setText("Total: $" + total);
+        totalPrice.setText("Total: " + formattedPrice);
 
         // floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -134,7 +144,16 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
     public static void updateTotal() {
         double total = OrderData.getTotal();
-        totalPrice.setText("Total: " + total);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedPrice;
+        try {
+            formattedPrice = formatter.format(total);
+        }
+        catch (java.lang.NumberFormatException e) {
+            formattedPrice = "$0.00";
+        }
+        System.out.println("FORMATTED PRICE IS: " + formattedPrice);
+        totalPrice.setText("Total: " + formattedPrice);
     }
 
 
@@ -144,7 +163,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         getMenuInflater().inflate(app_bar_menu, menu);
         return true;
     }
-
 
     // App Bar Icons OnClick
     @Override
