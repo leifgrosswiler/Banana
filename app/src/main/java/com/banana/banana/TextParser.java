@@ -135,13 +135,19 @@ public class TextParser {
         }
 
         // If the string is now empty, give it a price of 0.00
-        if (newWord.equals("")) {
+        if (newWord.trim().length() == 0) {
             newWord = "0.00";
         }
 
         // Make sure price is formatted correctly
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        String formattedPrice = formatter.format(Double.parseDouble(newWord));
+        String formattedPrice;
+        try {
+            formattedPrice = formatter.format(Double.parseDouble(newWord));
+        }
+        catch (java.lang.NumberFormatException e) {
+            formattedPrice = "$0.00";
+        }
         formattedPrice = formattedPrice.substring(1);
 
         Log.v(TAG, "Corrected " +  word + " to " + formattedPrice);

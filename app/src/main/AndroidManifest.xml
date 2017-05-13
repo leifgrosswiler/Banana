@@ -22,35 +22,40 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Banana"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".MainActivity"
-            android:label="Gmail API Android Quickstart" />
-        <activity android:name=".OpenCamera">
+            android:label="Gmail API Android Quickstart"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".OpenCamera" android:screenOrientation="portrait">
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN" />-->
 
                 <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
         </activity>
-        <activity android:name=".StartScreen">
+        <activity android:name=".StartScreen" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditSpecifics" />
-        <activity android:name=".EditReceipt" />
-        <activity android:name=".AddOrder" />
+        <activity android:name=".EditSpecifics" android:screenOrientation="portrait"/>
+        <activity android:name=".EditReceipt" android:screenOrientation="portrait"/>
+        <activity android:name=".AddOrder" android:screenOrientation="portrait"/>
         <activity
             android:name=".Checkout"
-            android:parentActivityName=".EditReceipt" />
+            android:parentActivityName=".EditReceipt"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SelectItems"
-            android:parentActivityName=".MainReceipt" />
+            android:parentActivityName=".MainReceipt"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".TaxAddition"
-            android:parentActivityName=".MainReceipt" />
+            android:parentActivityName=".MainReceipt"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -62,10 +67,10 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".MainReceipt" />
-        <activity android:name=".PickItems" />
-        <activity android:name=".TextMain" />
-        <activity android:name=".AddNewContact"></activity>
+        <activity android:name=".MainReceipt" android:screenOrientation="portrait"/>
+        <activity android:name=".PickItems" android:screenOrientation="portrait"/>
+        <activity android:name=".AddNewContact" android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>
