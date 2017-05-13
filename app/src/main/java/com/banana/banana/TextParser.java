@@ -144,6 +144,7 @@ public class TextParser {
         String formattedPrice;
         try {
             formattedPrice = formatter.format(Double.parseDouble(newWord));
+            formattedPrice = formattedPrice.replaceAll(",", "");
         }
         catch (java.lang.NumberFormatException e) {
             formattedPrice = "$0.00";
