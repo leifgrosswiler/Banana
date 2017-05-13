@@ -176,7 +176,7 @@ public class TaxAddition extends AppCompatActivity  {
     }
 
     public boolean isValid(String str) {
-
+        if (str.equals("") || str.equals(".")) return false;
         for (char c : str.toCharArray()) {
             // if any c is not a digit
             if (!Character.isDigit(c)) {

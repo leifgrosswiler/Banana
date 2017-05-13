@@ -115,7 +115,7 @@ public class ExpandableListDataPump {
         DecimalFormat df = new DecimalFormat("##0.00");
         for (String user : MyList.getAllUsers()) {
             double p = perc.get(user);
-            double tipprop = p* Integer.parseInt(tip);
+            double tipprop = p* Double.parseDouble(tip);
             double taxprop = p*tax;
 
             List<String> userOrder = expandableListDetail.get(user);
