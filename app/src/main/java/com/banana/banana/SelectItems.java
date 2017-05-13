@@ -130,26 +130,6 @@ public class SelectItems extends AppCompatActivity {
             }
         });
 
-        // Return to parent
-        Button finish = (Button) findViewById(R.id.finish);
-        finish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent resultIntent = new Intent();
-//                resultIntent.putExtra(SELECTED_ID, checked);
-//                resultIntent.putExtra(NAME_ID, name);
-                setResult(Activity.RESULT_OK,resultIntent);
-                Set<String> users = ((MyList) getApplication()).getUsers();
-//                System.out.println(users.toString());
-                for (String user : users){
-                    if (!categories.contains(user)){
-                        spinnerAdapter.add(user);
-                    }
-                }
-                spinnerAdapter.notifyDataSetChanged();
-                finish();
-            }
-        });
     }
 
     /**

@@ -19,6 +19,7 @@ public class AddOrder extends AppCompatActivity {
     private EditText addName;
     private EditText addPrice;
     private Toolbar toolbar;
+    private Boolean disableCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,33 +30,37 @@ public class AddOrder extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         ((TextView) toolbar.findViewById(R.id.name)).setText("ADD NEW ITEM");
+        disableCheck = true;
         invalidateOptionsMenu();
         addName = (EditText) findViewById(R.id.addName);
         addPrice = (EditText) findViewById(R.id.addPrice);
         addName.setText("", EditText.BufferType.EDITABLE);
         addPrice.setText("", EditText.BufferType.EDITABLE);
 
+        addPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-        // return back to EditReceipt
-//        Button done = (Button) findViewById(R.id.addDone);
-//        done.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
-//
-//                // temporary way to update original array list
-//                String newName = addName.getText().toString();
-//                String newPrice = addPrice.getText().toString();
-//
-//                if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
-//                else OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
-//
-//
-//                startActivity(intentDone);
-//                finish();
-//            }
-//        });
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals("")) {
+                    System.out.println("This is s:" + s.toString() + "that's it");
+                    disableCheck = false;
+                    System.out.println("-----------------------------------------------ENABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+                else{
+                    disableCheck = true;
+                    System.out.println("-----------------------------------------------DISSABLING THE CHECK");
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+
 
     }
 
@@ -63,6 +68,9 @@ public class AddOrder extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(app_bar2_menu, menu);
+        MenuItem item = menu.findItem(R.id.check);
+        if (item == null) System.out.println("Item is null");
+        item.setEnabled(!disableCheck);
         return true;
     }
 
@@ -73,19 +81,26 @@ public class AddOrder extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.check:
                 Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
+
                 // temporary way to update original array list
                 String newName = addName.getText().toString();
                 String newPrice = addPrice.getText().toString();
 
                 if (!EditSpecifics.isValid(newPrice)) {
-                    Toast.makeText(getApplicationContext(), "Not a price...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                if (newName.isEmpty() || newName.trim().isEmpty()) {
+                    Toast.makeText(getApplicationContext(),"Order needs a name...", Toast.LENGTH_SHORT).show();
                     return false;
                 }
 
                 if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
-                else
-                    OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
+                else OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
+
+
                 startActivity(intentDone);
+
             default:
                 return super.onOptionsItemSelected(item);
         }
