@@ -77,6 +77,8 @@ public class OpenCamera extends AppCompatActivity {
     private Camera.PictureCallback jpegCallback;
     private PackageManager pm;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    public static File photoFile = null;
+    public static File cropFile = null;
 
 
     public static final String DATA_PATH = Environment
@@ -173,7 +175,7 @@ public class OpenCamera extends AppCompatActivity {
             public void onPictureTaken(byte[] data, Camera camera) {
                 FileOutputStream outStream = null;
                 try {
-                    File photoFile = createImageFile();
+                    photoFile = createImageFile();
                     System.out.println(photoFile.exists() + " " + photoFile.toString());
                     outStream = new FileOutputStream(photoFile.getAbsoluteFile());
                     outStream.write(data);
@@ -347,7 +349,10 @@ public class OpenCamera extends AppCompatActivity {
             File mFile = new File(imageUri.getPath());
 
             // If photo is discarded, return to home screen
-            if (data == null) return;
+            if (data == null) {
+                photoFile.delete();
+                return;
+            }
             refineImg(imageUri);
             onPhotoTaken(true);
             Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
@@ -358,7 +363,7 @@ public class OpenCamera extends AppCompatActivity {
 
     //Crop the photo after picture is taken
     private void performCrop(File imageFile) {
-        File cropFile = null;
+        cropFile = null;
         try {
             cropFile = createImageFile();
         } catch (IOException ex) {

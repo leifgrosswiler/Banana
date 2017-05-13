@@ -25,6 +25,8 @@ import java.util.List;
 import static com.banana.banana.Checkout.request;
 import static com.banana.banana.R.menu.app_bar_menu;
 
+import static com.banana.banana.OpenCamera.photoFile;
+import static com.banana.banana.OpenCamera.cropFile;
 
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
@@ -48,6 +50,9 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_receipt);
+
+        cropFile.delete();
+        photoFile.delete();
 
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
