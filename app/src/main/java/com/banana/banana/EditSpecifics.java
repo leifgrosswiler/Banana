@@ -68,12 +68,16 @@ public class EditSpecifics extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (newItem.isEmpty() || newItem.trim().isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Order needs a name...", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Order updated = new Order(newItem, newPrice, position,OrderData.getAt(position).getNumPpl());
         try {
             OrderData.set(position, updated);
         } catch(Exception e) {
-            System.out.println("position is fucked up");
+            System.out.println("position is incorrect");
         }
 
         Intent intentUpdate = new Intent(EditSpecifics.this, MainReceipt.class);
@@ -81,7 +85,7 @@ public class EditSpecifics extends AppCompatActivity {
     }
 
     public static boolean isValid(String str) {
-        if (str.equals(""))
+        if (str.equals("") || str.equals("."))
             return false;
         for (char c : str.toCharArray()) {
             // if any c is not a digit
