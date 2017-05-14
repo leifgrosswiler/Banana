@@ -75,6 +75,7 @@ public class AddOrder extends AppCompatActivity {
         }
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

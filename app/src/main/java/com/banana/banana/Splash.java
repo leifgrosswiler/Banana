@@ -37,6 +37,7 @@ public class Splash extends Activity {
         }, SPLASH_DISPLAY_LENGTH);
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

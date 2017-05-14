@@ -235,6 +235,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

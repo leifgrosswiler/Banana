@@ -92,6 +92,7 @@ public class AddNewContact extends AppCompatActivity {
         }
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

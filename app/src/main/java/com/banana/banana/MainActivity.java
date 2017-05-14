@@ -184,6 +184,7 @@ public class MainActivity extends Activity
                 .setBackOff(new ExponentialBackOff());
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

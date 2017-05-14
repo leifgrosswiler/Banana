@@ -91,6 +91,7 @@ public class EditReceipt extends AppCompatActivity {
         finish();
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

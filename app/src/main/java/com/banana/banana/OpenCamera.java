@@ -466,6 +466,7 @@ public class OpenCamera extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();

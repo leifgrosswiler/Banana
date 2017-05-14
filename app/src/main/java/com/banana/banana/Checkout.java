@@ -91,6 +91,7 @@ public class Checkout extends AppCompatActivity {
         }
     }
 
+    // Checks if permissions have changed
     @Override
     public void onResume() {
         super.onResume();
