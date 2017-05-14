@@ -137,7 +137,7 @@ public class OpenCamera extends AppCompatActivity {
 
         }
 
-        // lang.traineddata file with the app (in assets folder)
+        // Transfer the traindata file into the phone
         if (!(new File(DATA_PATH + "tessdata/" + lang + ".traineddata")).exists()) {
             try {
                 AssetManager assetManager = getAssets();
@@ -190,7 +190,7 @@ public class OpenCamera extends AppCompatActivity {
                             BuildConfig.APPLICATION_ID + ".provider",
                             photoFile);
                     // Enters cropping function
-                    performCrop(photoFile);
+                    performCrop();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -310,7 +310,6 @@ public class OpenCamera extends AppCompatActivity {
 
     //Preprocess image before giving to Tesseract
     private void refineImg(Uri fileUri) {
-        System.out.println("Refining image");
         Mat image = Imgcodecs.imread(fileUri.getPath());
         Mat gray = new Mat();
         Imgproc.cvtColor(image,gray,Imgproc.COLOR_BGR2GRAY);
@@ -345,21 +344,15 @@ public class OpenCamera extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        Log.v(TAG, "in result handler");
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
-            File mFile = new File(imageUri.getPath());
-            Log.v(TAG, "entering crop");
-            performCrop(mFile);
+            performCrop();
         }
 
-        // user is returning from cropping the image
+        // User is returning from cropping the image
         else if (requestCode == CROP_PIC) {
             // get the cropped bitmap
-            onPhotoTaken(false);
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
-            File mFile = new File(imageUri.getPath());
 
             // If photo is discarded, return to home screen
             if (data == null) {
@@ -367,58 +360,48 @@ public class OpenCamera extends AppCompatActivity {
                 return;
             }
             refineImg(imageUri);
-            onPhotoTaken(true);
-            Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
+            onPhotoTaken();
             Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + processedText);
             sendMessage(takePictureButton);
         }
     }
 
     //Crop the photo after picture is taken
-    private void performCrop(File imageFile) {
+    private void performCrop() {
         cropFile = null;
         try {
             cropFile = createImageFile();
         } catch (IOException ex) {
             // Error occurred while creating the File
+            Log.v(TAG, "COULD NOT CREATE FILE FOR CROP OUTPUT");
             return;
         }
         Uri croppedUri = FileProvider.getUriForFile(OpenCamera.this,
                 BuildConfig.APPLICATION_ID + ".provider", cropFile);
 
-        //initiate crop intent
+        //Initiate crop intent
         try {
-            try {
-                Intent cropIntent = new Intent("com.android.camera.action.CROP");
-                // indicate image type and Uri
-                cropIntent.setDataAndType(photoURI, "image/*");
-                cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                cropIntent.putExtra("crop", "true");
-                cropIntent.putExtra("output", croppedUri);
-                cropIntent.putExtra("outputFormat", "PNG");
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(photoURI, "image/*");
+            cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            cropIntent.putExtra("crop", "true");
+            cropIntent.putExtra("output", croppedUri);
+            cropIntent.putExtra("outputFormat", "PNG");
 
-                List<ResolveInfo> resInfoList = OpenCamera.this.getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
-                for (ResolveInfo resolveInfo : resInfoList) {
-                    String packageName = resolveInfo.activityInfo.packageName;
-                    OpenCamera.this.grantUriPermission(packageName, croppedUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                }
-
-                cropIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                cropIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-                startActivityForResult(cropIntent, CROP_PIC);
-            } catch (ActivityNotFoundException anfe) {
-                // display an error message
-                System.out.println("no crop app");
-                String errorMessage = "Whoops - your device doesn't support the crop action!";
-                Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
-                toast.show();
+            //Grant crop intent the permissions necessary to access photo files
+            List<ResolveInfo> resInfoList = OpenCamera.this.getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                OpenCamera.this.grantUriPermission(packageName, croppedUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
-        }
-        // respond to users whose devices do not support the crop action
-        catch (ActivityNotFoundException anfe) {
-            Toast toast = Toast
-                    .makeText(this, "This device doesn't support the crop action!", Toast.LENGTH_SHORT);
+            cropIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            cropIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            startActivityForResult(cropIntent, CROP_PIC);
+        } catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
             toast.show();
         }
     }
@@ -430,12 +413,8 @@ public class OpenCamera extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
-        if (storageDir.exists())
-            System.out.println("the file/directory exists!");
-        else {
-            boolean result = storageDir.mkdir();
-            System.out.println(result);
-
+        if (!storageDir.exists()) {
+            storageDir.mkdir();
         }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -449,7 +428,7 @@ public class OpenCamera extends AppCompatActivity {
     }
 
     //Run Tesseract on photo
-    protected void onPhotoTaken(boolean test) {
+    protected void onPhotoTaken() {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
         options.inScaled = false;
@@ -460,45 +439,6 @@ public class OpenCamera extends AppCompatActivity {
             Log.v(TAG, "Bitmap is null");
             return;
         }
-//        //Rotate image
-//        try {
-//            ExifInterface exif = new ExifInterface(mCurrentPhotoPath.replaceFirst("file:", ""));
-//            int exifOrientation = exif.getAttributeInt(
-//                    ExifInterface.TAG_ORIENTATION,
-//                    ExifInterface.ORIENTATION_NORMAL);
-//
-//            int rotate = 90;
-//
-//            switch (exifOrientation) {
-//                case ExifInterface.ORIENTATION_ROTATE_90:
-//                    rotate = 180;
-//                    break;
-//                case ExifInterface.ORIENTATION_ROTATE_180:
-//                    rotate = 270;
-//                    break;
-//                case ExifInterface.ORIENTATION_ROTATE_270:
-//                    rotate = 0;
-//                    break;
-//            }
-//
-//            if (rotate != 90) {
-//
-//                // Getting width & height of the given image.
-//                int w = bitmap.getWidth();
-//                int h = bitmap.getHeight();
-//
-//                // Setting pre rotate
-//                Matrix mtx = new Matrix();
-//                mtx.preRotate(rotate);
-//
-//                // Rotating Bitmap
-//                bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
-//            }
-//
-//        }
-//        catch (Exception e) {
-//            System.out.println(e.toString());
-//        }
 
         //Setup and call Tesseract
         TessBaseAPI baseApi = new TessBaseAPI();
@@ -508,16 +448,9 @@ public class OpenCamera extends AppCompatActivity {
         recognizedText = baseApi.getUTF8Text();
         baseApi.end();
 
-        if (test) {
-            processedText = recognizedText;
-        } else {
-            rawText = recognizedText;
-        }
-
-        if (test) {
-            parseResult = parse(recognizedText);
-            setFoodAndPrice();
-        }
+        processedText = recognizedText;
+        parseResult = parse(recognizedText);
+        setFoodAndPrice();
     }
 
     /** Transfers us over to list of receipt items*/
@@ -575,10 +508,14 @@ public class OpenCamera extends AppCompatActivity {
 
     // Perform necessary steps to show the camera screen appropriately
     private void startPreview() {
+
+        // camera configured if not so already
         if (cameraConfigured && camera!=null) {
             camera.startPreview();
             Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+
+            // set up rotation details
             int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
             int degrees = 0;
             switch (rotation) {
@@ -588,8 +525,6 @@ public class OpenCamera extends AppCompatActivity {
                 case Surface.ROTATION_270: degrees = 270; break;//Landscape right
             }
             int rotate = (info.orientation - degrees + 360) % 360;
-
-            // Set the rotation parameter
             Camera.Parameters params = camera.getParameters();
             params.setRotation(rotate);
             camera.setParameters(params);
@@ -598,12 +533,12 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    // Correctly orient the camera for the surfaceview
     public static void setCameraDisplayOrientation(Activity activity,
                                                    int cameraId, android.hardware.Camera camera) {
 
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
-
         android.hardware.Camera.getCameraInfo(cameraId, info);
 
         int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -631,6 +566,7 @@ public class OpenCamera extends AppCompatActivity {
             // no-op -- wait until surfaceChanged()
         }
 
+        // detects when surface has changed
         public void surfaceChanged(SurfaceHolder holder,
                                    int format, int width,
                                    int height) {

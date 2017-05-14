@@ -1,6 +1,10 @@
 package com.banana.banana;
 
-import android.util.Log;
+/* TextParser.java */
+/* Author: Leif Grosswiler */
+/* Takes the OCR output and turn it into a List of String Lists, with format (Title, Price). */
+/* Each title/price pair corresponds to one item on the receipt. */
+/* Also performs a number of error-correction techniques to ensure usable output is produced. */
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -9,37 +13,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.lang.*;
-import static android.content.ContentValues.TAG;
 
 
-/* Created by Leif on 4/19/17. */
+
 public class TextParser {
 
+    // Split the input line-by-line and pass it to the parsing function
     public static List<List<String>> parse(String input) {
-        Log.v(TAG, "Here comes the input: ");
-        Log.v(TAG, input);
         List<String> lines = new ArrayList<>(Arrays.asList(input.split("\n")));
         return realParse(lines);
     }
 
-    // Temporary parsing function that takes the first three elements of lines with 3 or more words
-    // This is used to create the checklist while the OCR output is unusable
-    private static List<List<String>> fakeParse(List<String> lines) {
-        List<List<String>> checklistOutput = new ArrayList<>();
-        for (String line : lines) {
-            List<String> words = new ArrayList<>(Arrays.asList(line.split(" ")));
-            if (words.size() >= 3) {
-                List<String> outputLine = new ArrayList<>();
-                outputLine.add(0, words.get(0));
-                outputLine.add(1, words.get(1));
-                outputLine.add(2, words.get(2));
-                checklistOutput.add(outputLine);
-            }
-        }
-        return checklistOutput;
-    }
-
-    // Eventual parsing function to be used when OCR output isn't crap
+    // Parsing function that takes the OCR string as input and returns a list of lists
+    // of strings with format (Title, Price)
     private static List<List<String>> realParse(List<String> lines) {
         List<List<String>> checklistOutput = new ArrayList<>();
         List<Map<String, String>> wordTypes = new ArrayList<>();
@@ -75,18 +61,28 @@ public class TextParser {
             // Take the elements of a valid line and store them in the following order:
             // 1: Title  2: Quantity  3: Price
             List<String> outputLine = new ArrayList<>();
-            outputLine.add(0, "");
-            outputLine.add(1, "1");
-            outputLine.add(2, "0.00");
+            outputLine.add(0, ""); // Default title to empty string
+            outputLine.add(1, "1"); // Default quantity to 1
+            outputLine.add(2, "0.00"); // Default price to 0.00
             for (String word : typeSet.keySet()) {
                 if (typeSet.get(word).equals("Title")) {
-
-                    outputLine.set(0, outputLine.get(0) + " " + cleanTitle(word)); // (trim removes leading and trailing whitespace)
-                } else if (typeSet.get(word).equals("Quantity")) {
                     outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
-                } else if (typeSet.get(word).equals("Price")) {
+                }
+
+                // Quantity is currently added to the title
+                // This is left to ease potential expansion of the checklist into (Title, Quantity, Price)
+                else if (typeSet.get(word).equals("Quantity")) {
+                    outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
+                }
+
+                else if (typeSet.get(word).equals("Price")) {
                     outputLine.set(2, word);
                 }
+            }
+
+            // If there is no title, output an error message in its place
+            if (outputLine.get(0).trim().length() == 0) {
+                outputLine.set(0, "<ITEM MISSING>");
             }
             checklistOutput.add(outputLine);
         }
@@ -94,6 +90,8 @@ public class TextParser {
         return checklistOutput;
     }
 
+    // Categorize the word as a price if it contains a '$', '.', or other character that Tesseract
+    // often misrecognizes a period for
     private static String categorizeWord(String word) {
         if (word.contains(String.valueOf('$')) || word.contains(String.valueOf('.')) || word.contains(String.valueOf(','))
          || word.contains(String.valueOf("'")) || word.contains(String.valueOf("-")) || word.contains(String.valueOf("~"))
@@ -106,10 +104,13 @@ public class TextParser {
         }
     }
 
+    // Use regex to check if a string is numeric
     private static boolean isNumeric(String s) {
         return s.matches("[-+]?\\d*\\.?\\d+");
     }
 
+    // Correct common OCR errors for prices, resulting in a usable, properly formatted string
+    // that can always be cast to a double value
     private static String correctErrors(String word) {
         String newWord = word;
         newWord = newWord.replaceAll(",", ".");
@@ -151,14 +152,6 @@ public class TextParser {
         }
         formattedPrice = formattedPrice.substring(1);
 
-        Log.v(TAG, "Corrected " +  word + " to " + formattedPrice);
         return formattedPrice;
-    }
-
-    private static String cleanTitle(String title) {
-        if (title.trim().length() == 0) {
-            return "<ITEM MISSING>";
-        }
-        return title.trim();
     }
 }
