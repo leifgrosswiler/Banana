@@ -135,7 +135,7 @@ public class StartScreen extends AppCompatActivity {
         // Data structures for temporarily storing info
         List<CoolList> all = new ArrayList<>();
         Map<String, ArrayList<String>> tempAll = new HashMap<>();
-        
+
         String[] EMAIL_PROJECTION = new String[] {
                 ContactsContract.CommonDataKinds.Email.CONTACT_ID,
                 ContactsContract.Contacts.DISPLAY_NAME,

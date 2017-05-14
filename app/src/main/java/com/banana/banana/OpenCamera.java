@@ -3,21 +3,16 @@ package com.banana.banana;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.hardware.Camera;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -31,12 +26,16 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -44,43 +43,47 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
 import static com.banana.banana.TextParser.parse;
 
-import static com.banana.banana.SelectItems.everything;
-
 public class OpenCamera extends AppCompatActivity {
 
-    public static final String PACKAGE_NAME = "com.datumdroid.android.ocr.simple";
+    // Intent stuff
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
+    // Picture button
     private Button takePictureButton;
 
+    // Parsing stuff
     private String rawText = "";
     private String processedText = "";
+
+    // Request stuff
     final int REQUEST_TAKE_PHOTO = 1;
     final int CROP_PIC = 2;
-    private static String mCurrentPhotoPath;
-    private Uri photoURI;
 
+    // Camera stuff
     private SurfaceView preview=null;
     private SurfaceHolder previewHolder=null;
     private Camera camera=null;
     private boolean inPreview=false;
     private boolean cameraConfigured=false;
     private Camera.PictureCallback jpegCallback;
+
+    // Permissions stuff
     private PackageManager pm;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+
+    // Storage stuff
     public static File photoFile = null;
     public static File cropFile = null;
+    private static String mCurrentPhotoPath;
+    private Uri photoURI;
 
-
+    // Tesseract OCR stuff
     public static final String DATA_PATH = Environment
             .getExternalStorageDirectory().toString() + "/SimpleAndroidOCR/";
     // You should have the trained data file in assets folder
@@ -105,14 +108,13 @@ public class OpenCamera extends AppCompatActivity {
         setThingsUp();
     }
 
+    // Function for setting up the screen
     private void setThingsUp() {
 
+        // Set up camera
         previewHolder=preview.getHolder();
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-//        if (everything == null)
-//            getContactNames();
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -161,6 +163,7 @@ public class OpenCamera extends AppCompatActivity {
         //THIS IS THE PICTURE TAKING CODE//
         takePictureButton = (Button) findViewById(R.id.button_image);
 
+        // Check for camera and storage permissions before starting (won't function without)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, 0);
@@ -171,10 +174,12 @@ public class OpenCamera extends AppCompatActivity {
         }
         takePictureButton.setEnabled(true);
 
+        // Callback for when picture is taken by camera
         jpegCallback = new Camera.PictureCallback() {
             public void onPictureTaken(byte[] data, Camera camera) {
                 FileOutputStream outStream = null;
                 try {
+                    // Storage stuff
                     photoFile = createImageFile();
                     System.out.println(photoFile.exists() + " " + photoFile.toString());
                     outStream = new FileOutputStream(photoFile.getAbsoluteFile());
@@ -184,6 +189,7 @@ public class OpenCamera extends AppCompatActivity {
                     photoURI = FileProvider.getUriForFile(OpenCamera.this,
                             BuildConfig.APPLICATION_ID + ".provider",
                             photoFile);
+                    // Enters cropping function
                     performCrop(photoFile);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -194,11 +200,14 @@ public class OpenCamera extends AppCompatActivity {
             }
         };
 
+        // Specifically for autofocus of camera
         preview.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (camera != null) {
                     camera.cancelAutoFocus();
+
+                    // Creates parameters for the camera to achieve autofocus
                     Camera.Parameters parameters = camera.getParameters();
                     if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
                         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -209,6 +218,8 @@ public class OpenCamera extends AppCompatActivity {
                     try {
                         camera.setParameters(parameters);
                         camera.startPreview();
+
+                        // Start the autofocus with the above parameters
                         camera.autoFocus(new Camera.AutoFocusCallback() {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
@@ -217,6 +228,7 @@ public class OpenCamera extends AppCompatActivity {
                                 int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
                                 decorView.setSystemUiVisibility(uiOptions);
 
+                                // Give the camera a new FocusArea to analyse (null means it'll find the best area)
                                 if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
                                     Camera.Parameters parameters = camera.getParameters();
                                     parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -248,6 +260,7 @@ public class OpenCamera extends AppCompatActivity {
         camera.takePicture(null, null, jpegCallback);
     }
 
+    // Refresh camera screen to current camera view
     public void refreshCamera() {
         // Hide the status bar.
         View decorView = getWindow().getDecorView();
@@ -283,7 +296,7 @@ public class OpenCamera extends AppCompatActivity {
             }
             int rotate = (info.orientation - degrees + 360) % 360;
 
-            //STEP #2: Set the 'rotation' parameter
+            // Set the 'rotation' parameter
             Camera.Parameters params = camera.getParameters();
             params.setRotation(rotate);
             camera.setParameters(params);
@@ -535,24 +548,19 @@ public class OpenCamera extends AppCompatActivity {
         super.onPause();
     }
 
-
-    private void initPreview(int width, int height) {
+    // Initialize the preview for the camera to work
+    private void initPreview() {
         if (camera!=null && previewHolder.getSurface()!=null) {
             try {
                 camera.setPreviewDisplay(previewHolder);
             }
             catch (Throwable t) {
-                Log.e("CD-surfaceCallback",
-                        "Exception in setPreviewDisplay()", t);
-                Toast
-                        .makeText(OpenCamera.this, t.getMessage(), Toast.LENGTH_LONG)
-                        .show();
+                Toast.makeText(OpenCamera.this, t.getMessage(), Toast.LENGTH_LONG).show();
             }
 
+            // Configure camera details if necessary
             if (!cameraConfigured) {
                 Camera.Parameters parameters=camera.getParameters();
-//                Camera.Size size=getBestPreviewSize(width, height,
-//                        parameters);
                 List<Camera.Size> sizes=parameters.getSupportedPreviewSizes();
                 Camera.Size size = sizes.get(0);
 
@@ -565,6 +573,7 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
+    // Perform necessary steps to show the camera screen appropriately
     private void startPreview() {
         if (cameraConfigured && camera!=null) {
             camera.startPreview();
@@ -580,7 +589,7 @@ public class OpenCamera extends AppCompatActivity {
             }
             int rotate = (info.orientation - degrees + 360) % 360;
 
-//STEP #2: Set the 'rotation' parameter
+            // Set the rotation parameter
             Camera.Parameters params = camera.getParameters();
             params.setRotation(rotate);
             camera.setParameters(params);
@@ -625,7 +634,7 @@ public class OpenCamera extends AppCompatActivity {
         public void surfaceChanged(SurfaceHolder holder,
                                    int format, int width,
                                    int height) {
-            initPreview(width, height);
+            initPreview();
             startPreview();
         }
 
