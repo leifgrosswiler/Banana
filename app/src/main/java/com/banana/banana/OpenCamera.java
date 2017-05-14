@@ -348,7 +348,7 @@ public class OpenCamera extends AppCompatActivity {
 
             // If photo is discarded, return to home screen
             if (data == null) return;
-            refineImg(imageUri);
+            //refineImg(imageUri);
             onPhotoTaken(true);
             Log.v(TAG, "THIS IS THE RAW OUTPUT\n" + rawText);
             Log.v(TAG, "THIS IS THE PROCESSED OUTPUT\n" + processedText);
