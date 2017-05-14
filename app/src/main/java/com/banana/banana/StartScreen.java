@@ -28,6 +28,7 @@ import static com.banana.banana.SelectItems.everything;
 
 public class StartScreen extends AppCompatActivity {
 
+    //Used for checking permission result later
     private static final int MY_PERMISSIONS_REQUEST = 0;
 
     @Override
@@ -43,14 +44,19 @@ public class StartScreen extends AppCompatActivity {
         setThingsUp();
     }
 
+    // Perform desired setup features
     private void setThingsUp() {
 
+        // Variables used for checking and requestng permissions
         boolean shouldStay = false;
         List<String> permissionRequests = new ArrayList<>();
         int pCount = 0;
 
         // Figure out all of the current permssions granted
+        // Request permissions if necessary
         PackageManager pm = this.getPackageManager();
+
+        // Check contacts permission
         int hasPermCont = pm.checkPermission(
                 Manifest.permission.READ_CONTACTS,
                 this.getPackageName());
@@ -59,8 +65,11 @@ public class StartScreen extends AppCompatActivity {
             shouldStay = true;
             pCount++;
         } else if (everything == null) {
+            // Retrieve all contact information for later if it's granted
             getContactNames();
         }
+
+        // Check camera permissions
         int hasPermCam = pm.checkPermission(
                 Manifest.permission.CAMERA,
                 this.getPackageName());
@@ -69,6 +78,8 @@ public class StartScreen extends AppCompatActivity {
             shouldStay = true;
             pCount++;
         }
+
+        // Check SMS permissions
         int hasPermSMS = pm.checkPermission(
                 Manifest.permission.SEND_SMS,
                 this.getPackageName());
@@ -77,6 +88,8 @@ public class StartScreen extends AppCompatActivity {
             shouldStay = true;
             pCount++;
         }
+
+        // Check storage permissions
         int hasPermStore = pm.checkPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 this.getPackageName());
@@ -85,6 +98,8 @@ public class StartScreen extends AppCompatActivity {
             shouldStay = true;
             pCount++;
         }
+
+        // Check phone number accessibility permissions
         int hasPermNumb = pm.checkPermission(
                 Manifest.permission.READ_PHONE_STATE,
                 this.getPackageName());
@@ -101,7 +116,7 @@ public class StartScreen extends AppCompatActivity {
                     permissionRequests.toArray(permissionsArray),
                     MY_PERMISSIONS_REQUEST);
         } else {
-            // If all necessary permissions granted, move to main app
+            // If all necessary permissions granted, move to main app with slight delay for effect
             new Handler().postDelayed(new Runnable(){
                 @Override
                 public void run() {
@@ -114,11 +129,13 @@ public class StartScreen extends AppCompatActivity {
         }
     }
 
+    // Retrieve all the necessary contact information (names, email, phone numbers)
     private void getContactNames() {
 
+        // Data structures for temporarily storing info
         List<CoolList> all = new ArrayList<>();
         Map<String, ArrayList<String>> tempAll = new HashMap<>();
-
+        
         String[] EMAIL_PROJECTION = new String[] {
                 ContactsContract.CommonDataKinds.Email.CONTACT_ID,
                 ContactsContract.Contacts.DISPLAY_NAME,
