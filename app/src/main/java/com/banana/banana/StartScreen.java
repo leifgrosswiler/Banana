@@ -132,28 +132,34 @@ public class StartScreen extends AppCompatActivity {
     // Retrieve all the necessary contact information (names, email, phone numbers)
     private void getContactNames() {
 
-        // Data structures for temporarily storing info
+        // Data structures for temporarily storing info within this function
         List<CoolList> all = new ArrayList<>();
         Map<String, ArrayList<String>> tempAll = new HashMap<>();
-
+        
+        // Request vector for email
         String[] EMAIL_PROJECTION = new String[] {
                 ContactsContract.CommonDataKinds.Email.CONTACT_ID,
                 ContactsContract.Contacts.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Email.DATA
         };
 
+        // Request vector for phone number
         String[] PHONE_PROJECTION = new String[] {
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                 ContactsContract.Contacts.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.DATA
         };
 
+        // Create the necessary navigation objects to query for the phone number and email of each contact
         ContentResolver cr = getContentResolver();
         Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, EMAIL_PROJECTION, null, null, null);
         Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
 
+        // Continue until we run out of both phone numbers and emails to read from contacts
         if (cursor != null && phoneCursor != null) {
             try {
+
+                // Save the indices of display name, email, and phone number to save time on repeated queries
                 final int displayNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
                 final int emailIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
                 final int displayNameIndexNum = phoneCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
@@ -161,6 +167,7 @@ public class StartScreen extends AppCompatActivity {
 
                 String displayName, address, displayNameNum, number;
 
+                // Get email addresses and add them to the corresponding current contact ArrayList
                 while (cursor.moveToNext()) {
                     ArrayList<String> curContact = new ArrayList<>();
                     displayName = cursor.getString(displayNameIndex);
@@ -170,15 +177,20 @@ public class StartScreen extends AppCompatActivity {
                     tempAll.put(displayName, curContact);
                 }
 
+                // Get phone numbers and add them to the corresponding current contact ArrayList
                 while (phoneCursor.moveToNext()) {
                     displayNameNum = phoneCursor.getString(displayNameIndexNum);
                     number = phoneCursor.getString(phoneIndex);
                     ArrayList<String> curContact = tempAll.get(displayNameNum);
 
+                    // If the contact already has an email, add a phone number too
                     if (curContact != null) {
                         curContact.add(1, number);
                         tempAll.put(displayNameNum, curContact);
                     }
+
+                    // If the contact doesn't have an email but has a phone number, make sure the email
+                    // field is set to null
                     else {
                         curContact = new ArrayList<>();
                         curContact.add(0, null);
@@ -193,6 +205,7 @@ public class StartScreen extends AppCompatActivity {
             }
         }
 
+        // Translate each of the ArrayList contacts into a CoolList contact for easier displaying later
         for(String key : tempAll.keySet()) {
             CoolList curContact = new CoolList();
             String curEmail = tempAll.get(key).get(0);
@@ -203,6 +216,7 @@ public class StartScreen extends AppCompatActivity {
             all.add(curContact);
         }
 
+        // Save the local CooLList into a global variable for displaying later
         everything = all;
     }
 
