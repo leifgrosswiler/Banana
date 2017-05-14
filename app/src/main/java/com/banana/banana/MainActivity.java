@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -72,7 +73,9 @@ public class MainActivity extends Activity
     private static final String[] SCOPES = {GmailScopes.MAIL_GOOGLE_COM};
 
     // Permission request stuff
-    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
+    private static final int MY_PERMISSIONS_REQUEST_CREATE = 0;
+    private static final int MY_PERMISSIONS_REQUEST_RESUME = 1;
+    private static final int MY_PERMISSIONS_REQUEST_PAUSE = 2;
     private PackageManager pm;
 
     // Text messaging stuff
@@ -91,20 +94,48 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        boolean shouldStay = false;
+        List<String> permissionRequests = new ArrayList<>();
+        int pCount = 0;
+        String[] permList;
+
+        pm = this.getPackageManager();
+        // Check SMS permissions
+        int hasPermSMS = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPermSMS != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.SEND_SMS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check phone number accessibility permissions
+        int hasPermNumb = pm.checkPermission(
+                Manifest.permission.READ_PHONE_STATE,
+                this.getPackageName());
+        if (hasPermNumb != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_PHONE_STATE);
+            shouldStay = true;
+            pCount++;
+        }
+
+        if (shouldStay) {
+            permList = new String[pCount];
+            ActivityCompat.requestPermissions(this,
+                    permissionRequests.toArray(permList),
+                    MY_PERMISSIONS_REQUEST_CREATE);
+        } else {
+            setThingsUp();
+        }
+
+    }
+
+    public void setThingsUp() {
+
         // Set up texting
         TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
         myPhoneNo =  tm.getLine1Number();
-
-        // Check SMS Permissions in beginning
-        pm = this.getPackageManager();
-        int hasPerm = pm.checkPermission(
-                Manifest.permission.SEND_SMS,
-                this.getPackageName());
-        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.SEND_SMS},
-                    MY_PERMISSIONS_REQUEST_SEND_SMS);
-        }
 
         // Set up the message sending button
         mSendRequests = (Button) findViewById(R.id.callApi);
@@ -151,6 +182,69 @@ public class MainActivity extends Activity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Variables used for checking and requestng permissions
+        boolean shouldStay = false;
+        List<String> permissionRequests = new ArrayList<>();
+
+        // Figure out all of the current permssions granted
+        // Request permissions if necessary
+        PackageManager pm = this.getPackageManager();
+
+        // Check contacts permission
+        int hasPermCont = pm.checkPermission(
+                Manifest.permission.READ_CONTACTS,
+                this.getPackageName());
+        if (hasPermCont != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_CONTACTS);
+            shouldStay = true;
+        }
+
+        // Check camera permissions
+        int hasPermCam = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.CAMERA);
+            shouldStay = true;
+        }
+
+        // Check SMS permissions
+        int hasPermSMS = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPermSMS != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.SEND_SMS);
+            shouldStay = true;
+        }
+
+        // Check storage permissions
+        int hasPermStore = pm.checkPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                this.getPackageName());
+        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            shouldStay = true;
+        }
+
+        // Check phone number accessibility permissions
+        int hasPermNumb = pm.checkPermission(
+                Manifest.permission.READ_PHONE_STATE,
+                this.getPackageName());
+        if (hasPermNumb != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_PHONE_STATE);
+            shouldStay = true;
+        }
+
+        if (shouldStay) {
+            Intent i = new Intent(this, StartScreen.class);
+            startActivity(i);
+        }
     }
 
     // Function for finding text contacts and sending messages
@@ -284,9 +378,37 @@ public class MainActivity extends Activity
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(
-                requestCode, permissions, grantResults, this);
+        boolean shouldStay = false;
+        List<String> permissionRequests = new ArrayList<>();
+        int pCount = 0;
+        String[] permList;
+
+        pm = this.getPackageManager();
+        // Check SMS permissions
+        int hasPermSMS = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPermSMS != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.SEND_SMS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check phone number accessibility permissions
+        int hasPermNumb = pm.checkPermission(
+                Manifest.permission.READ_PHONE_STATE,
+                this.getPackageName());
+        if (hasPermNumb != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_PHONE_STATE);
+            shouldStay = true;
+            pCount++;
+        }
+
+        if (shouldStay) {
+            Toast.makeText(this, "Requires SMS and Phone State permissions", Toast.LENGTH_SHORT).show();
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_CREATE) {
+            setThingsUp();
+        }
     }
 
     @Override

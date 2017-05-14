@@ -1,6 +1,9 @@
 package com.banana.banana;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -49,9 +53,17 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_receipt);
 
-        if (cropFile.exists() || photoFile.exists()) {
-            cropFile.delete();
-            photoFile.delete();
+        PackageManager pm = this.getPackageManager();
+        int hasPerm = pm.checkPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                this.getPackageName());
+        if (hasPerm == PackageManager.PERMISSION_GRANTED) {
+            if (cropFile != null && photoFile != null) {
+                if (cropFile.exists() || photoFile.exists()) {
+                    cropFile.delete();
+                    photoFile.delete();
+                }
+            }
         }
 
         toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -222,5 +234,75 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         finish();
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Variables used for checking and requestng permissions
+        boolean shouldStay = false;
+        List<String> permissionRequests = new ArrayList<>();
+        int pCount = 0;
+
+        // Figure out all of the current permssions granted
+        // Request permissions if necessary
+        PackageManager pm = this.getPackageManager();
+
+        // Check contacts permission
+        int hasPermCont = pm.checkPermission(
+                Manifest.permission.READ_CONTACTS,
+                this.getPackageName());
+        if (hasPermCont != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_CONTACTS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check camera permissions
+        int hasPermCam = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.CAMERA);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check SMS permissions
+        int hasPermSMS = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPermSMS != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.SEND_SMS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check storage permissions
+        int hasPermStore = pm.checkPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                this.getPackageName());
+        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check phone number accessibility permissions
+        int hasPermNumb = pm.checkPermission(
+                Manifest.permission.READ_PHONE_STATE,
+                this.getPackageName());
+        if (hasPermNumb != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_PHONE_STATE);
+            shouldStay = true;
+            pCount++;
+        }
+
+        if (shouldStay) {
+            Intent i = new Intent(this, StartScreen.class);
+            startActivity(i);
+        }
+    }
+
 
 }

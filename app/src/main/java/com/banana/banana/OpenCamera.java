@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.banana.banana.OrderData.setFoodAndPrice;
+import static com.banana.banana.SelectItems.everything;
 import static com.banana.banana.TextParser.parse;
 
 public class OpenCamera extends AppCompatActivity {
@@ -326,11 +327,14 @@ public class OpenCamera extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 0) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                takePictureButton.setEnabled(true);
+            if (grantResults.length > 1) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    takePictureButton.setEnabled(true);
+                }
             }
-        } else if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
+        }
+        if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
             int hasPerm = pm.checkPermission(
                     Manifest.permission.CAMERA,
                     this.getPackageName());
@@ -466,31 +470,68 @@ public class OpenCamera extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        // Request all important permissions for this screen before doing anything
-        pm = this.getPackageManager();
-        List<String> permRequests = new ArrayList<>();
-        String[] permList;
+        // Variables used for checking and requestng permissions
+        boolean shouldStay = false;
+        List<String> permissionRequests = new ArrayList<>();
         int pCount = 0;
 
+        // Figure out all of the current permssions granted
+        // Request permissions if necessary
+        PackageManager pm = this.getPackageManager();
+
+        // Check contacts permission
+        int hasPermCont = pm.checkPermission(
+                Manifest.permission.READ_CONTACTS,
+                this.getPackageName());
+        if (hasPermCont != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_CONTACTS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check camera permissions
         int hasPermCam = pm.checkPermission(
                 Manifest.permission.CAMERA,
                 this.getPackageName());
         if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.CAMERA);
+            shouldStay = true;
             pCount++;
-            permRequests.add(Manifest.permission.CAMERA);
         }
+
+        // Check SMS permissions
+        int hasPermSMS = pm.checkPermission(
+                Manifest.permission.SEND_SMS,
+                this.getPackageName());
+        if (hasPermSMS != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.SEND_SMS);
+            shouldStay = true;
+            pCount++;
+        }
+
+        // Check storage permissions
         int hasPermStore = pm.checkPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 this.getPackageName());
         if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            shouldStay = true;
             pCount++;
-            permRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
-        if (pCount > 0) {
-            permList = new String[pCount];
-            ActivityCompat.requestPermissions(this,
-                    permRequests.toArray(permList),
-                    MY_PERMISSIONS_REQUEST_CAMERA);
+
+        // Check phone number accessibility permissions
+        int hasPermNumb = pm.checkPermission(
+                Manifest.permission.READ_PHONE_STATE,
+                this.getPackageName());
+        if (hasPermNumb != PackageManager.PERMISSION_GRANTED) {
+            permissionRequests.add(Manifest.permission.READ_PHONE_STATE);
+            shouldStay = true;
+            pCount++;
+        }
+
+        if (shouldStay) {
+            Intent i = new Intent(this, StartScreen.class);
+            startActivity(i);
         }
         else {
             camera = Camera.open();
@@ -499,46 +540,46 @@ public class OpenCamera extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onPause() {
-
-        // Request all important permissions for this screen before doing anything
-        pm = this.getPackageManager();
-        List<String> permRequests = new ArrayList<>();
-        String[] permList;
-        int pCount = 0;
-
-        int hasPermCam = pm.checkPermission(
-                Manifest.permission.CAMERA,
-                this.getPackageName());
-        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
-            pCount++;
-            permRequests.add(Manifest.permission.CAMERA);
-        }
-        int hasPermStore = pm.checkPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                this.getPackageName());
-        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
-            pCount++;
-            permRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (pCount > 0) {
-            permList = new String[pCount];
-            ActivityCompat.requestPermissions(this,
-                    permRequests.toArray(permList),
-                    MY_PERMISSIONS_REQUEST_CAMERA);
-        }
-        else if (camera != null){
-            if (inPreview) {
-                camera.stopPreview();
-            }
-            camera.release();
-            camera = null;
-            inPreview = false;
-        }
-
-        super.onPause();
-    }
+//    @Override
+//    public void onPause() {
+//
+//        // Request all important permissions for this screen before doing anything
+//        pm = this.getPackageManager();
+//        List<String> permRequests = new ArrayList<>();
+//        String[] permList;
+//        int pCount = 0;
+//
+//        int hasPermCam = pm.checkPermission(
+//                Manifest.permission.CAMERA,
+//                this.getPackageName());
+//        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+//            pCount++;
+//            permRequests.add(Manifest.permission.CAMERA);
+//        }
+//        int hasPermStore = pm.checkPermission(
+//                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                this.getPackageName());
+//        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+//            pCount++;
+//            permRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        }
+//        if (pCount > 0) {
+//            permList = new String[pCount];
+//            ActivityCompat.requestPermissions(this,
+//                    permRequests.toArray(permList),
+//                    MY_PERMISSIONS_REQUEST_CAMERA);
+//        }
+//        else if (camera != null){
+//            if (inPreview) {
+//                camera.stopPreview();
+//            }
+//            camera.release();
+//            camera = null;
+//            inPreview = false;
+//        }
+//
+//        super.onPause();
+//    }
 
     // Initialize the preview for the camera to work
     private void initPreview() {
