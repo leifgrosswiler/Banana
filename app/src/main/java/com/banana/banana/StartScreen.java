@@ -13,7 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,7 +134,7 @@ public class StartScreen extends AppCompatActivity {
         // Data structures for temporarily storing info within this function
         List<CoolList> all = new ArrayList<>();
         Map<String, ArrayList<String>> tempAll = new HashMap<>();
-        
+
         // Request vector for email
         String[] EMAIL_PROJECTION = new String[] {
                 ContactsContract.CommonDataKinds.Email.CONTACT_ID,

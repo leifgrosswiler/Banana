@@ -62,38 +62,36 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
 
+    // Credential request stuff
     GoogleAccountCredential mCredential;
-    private Button mSendRequests;
-    //private ListView mFinalList;
-    private PackageManager pm;
-
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
-
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = {GmailScopes.MAIL_GOOGLE_COM};
 
+    // Permission request stuff
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
+    private PackageManager pm;
 
+    // Text messaging stuff
     private static String myPhoneNo;
+    private Button mSendRequests;
 
+    // Organization/list stuff
     ExpandableListView expandableListView;
     ExpandableListAdapter expandableListAdapter;
     List<String> expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
 
-    /**
-     * Create the final activity.
-     *
-     * @param savedInstanceState previously saved instance data.
-     */
+    // Create the final activity.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Set up texting
         TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
         myPhoneNo =  tm.getLine1Number();
 
@@ -124,9 +122,6 @@ public class MainActivity extends Activity
 
         // Set up the overview list
         expandableListView = (ExpandableListView) findViewById(R.id.finalList);
-
-        Set<String> userSet = ((MyList) getApplication()).getUsers();
-
         expandableListDetail = ((MyList) getApplication()).getPumpData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpandableListAdapter(this, expandableListTitle, expandableListDetail);
@@ -176,6 +171,7 @@ public class MainActivity extends Activity
                     list = ((MyList) getApplication()).getUserOrders(name);
                     if (list.size() == 0)
                         continue;
+                    // Set up message to be sent
                     String header = ("You owe me for:");
                     SmsManager sms = SmsManager.getDefault();
                     sms.sendTextMessage(phoneNo, null, header.toString(), null, null);
@@ -185,6 +181,7 @@ public class MainActivity extends Activity
                     }
                     Double amt = ((MyList) getApplication()).getUserTotal(name);
                     String total = Double.toString(amt);
+                    // Create Venmo link and send it users selected so
                     String link = "https://venmo.com/?txn=pay&audience=friends&recipients="
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
                     if (useVenmo.isChecked())
@@ -197,13 +194,7 @@ public class MainActivity extends Activity
         }
     }
 
-    /**
-     * Attempt to call the API, after verifying that all the preconditions are
-     * satisfied. The preconditions are: Google Play Services installed, an
-     * account was selected and the device currently has online access. If any
-     * of the preconditions are not satisfied, the app will prompt the user as
-     * appropriate.
-     */
+    // Attempt to call the API, after verifying that all the preconditions are satisfied.
     private void PerformEmailOperation() {
         if (!isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
@@ -217,18 +208,11 @@ public class MainActivity extends Activity
         }
     }
 
-    /**
-     * Attempts to set the account used with the API credentials. If an account
-     * name was previously saved it will use that one; otherwise an account
-     * picker dialog will be shown to the user. Note that the setting the
-     * account to use with the credentials object requires the app to have the
-     * GET_ACCOUNTS permission, which is requested here if it is not already
-     * present. The AfterPermissionGranted annotation indicates that this
-     * function will be rerun automatically whenever the GET_ACCOUNTS permission
-     * is granted.
-     */
+
+    // Attempts to set the account used with the API credentials
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     private void chooseAccount() {
+        // Check permissions for getting accounts
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
             String accountName = getPreferences(Context.MODE_PRIVATE)
@@ -252,30 +236,23 @@ public class MainActivity extends Activity
         }
     }
 
-    /**
-     * Called when an activity launched here (specifically, AccountPicker
-     * and authorization) exits, giving you the requestCode you started it with,
-     * the resultCode it returned, and any additional data from it.
-     *
-     * @param requestCode code indicating which activity result is incoming.
-     * @param resultCode  code indicating the result of the incoming
-     *                    activity result.
-     * @param data        Intent (containing result data) returned by incoming
-     *                    activity result.
-     */
     @Override
     protected void onActivityResult(
             int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Different cases for activity requests
         switch (requestCode) {
+            // needed google play services
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
                     Toast.makeText(getApplicationContext(), "This app requires Google Play Services",
                             Toast.LENGTH_LONG).show();
                 } else {
+                    // Create and send the email
                     PerformEmailOperation();
                 }
                 break;
+            // needed to choose an account
             case REQUEST_ACCOUNT_PICKER:
                 if (resultCode == RESULT_OK && data != null &&
                         data.getExtras() != null) {
@@ -288,10 +265,12 @@ public class MainActivity extends Activity
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
+                        // Create and send an email
                         PerformEmailOperation();
                     }
                 }
                 break;
+            // needed to request Gmail authorization
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
                     PerformEmailOperation();
@@ -300,15 +279,7 @@ public class MainActivity extends Activity
         }
     }
 
-    /**
-     * Respond to requests for permissions at runtime for API 23 and above.
-     *
-     * @param requestCode  The request code passed in
-     *                     requestPermissions(android.app.Activity, String, int, String[])
-     * @param permissions  The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *                     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
-     */
+    // Respond to permission request.
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
@@ -318,37 +289,17 @@ public class MainActivity extends Activity
                 requestCode, permissions, grantResults, this);
     }
 
-    /**
-     * Callback for when a permission is granted using the EasyPermissions
-     * library.
-     *
-     * @param requestCode The request code associated with the requested
-     *                    permission
-     * @param list        The requested permission list. Never null.
-     */
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
         // Do nothing.
     }
 
-    /**
-     * Callback for when a permission is denied using the EasyPermissions
-     * library.
-     *
-     * @param requestCode The request code associated with the requested
-     *                    permission
-     * @param list        The requested permission list. Never null.
-     */
     @Override
     public void onPermissionsDenied(int requestCode, List<String> list) {
         // Do nothing.
     }
 
-    /**
-     * Checks whether the device currently has a network connection.
-     *
-     * @return true if the device has a network connection, false otherwise.
-     */
+    // Checks whether the device currently has a network connection.
     private boolean isDeviceOnline() {
         ConnectivityManager connMgr =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -356,12 +307,7 @@ public class MainActivity extends Activity
         return (networkInfo != null && networkInfo.isConnected());
     }
 
-    /**
-     * Check that Google Play services APK is installed and up to date.
-     *
-     * @return true if Google Play Services is available and up to
-     * date on this device; false otherwise.
-     */
+    // Check that Google Play services APK is installed and up to date.
     private boolean isGooglePlayServicesAvailable() {
         GoogleApiAvailability apiAvailability =
                 GoogleApiAvailability.getInstance();
@@ -370,10 +316,7 @@ public class MainActivity extends Activity
         return connectionStatusCode == ConnectionResult.SUCCESS;
     }
 
-    /**
-     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
-     * Play Services installation via a user dialog, if possible.
-     */
+     // Attempt to resolve a missing, out-of-date, invalid or disabled Google Play Services
     private void acquireGooglePlayServices() {
         GoogleApiAvailability apiAvailability =
                 GoogleApiAvailability.getInstance();
@@ -385,13 +328,7 @@ public class MainActivity extends Activity
     }
 
 
-    /**
-     * Display an error dialog showing that Google Play Services is missing
-     * or out of date.
-     *
-     * @param connectionStatusCode code describing the presence (or lack of)
-     *                             Google Play Services on this device.
-     */
+    // Display an error dialog showing that Google Play Services is missing
     void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
@@ -402,10 +339,8 @@ public class MainActivity extends Activity
         dialog.show();
     }
 
-    /**
-     * An asynchronous task that handles the Gmail API call.
-     * Placing the API calls in their own task ensures the UI stays responsive.
-     */
+
+    // An asynchronous task that handles the Gmail API call
     private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
         private com.google.api.services.gmail.Gmail mService = null;
         private Exception mLastError = null;
@@ -419,11 +354,7 @@ public class MainActivity extends Activity
                     .build();
         }
 
-        /**
-         * Background task to call Gmail API.
-         *
-         * @param params no parameters needed for this task.
-         */
+        // Background task to call Gmail API.
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
@@ -446,9 +377,9 @@ public class MainActivity extends Activity
             //Do Nothing
         }
 
+        // if the user backs out of sending the message
         @Override
         protected void onCancelled() {
-            //  mProgress.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
@@ -469,16 +400,7 @@ public class MainActivity extends Activity
         }
     }
 
-    /**
-     * Create a MimeMessage using the parameters provided.
-     *
-     * @param to       email address of the receiver
-     * @param from     email address of the sender, the mailbox account
-     * @param subject  subject of the email
-     * @param bodyText body text of the email
-     * @return the MimeMessage to be used to send email
-     * @throws MessagingException
-     */
+    // Create a MimeMessage using the parameters provided.
     public static MimeMessage createEmail(String to,
                                           String from,
                                           String subject,
@@ -497,14 +419,7 @@ public class MainActivity extends Activity
         return email;
     }
 
-    /**
-     * Create a message from an email.
-     *
-     * @param emailContent Email to be set to raw of message
-     * @return a message containing a base64url encoded email
-     * @throws IOException
-     * @throws MessagingException
-     */
+    // Create a message from an email.
     public static com.google.api.services.gmail.model.Message createMessageWithEmail(MimeMessage emailContent)
             throws MessagingException, IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -516,17 +431,7 @@ public class MainActivity extends Activity
         return message;
     }
 
-    /**
-     * Send an email from the user's mailbox to its recipient.
-     *
-     * @param service      Authorized Gmail API instance.
-     * @param userId       User's email address. The special value "me"
-     *                     can be used to indicate the authenticated user.
-     * @param emailContent Email to be sent.
-     * @return The sent message
-     * @throws MessagingException
-     * @throws IOException
-     */
+    // Send an email from the user's mailbox to its recipient.
     public static com.google.api.services.gmail.model.Message sendMessage(Gmail service,
                                                                           String userId,
                                                                           MimeMessage emailContent)
@@ -539,17 +444,21 @@ public class MainActivity extends Activity
     // Function responsible for constructing each email to be sent
     private void CreateAndSendEmail(Gmail service) throws MessagingException {
 
-        //HashMap<String, List<String>> map = ((MyList) getApplication()).getList();
         Set<String> names = ((MyList) getApplication()).getUsers();
         List<Order> list;
         CheckBox useVenmo = (CheckBox)findViewById(R.id.useVenmo);
+
         // Search through names and create and send emails
         for (String name : names) {
+            // Checks to make sure it's an email
             if (!((MyList) getApplication()).isNumber(name)) {
                 list = ((MyList) getApplication()).getUserOrders(name);
                 if (list.size() == 0) {
+                    // if no items given to this user, no message is sent
                     continue;
                 }
+
+                // Creates actual email
                 String email = ((MyList) getApplication()).getMethod(name);
                 StringBuilder body = new StringBuilder();
                 body.append("You owe me for:\n");
@@ -564,8 +473,9 @@ public class MainActivity extends Activity
                         + myPhoneNo + "&amount=" + total + "&note=Banana+Payment";
                 if (useVenmo.isChecked())
                     body.append(link + "\n");
-
                 MimeMessage mimeMessage = createEmail(email, mCredential.getSelectedAccountName(), subject, body.toString());
+
+                // Attempts to send the above created email
                 try {
                     sendMessage(service, "me", mimeMessage);
                 } catch (UserRecoverableAuthIOException e) {
