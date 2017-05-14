@@ -35,8 +35,6 @@ public class SelectItems extends AppCompatActivity {
     public static final String NAME_ID = "com.banana.nameID";
     public static final String SELECTED_ID = "com.banana.selectedID";
     public static final String PickItems_ID = "com.banana.pickID";
-    ListView listView;
-    ArrayList<OrderOld> dataModels;
 
     //Contacts stuff
     private ListView contNames;
@@ -46,7 +44,6 @@ public class SelectItems extends AppCompatActivity {
 
     private ArrayAdapter<CoolList> adapter;
     private SearchView sv;
-//    private ArrayList<String> newNames = new ArrayList<>();
 
 
     // Request code for READ_CONTACTS. It can be any number > 0.
@@ -71,23 +68,14 @@ public class SelectItems extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if(!((MyList) getApplication()).contains(adapter.getItem(position).get(0))) {
                     System.out.println(v.toString());
-//                    if (adapter.getItem(position).get(1) != null) {
-//                        System.out.println("Email adding");
-//                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(1), false);
-//                    } else {
-//                        System.out.println("Number adding");
-//                        ((MyList) getApplication()).add(adapter.getItem(position).get(0), adapter.getItem(position).get(2), true);
-//                    }
-//                    MyList.addUser(adapter.getItem(position).get(0), OrderData.size());
 
                     // go to pick items screen
                     i = new Intent(SelectItems.this, PickItems.class);
                     i.putExtra(PickItems_ID, adapter.getItem(position).get(0));
-//                    startActivity(i);
 
                     person = adapter.getItem(position).get(0);
                     PopupMenu popup = new PopupMenu(SelectItems.this, v);
-                    //Inflating the Popup using xml file
+                    // Inflating the Popup using xml file
                     MenuInflater MI = popup.getMenuInflater();
                     MI.inflate(R.menu.popup, popup.getMenu());
 
@@ -99,7 +87,7 @@ public class SelectItems extends AppCompatActivity {
                             popup.getMenu().add(adapter.getItem(position).get(2));
                     }
 
-                    //registering popup with OnMenuItemClickListener
+                    // linking popup with OnMenuItemClickListener
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         public boolean onMenuItemClick(MenuItem item) {
                             Toast.makeText(
@@ -113,18 +101,15 @@ public class SelectItems extends AppCompatActivity {
                             else
                                 ((MyList) getApplication()).add(person, item.getTitle().toString(), true);
                             MyList.addUser(person, OrderData.size());
-//                            Intent i = new Intent(SelectItems.this, PickItems.class);
-//                            i.putExtra(PickItems_ID, item.getTitle().toString());
                             startActivity(i);
                             return true;
                         }
                     });
 
-                    popup.show(); //showing popup menu
+                    popup.show(); // showing popup menu
 
                     System.out.println(((MyList) getApplication()).getUsers());
                 }
-                // TODO: print toaster message for user already exist in else
                 System.out.println(adapter.getItem(position));
 
             }
@@ -132,17 +117,14 @@ public class SelectItems extends AppCompatActivity {
 
     }
 
-    /**
-     * Show the contacts in the ListView.
-     */
+    // Show the contacts in the ListView.
     private void showContacts() {
         // Check the SDK version and whether the permission is already granted or not.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+            // After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
-            // Android version is lesser than 6.0 or the permission is already granted.
-            //getContactNames();
+            // Android version is lesser than 6.0 or the permission is already granted
             adapter = new ArrayAdapter<CoolList>(this, android.R.layout.simple_selectable_list_item, everything);
             contNames.setAdapter(adapter);
 
@@ -178,96 +160,6 @@ public class SelectItems extends AppCompatActivity {
             }
         }
     }
-
-    /**
-     * Read the name of all the contacts.
-     *
-     * @return a list of names.
-     */
-//    private void getContactNames() {
-//        List<CoolList> all = new ArrayList<>();
-//
-//        // Get the ContentResolver
-//        ContentResolver cr = getContentResolver();
-//        // Get the Cursor of all the contacts
-//        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-//
-//        // Move the cursor to first. Also check whether the cursor is empty or not.
-//        if (cursor.moveToFirst()) {
-//            // Iterate through the cursor
-//            int i = 0;
-//            do {
-//                // Get the contacts name
-//                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-//                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-//
-//                // Get the contacts email
-//                Cursor emailCursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-//                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?", new String[]{ id }, null);
-//
-//                Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-//                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{ id }, null);
-//
-//                //Only adds contact if an email address or phone numbers is associated with it
-//                if (phoneCursor.moveToNext()) {
-//                    all.add(new CoolList());
-//                    all.get(i).add(name);
-//                    String number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA));
-//                    if (emailCursor.moveToNext()) {
-//                        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                        all.get(i).add(email);
-//                        all.get(i).add(number);
-//                    } else {
-//                        all.get(i).add(null);
-//                        all.get(i).add(number);
-//                    }
-//                    i++;
-//                } else if (emailCursor.moveToNext()) {
-//                    all.add(new CoolList());
-//                    all.get(i).add(name);
-//                    String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                    all.get(i).add(email);
-//                    i++;
-//                }
-//            } while (cursor.moveToNext());
-//        }
-//        // Close the cursor
-//        cursor.close();
-//
-//        everything = all;
-//    }
-
-    // Specific String List built for this class to use in the list view (uses specific toString method)
-//    public class CoolList extends ArrayList {
-//
-//        ArrayList<String> alist;
-//
-//        public CoolList() {
-//            alist = new ArrayList<String>();
-//        }
-//
-//        // Special toString function for this class
-//        @Override
-//        public String toString() {
-//            String s = "";
-//            for (int i = 0; i < alist.size(); i++) {
-//                // Doesn't add if the item is null (this could only be the email address currently)
-//                if (alist.get(i) != null)
-//                    s = s + alist.get(i) + "\n";
-//            }
-//            return s;
-//        }
-//
-//        public void add(String e) {
-//            alist.add(e);
-//        }
-//
-//        @Override
-//        public String get(int ind) {
-//            return alist.get(ind);
-//        }
-//
-//    }
 
 }
 

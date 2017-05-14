@@ -23,7 +23,6 @@ public class EditSpecifics extends AppCompatActivity {
     int position;
     private Toolbar toolbar;
     private String price;
-    private Boolean disableCheck = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,28 +46,6 @@ public class EditSpecifics extends AppCompatActivity {
         editName.setText(item, TextView.BufferType.EDITABLE);
         editPrice.setText(price, TextView.BufferType.EDITABLE);
 
-        editPrice.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!s.toString().equals("")) {
-                    disableCheck = false;
-                    System.out.println("-----------------------------------------------ENABLING THE CHECK");
-                    invalidateOptionsMenu();
-                }
-                else{
-                    disableCheck = true;
-                    System.out.println("-----------------------------------------------DISSABLING THE CHECK");
-                    invalidateOptionsMenu();
-                }
-            }
-        });
 
         // button
 //        final Button done = (Button) findViewById(R.id.editDone);
@@ -91,12 +68,16 @@ public class EditSpecifics extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Not a price...", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (newItem.isEmpty() || newItem.trim().isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Order needs a name...", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Order updated = new Order(newItem, newPrice, position,OrderData.getAt(position).getNumPpl());
         try {
             OrderData.set(position, updated);
         } catch(Exception e) {
-            System.out.println("position is fucked up");
+            System.out.println("position is incorrect");
         }
 
         Intent intentUpdate = new Intent(EditSpecifics.this, MainReceipt.class);
@@ -104,7 +85,8 @@ public class EditSpecifics extends AppCompatActivity {
     }
 
     public static boolean isValid(String str) {
-
+        if (str.equals("") || str.equals("."))
+            return false;
         for (char c : str.toCharArray()) {
             // if any c is not a digit
             if (!Character.isDigit(c)) {
@@ -120,9 +102,6 @@ public class EditSpecifics extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(app_bar2_menu, menu);
-        MenuItem item = menu.findItem(R.id.check);
-        if (item == null) System.out.println("AAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHH");
-        item.setEnabled(!disableCheck);
         return true;
     }
 
@@ -133,13 +112,9 @@ public class EditSpecifics extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.check:
                 updateInfo();
-
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-
 }
 

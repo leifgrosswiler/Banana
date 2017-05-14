@@ -17,14 +17,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.api.gbase.client.Tax;
-
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.banana.banana.Checkout.request;
+import static com.banana.banana.OpenCamera.cropFile;
+import static com.banana.banana.OpenCamera.photoFile;
 import static com.banana.banana.R.menu.app_bar_menu;
-
 
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
@@ -49,6 +49,11 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_receipt);
 
+        if (cropFile.exists() || photoFile.exists()) {
+            cropFile.delete();
+            photoFile.delete();
+        }
+
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -61,8 +66,17 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
         //Get the total price and set
         double total = OrderData.getTotal();
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedPrice;
+        try {
+            formattedPrice = formatter.format(total);
+        }
+        catch (java.lang.NumberFormatException e) {
+            formattedPrice = "$0.00";
+        }
+        System.out.println("FORMATTED PRICE IS: " + formattedPrice);
         totalPrice = (TextView)findViewById(R.id.totalView);
-        totalPrice.setText("Total: " + total);
+        totalPrice.setText("Total: " + formattedPrice);
 
         // floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -85,8 +99,6 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 OrderData.delete(viewHolder.getAdapterPosition());
-//                adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-//                adapter.notifyItemRangeChanged(viewHolder.getAdapterPosition(), );
             }
 
         };
@@ -102,12 +114,7 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
 
-        // add new user to spinner
-//        Intent newIntent = getIntent();
-//        String name = newIntent.getStringExtra(PickItems.NEW_ID);
-//        if (name != null) {
-//            categories.add(name);
-//        }
+
         // add users to spinner
         for (String person : MyList.getAllUsers()){
             categories.add(person);
@@ -139,17 +146,18 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
 
     public static void updateTotal() {
         double total = OrderData.getTotal();
-        totalPrice.setText("Total: " + total);
-        System.out.println("TRYING TO UPDATE THE TOTAL. PLZ PLZ CHANGE: " + total);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedPrice;
+        try {
+            formattedPrice = formatter.format(total);
+        }
+        catch (java.lang.NumberFormatException e) {
+            formattedPrice = "$0.00";
+        }
+        System.out.println("FORMATTED PRICE IS: " + formattedPrice);
+        totalPrice.setText("Total: " + formattedPrice);
     }
 
-//    private void payItems(String name){
-//        for (int i = 0; i < OrderData.size(); i++){
-//            View thisView = recView.getChildAt(i);
-//            if (MyList.getTracker(name)[i])
-//                ((TextView) thisView.findViewById(R.id.payer)).setText(name);
-//        }
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -158,15 +166,11 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         return true;
     }
 
-
     // App Bar Icons OnClick
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_user:
-//                Intent intentDone = new Intent(MainReceipt.this, SelectItems.class);
-//                startActivityForResult(intentDone, request);
-
                 View vItem = findViewById(R.id.add_user);
                 PopupMenu popup = new PopupMenu(this, vItem);
                 popup.getMenuInflater().inflate(R.menu.pop_menu1, popup.getMenu());

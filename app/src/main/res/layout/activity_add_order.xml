@@ -12,33 +12,25 @@
         android:id="@+id/addName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="Item"
-        android:gravity="center"
         android:layout_below="@+id/app_bar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="46dp" />
+        android:layout_marginTop="46dp"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Item Name"
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/addPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="number"
-        android:hint="Price"
-        android:gravity="center"
-        android:layout_marginTop="27dp"
+        android:layout_alignStart="@+id/addName"
         android:layout_below="@+id/addName"
-        android:layout_alignStart="@+id/addName" />
+        android:layout_marginTop="27dp"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Item Price"
+        android:inputType="numberDecimal" />
 
-    <!--<Button-->
-        <!--android:id="@+id/addDone"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_marginBottom="29dp"-->
-        <!--android:text="@string/button_done" />-->
 
 </RelativeLayout>
