@@ -66,7 +66,7 @@ public class TextParser {
             outputLine.add(2, "0.00"); // Default price to 0.00
             for (String word : typeSet.keySet()) {
                 if (typeSet.get(word).equals("Title")) {
-                    outputLine.set(0, outputLine.get(0) + " " + cleanTitle(word)); // (trim removes leading and trailing whitespace)
+                    outputLine.set(0, outputLine.get(0) + " " + word.trim()); // (trim removes leading and trailing whitespace)
                 }
 
                 // Quantity is currently added to the title
@@ -78,6 +78,11 @@ public class TextParser {
                 else if (typeSet.get(word).equals("Price")) {
                     outputLine.set(2, word);
                 }
+            }
+
+            // If there is no title, output an error message in its place
+            if (outputLine.get(0).trim().length() == 0) {
+                outputLine.set(0, "<ITEM MISSING>");
             }
             checklistOutput.add(outputLine);
         }
@@ -148,13 +153,5 @@ public class TextParser {
         formattedPrice = formattedPrice.substring(1);
 
         return formattedPrice;
-    }
-
-    // Remove extra whitespace from title, and re-write it to an error if it's empty
-    private static String cleanTitle(String title) {
-        if (title.trim().length() == 0) {
-            return "<ITEM MISSING>";
-        }
-        return title.trim();
     }
 }
