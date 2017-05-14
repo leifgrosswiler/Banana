@@ -231,19 +231,22 @@ public class OpenCamera extends AppCompatActivity {
                                 decorView.setSystemUiVisibility(uiOptions);
 
                                 // Give the camera a new FocusArea to analyse (null means it'll find the best area)
-                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
-                                    Camera.Parameters parameters = camera.getParameters();
-                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                                    if (parameters.getMaxNumFocusAreas() > 0) {
-                                        parameters.setFocusAreas(null);
-                                    }
-                                    camera.setParameters(parameters);
-                                    try {
-                                        camera.startPreview();
-                                    } catch (Exception e) {
-                                        System.out.println(e.toString());
-                                    }
+                                try {
+                                    if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                        Camera.Parameters parameters = camera.getParameters();
+                                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                        if (parameters.getMaxNumFocusAreas() > 0) {
+                                            parameters.setFocusAreas(null);
+                                        }
+                                        camera.setParameters(parameters);
+                                        try {
+                                            camera.startPreview();
+                                        } catch (Exception e) {
+                                            System.out.println(e.toString());
+                                        }
 
+                                    }
+                                } catch (Exception e) {
                                 }
                             }
                         });
@@ -612,25 +615,37 @@ public class OpenCamera extends AppCompatActivity {
 
         // camera configured if not so already
         if (cameraConfigured && camera!=null) {
-            camera.startPreview();
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+            try {
+                camera.startPreview();
+                Camera.CameraInfo info = new Camera.CameraInfo();
+                Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
 
-            // set up rotation details
-            int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
-            int degrees = 0;
-            switch (rotation) {
-                case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
-                case Surface.ROTATION_90: degrees = 90; break; //Landscape left
-                case Surface.ROTATION_180: degrees = 180; break;//Upside down
-                case Surface.ROTATION_270: degrees = 270; break;//Landscape right
+                // set up rotation details
+                int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+                int degrees = 0;
+                switch (rotation) {
+                    case Surface.ROTATION_0:
+                        degrees = 0;
+                        break; //Natural orientation
+                    case Surface.ROTATION_90:
+                        degrees = 90;
+                        break; //Landscape left
+                    case Surface.ROTATION_180:
+                        degrees = 180;
+                        break;//Upside down
+                    case Surface.ROTATION_270:
+                        degrees = 270;
+                        break;//Landscape right
+                }
+                int rotate = (info.orientation - degrees + 360) % 360;
+                Camera.Parameters params = camera.getParameters();
+                params.setRotation(rotate);
+                camera.setParameters(params);
+                setCameraDisplayOrientation(this, 0, camera);
+                inPreview = true;
             }
-            int rotate = (info.orientation - degrees + 360) % 360;
-            Camera.Parameters params = camera.getParameters();
-            params.setRotation(rotate);
-            camera.setParameters(params);
-            setCameraDisplayOrientation(this, 0, camera);
-            inPreview=true;
+            catch (Exception e) {
+            }
         }
     }
 
