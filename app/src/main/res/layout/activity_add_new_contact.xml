@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.banana.banana.AddNewContact">
+
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar2" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/contactName"
+        android:hint="Contact Name"
+        android:gravity="center"
+        android:layout_below="@+id/app_bar"
+        android:layout_alignStart="@+id/contactInfo"
+        android:layout_marginTop="39dp"
+        android:layout_alignEnd="@+id/contactInfo" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/contactInfo"
+        android:hint="Email or Phone Number"
+        android:gravity="center"
+        android:layout_marginTop="41dp"
+        android:layout_below="@+id/contactName"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

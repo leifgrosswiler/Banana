@@ -3,40 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <TextView
-        android:id="@+id/checkTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text='"Pick Your Items"'
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-    <ListView
-        android:id="@+id/checkList"
-        android:layout_width="fill_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="9dp"
-        android:choiceMode="multipleChoice"
-        android:layout_below="@+id/checkTitle"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar3" />
 
     <ListView
         android:id="@+id/contNames"
         android:layout_width="300dp"
         android:layout_height="200dp"
+        android:layout_below="@+id/app_bar"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/finish" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"/>
 
-    <Button
-        android:id="@+id/finish"
+    <TextView
+        android:id="@+id/popupHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="9dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/checkList"
-        android:text="@string/button_done" />
+        android:layout_centerInParent="true"/>
+
 
 </RelativeLayout>

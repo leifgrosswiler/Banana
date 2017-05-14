@@ -3,52 +3,71 @@ package com.banana.banana;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import static com.banana.banana.R.menu.app_bar2_menu;
 
 public class AddOrder extends AppCompatActivity {
 
     private EditText addName;
     private EditText addPrice;
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_order);
 
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        ((TextView) toolbar.findViewById(R.id.name)).setText("ADD NEW ITEM");
+        invalidateOptionsMenu();
         addName = (EditText) findViewById(R.id.addName);
         addPrice = (EditText) findViewById(R.id.addPrice);
         addName.setText("", EditText.BufferType.EDITABLE);
         addPrice.setText("", EditText.BufferType.EDITABLE);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(app_bar2_menu, menu);
+        return true;
+    }
 
 
-        // return back to EditReceipt
-        Button done = (Button) findViewById(R.id.addDone);
-        done.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.EditReceipt.class);
-
+    // App Bar Icons OnClick
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.check:
+                Intent intentDone = new Intent(AddOrder.this, com.banana.banana.MainReceipt.class);
                 // temporary way to update original array list
                 String newName = addName.getText().toString();
                 String newPrice = addPrice.getText().toString();
-                String newItems[] = new String[com.banana.banana.EditReceipt.food.length + 1];
-                String newPrices[] = new String[com.banana.banana.EditReceipt.price.length + 1];
-                for(int i = 0; i < com.banana.banana.EditReceipt.food.length; i++){
-                    newItems[i] = com.banana.banana.EditReceipt.food[i];
-                    newPrices[i] = com.banana.banana.EditReceipt.price[i];
+
+                if (!EditSpecifics.isValid(newPrice)) {
+                    Toast.makeText(getApplicationContext(), "Not a price...", Toast.LENGTH_SHORT).show();
+                    return false;
                 }
-                newItems[newItems.length - 1] = newName;
-                newPrices[newItems.length - 1] = newPrice;
-                com.banana.banana.EditReceipt.food = newItems;
-                com.banana.banana.EditReceipt.price = newPrices;
+                if (newName.isEmpty() || newName.trim().isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Order needs a name...", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
 
+                if (EditReceipt.food == null) OrderData.add(newName, newPrice, 0);
+                else
+                    OrderData.add(newName, newPrice, com.banana.banana.EditReceipt.food.length + 1);
                 startActivity(intentDone);
-                finish();
-            }
-        });
-
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

@@ -11,6 +11,9 @@ MaterialDesign/*
 /build
 /captures
 .externalNativeBuild
+OpenCVLibrary320/*
+OpenCVLibrary2411/*
+OpenCVLibrary/*
 
 # Compiled source #
 ###################
@@ -19,7 +22,6 @@ MaterialDesign/*
 *.dll
 *.exe
 *.o
-*.so
 
 # Packages #
 ############

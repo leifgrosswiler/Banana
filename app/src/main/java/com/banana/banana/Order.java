@@ -1,56 +1,55 @@
 package com.banana.banana;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.text.DecimalFormat;
 
 /**
- * Created by andrewjayzhou on 4/10/17.
+ * Created by andrewjayzhou on 4/14/17.
  */
 
-public class Order implements Parcelable {
-    String item;
-    String price;
+public class Order {
 
-    public Order(String item, String price) {
+    private String item;
+    private String price;
+    private int p;
+    private int ppl;
+    //private ArrayList<String> users;
+
+
+    public Order(String item, String price, int p, int ppl) {
         this.item = item;
         this.price = price;
+        this.p = p;
+        this.ppl = ppl;
+//        users = new ArrayList<>();
+    }
+
+    public void setItem(String item) {
+        this.item = item;
     }
 
     public String getItem() {
         return item;
     }
 
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
     public String getPrice() {
         return price;
     }
 
-    // The following methods that are required for using Parcelable
-    private Order(Parcel in) {
-        // This order must match the order in writeToParcel()
-        item = in.readString();
-        price = in.readString();
-        // Continue doing this for the rest of your member data
+    public String getPricePP() {
+        double intPrice = Double.parseDouble(price);
+        double pricePP = intPrice/(double)ppl;
+        return Double.toString(pricePP);
     }
 
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(item);
-        out.writeString(price);
-    }
+    public int getPos() {return this.p;}
 
-    // Just cut and paste this for now
-    public int describeContents() {
-        return 0;
-    }
+    public int getNumPpl() {return this.ppl;}
 
-    // Just cut and paste this for now
-    public static final Parcelable.Creator<Order> CREATOR = new Parcelable.Creator<Order>() {
-        public Order createFromParcel(Parcel in) {
-            return new Order(in);
-        }
+    public void addUser() {this.ppl = this.ppl + 1;}
+    public void rmUser() {this.ppl = this.ppl - 1;}
 
-        public Order[] newArray(int size) {
-            return new Order[size];
-        }
-    };
 }
-

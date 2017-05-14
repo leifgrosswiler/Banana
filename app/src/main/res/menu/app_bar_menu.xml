@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainReceipt">
+
+    <item
+    android:id="@+id/add_user"
+    android:orderInCategory="100"
+    android:title="Add User"
+    android:icon="@drawable/ic_person_add_black_24dp"
+    app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/add_item"
+        android:orderInCategory="200"
+        android:title="Add Item"
+        android:icon="@drawable/ic_create_black_24dp"
+        app:showAsAction="ifRoom" />
+
+
+
+
+</menu>

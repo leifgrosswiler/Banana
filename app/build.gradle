@@ -6,10 +6,11 @@ android {
 
     defaultConfig {
         applicationId "com.banana.banana"
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -24,6 +25,7 @@ android {
 }
 
 dependencies {
+
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile('com.google.api-client:google-api-client-android:1.22.0') {
         exclude group: 'org.apache.httpcomponents'
@@ -32,6 +34,22 @@ dependencies {
         exclude group: 'org.apache.httpcomponents'
     }
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile('com.google.gdata:core:1.47.1') {
+        exclude group: 'com.sun.mail'
+        exclude group: 'javax.activation'
+        exclude group: 'javax.mail'
+    }
+
+//    compile('com.google.gdata:core:1.47.1') {
+//        exclude group: 'com.sun.mail'
+//        exclude group: 'javax.activation'
+//        exclude group: 'javax.mail'
+//    }
+
+    compile project(':openCVLibrary320')
+
+    compile 'com.android.support:multidex:1.0.0'
     compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.google.android.gms:play-services-auth:10.2.1'
     compile 'pub.devrel:easypermissions:0.2.1'
@@ -40,14 +58,11 @@ dependencies {
     compile 'com.sun.mail:android-activation:1.5.5'
     compile 'com.android.support:design:25.3.1'
     compile 'com.rmtheis:tess-two:6.3.0'
-    compile('com.google.gdata:core:1.47.1') {
-        exclude group: 'com.sun.mail'
-        exclude group: 'javax.activation'
-        exclude group: 'javax.mail'
-    }
-    testCompile 'junit:junit:4.12'
-    compile project(':openCVLibrary2411')
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 }
+
+
 
 
 
