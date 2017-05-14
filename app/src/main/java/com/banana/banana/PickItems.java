@@ -69,7 +69,6 @@ public class PickItems extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.check:
                 Intent intent = new Intent(PickItems.this, MainReceipt.class);
-//                intent.putExtra(NEW_ID, name);
                 startActivity(intent);
 
             default:
