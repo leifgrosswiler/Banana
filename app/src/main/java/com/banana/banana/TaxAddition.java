@@ -1,30 +1,23 @@
 package com.banana.banana;
 
-import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.w3c.dom.Text;
-
-import java.io.CharArrayReader;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
-import static com.banana.banana.EditReceipt.ITEM_ID;
-import static com.banana.banana.EditReceipt.PRICE_ID;
+import static com.banana.banana.R.menu.app_bar2_menu;
 
 
 public class TaxAddition extends AppCompatActivity  {
@@ -36,12 +29,19 @@ public class TaxAddition extends AppCompatActivity  {
     private TextView totalS;
     private boolean taxByPercent = true;
     private ToggleButton taxToggle;
+    private Toolbar toolbar;
+    private ExpandableListDataPump pump;
 
     int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tax);
+
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        ((TextView) toolbar.findViewById(R.id.name)).setText("TAX AND TIP");
 
         // set views
         editTax = (EditText) findViewById(R.id.editTax);
@@ -74,16 +74,16 @@ public class TaxAddition extends AppCompatActivity  {
                     editTax.setHint("Tax ($)");
                     taxByPercent = false;
                 }
-                updateTotal();
+                if (editTax.getText().toString().isEmpty())
+                    updateTotal(true);
+                else
+                    updateTotal(false);
             }
         });
 
-        // button
-        final Button done =(Button) findViewById(R.id.editDone);
+
         Set<String> names = ((MyList) getApplication()).getUsers();
-
-        final ExpandableListDataPump pump = new ExpandableListDataPump(this, names);
-
+        pump = new ExpandableListDataPump(this, names);
         editTax.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -94,18 +94,62 @@ public class TaxAddition extends AppCompatActivity  {
 
             @Override
             public void afterTextChanged(Editable s) {
-                updateTotal();
+                updateTotal(false);
             }
         });
 
+    }
 
+    private void updateTotal(boolean noToast) {
+        double tax;
+        double total = OrderData.getTotal();
+        String taxStr = editTax.getText().toString();
+        if (!isValid(taxStr)) {
+            if (!noToast)
+                Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
+            taxStr = "0";
+        }
+        if (taxStr.isEmpty()) taxStr = "0";
+        if (taxByPercent)
+            tax = ((double)Math.round(Double.parseDouble(taxStr)*total))/100;
+        else
+            tax = ((double)Math.round(Double.parseDouble(taxStr)*100))/100;
+        taxS.setText("$" + tax);
+        totalS.setText("$" + (tax + total));
+    }
 
-        done.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainReceipt.class));
+    }
 
-            @Override
-            public void onClick(View view) {
-                // get list of final prices and total price
+    public boolean isValid(String str) {
+        if (str.equals("") || str.equals(".")) return false;
+        for (char c : str.toCharArray()) {
+            // if any c is not a digit
+            if (!Character.isDigit(c)) {
+                // and not a proper punctuation mark, return false
+                if (c != '.' && c != ',') return false;
+            }
+        }
+        // otherwise return true
+        return true;
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(app_bar2_menu, menu);
+        return true;
+    }
+
+    // App Bar Icons OnClick
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.check:
                 pump.getData();
                 pump.rmTipTax();
 
@@ -146,46 +190,9 @@ public class TaxAddition extends AppCompatActivity  {
                 if (isValid(editTip.getText().toString()) && isValid(editTax.getText().toString()))
                     startActivity(finalIntent);
 
-            }
-        });
-
-    }
-
-    private void updateTotal() {
-        double tax;
-        double total = OrderData.getTotal();
-        String taxStr = editTax.getText().toString();
-        if (!isValid(taxStr)) {
-            Toast.makeText(getApplicationContext(),"Invalid Tax Value!", Toast.LENGTH_SHORT).show();
-            taxStr = "0";
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        if (taxStr.isEmpty()) taxStr = "0";
-        if (taxByPercent)
-            tax = ((double)Math.round(Double.parseDouble(taxStr)*total))/100;
-        else
-            tax = ((double)Math.round(Double.parseDouble(taxStr)*100))/100;
-        taxS.setText("$" + tax);
-        totalS.setText("$" + (tax + total));
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        super.onBackPressed();
-        startActivity(new Intent(this, MainReceipt.class));
-    }
-
-    public boolean isValid(String str) {
-        if (str.equals("") || str.equals(".")) return false;
-        for (char c : str.toCharArray()) {
-            // if any c is not a digit
-            if (!Character.isDigit(c)) {
-                // and not a proper punctuation mark, return false
-                if (c != '.' && c != ',') return false;
-            }
-        }
-        // otherwise return true
-        return true;
     }
 
 }
