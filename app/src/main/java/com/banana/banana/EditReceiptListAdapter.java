@@ -69,15 +69,8 @@ public class EditReceiptListAdapter extends ArrayAdapter implements View.OnClick
             result=convertView;
         }
 
-//        Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
-//        result.startAnimation(animation);
-//        lastPosition = position;
-
         viewHolder.txtItem.setText(dataModel.getItem());
         viewHolder.txtPrice.setText(dataModel.getPrice());
-
-//        viewHolder.info.setOnClickListener(this);
-//        viewHolder.info.setTag(position);
 
         return convertView;
     }

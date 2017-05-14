@@ -6,8 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -50,18 +48,6 @@ public class EditSpecifics extends AppCompatActivity {
         editPrice = (EditText) findViewById(R.id.editPrice);
         editName.setText(item, TextView.BufferType.EDITABLE);
         editPrice.setText(price, TextView.BufferType.EDITABLE);
-
-
-        // button
-//        final Button done = (Button) findViewById(R.id.editDone);
-//        if (isValid(price)) done.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                updateInfo(done, price);
-//            }
-//        });
-
     }
 
 //    public void updateInfo(Button done, String price){

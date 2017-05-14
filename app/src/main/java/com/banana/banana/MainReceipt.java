@@ -3,7 +3,6 @@ package com.banana.banana;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -33,7 +31,6 @@ import static com.banana.banana.R.menu.app_bar_menu;
 public class MainReceipt extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     public static final String ITEM_ID = "com.banana.itemID";
     public static final String PRICE_ID = "com.banana.priceID";
-    public static final String SPINNER_ID = "com.banana.spinnerID";
     public static final String P_ID = "com.banana.pID";
     private static TextView totalPrice;
 
@@ -43,12 +40,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
     public static ReceiptAdapter adapter;
     private Toolbar toolbar;
     public static List<String> categories;
-    private static TextView orderTotal;
     public static ArrayAdapter<String> spinnerAdapter;
 
 
     @Override
-    // TODO: incorporate mylist
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_receipt);
@@ -118,14 +113,12 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         itemTouchHelper.attachToRecyclerView(recView);
 
         // Spinner
-        // TODO: remove hardcorded cateogires
         spinner = (Spinner) findViewById(R.id.spinner);
         categories = new ArrayList<String>();
         categories.add("Select Payer: ");
         spinnerAdapter = new ArrayAdapter<String>(MainReceipt.this,
                 android.R.layout.simple_list_item_1, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-
 
         // add users to spinner
         for (String person : MyList.getAllUsers()){

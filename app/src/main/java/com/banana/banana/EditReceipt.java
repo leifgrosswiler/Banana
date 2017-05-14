@@ -12,7 +12,6 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
-import static com.banana.banana.OpenCamera.parseResult;
 
 
 public class EditReceipt extends AppCompatActivity {
@@ -21,10 +20,10 @@ public class EditReceipt extends AppCompatActivity {
     public static final String PRICE_ID = "com.banana.priceID";
     public static final String POSITION_ID = "com.banana.positionID";
     public static final String DATAMODELS_ID = "com.banana.dataModelsID";
-    public static final String SOURCE = "com.banana.source";
+
     // inputs
-    public static String food[];// = {"Pepperoni and Sausage Pizza", "Pasta", "Ice Cream Sandwitches", "Cheerios with Honey Oats", "Chicken Nuggets", "Tomato Soup"};
-    public static String price[];// = {"$15.74", "$1300.02", "$14.00", "$5.99", "$2.33", "$0.99"};
+    public static String food[];
+    public static String price[];
 
 
     ListView listView;
@@ -36,8 +35,7 @@ public class EditReceipt extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_receipt);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
+
         // LISTVIEW
         listView=(ListView)findViewById(android.R.id.list);
         dataModels= new ArrayList<>();

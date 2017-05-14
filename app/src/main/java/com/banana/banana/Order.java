@@ -1,7 +1,5 @@
 package com.banana.banana;
 
-import java.text.DecimalFormat;
-
 /**
  * Created by andrewjayzhou on 4/14/17.
  */
@@ -12,7 +10,6 @@ public class Order {
     private String price;
     private int p;
     private int ppl;
-    //private ArrayList<String> users;
 
 
     public Order(String item, String price, int p, int ppl) {
@@ -20,7 +17,6 @@ public class Order {
         this.price = price;
         this.p = p;
         this.ppl = ppl;
-//        users = new ArrayList<>();
     }
 
     public void setItem(String item) {

@@ -12,8 +12,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 import static com.banana.banana.MainReceipt.ITEM_ID;
 import static com.banana.banana.MainReceipt.PRICE_ID;
 import static com.banana.banana.MainReceipt.P_ID;
@@ -67,11 +65,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 holder.card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
                 holder.payer.setTextColor(Color.parseColor("#FFFFFF"));
             }
-//            for (String person : MyList.getAllUsers()){
-//                if (MyList.getTracker(person)[position]){
-//                    holder.payer
-//                }
-//            }
         }
     }
 
@@ -90,10 +83,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
         private TextView item;
         private TextView price;
         private View container;
-        private View avatar;
-        private View avatar2;
-        private CircleImageView circle;
-        private TextView letter;
         private CardView card;
         private TextView payer;
 
@@ -107,7 +96,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
             payer = (TextView) itemView.findViewById(R.id.payer);
 
             itemView.setOnClickListener(this);
-
         }
 
         @Override
@@ -133,7 +121,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                 int p = getLayoutPosition();
                 Order item = (Order) OrderData.getListData().get(p);
 
-                System.out.println("IM HEREEEEEE ");
                 boolean[] tracker = MyList.getTracker(user);
 
                 if (!tracker[p]) {
@@ -153,44 +140,8 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
                     int num = item.getNumPpl();
                     System.out.println("NUMBER     "+ num);
                 }
-
-//                if (!view.isSelected()){
-//                    MyList.isSelected(user, p, true);
-////                    card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
-//                }
-//                else {
-//                    MyList.isSelected(user, p, false);
-////                    card.setBackgroundColor(Color.parseColor("#ffffff"));
-//                }
-////                PickItems.highlight(MyList.getTracker(user));
-//                System.out.println("ATTENTION: " + tracker[p]);
-//                if (tracker[p])
-//                    card.setCardBackgroundColor(Color.parseColor("#FF8A65"));
-//                else
-//                    card.setBackgroundColor(Color.parseColor("#ffffff"));
-
             }
-//            else if (user != "Master") {
-////                letter.setText(Character.toString(user.charAt(0)));
-////                circle.setBackgroundColor(0xff0000ff);
-//                int p = getLayoutPosition();
-//                if (view.isSelected()) {
-//                    // get the number of people who have selected an item
-//                    // based on this set the icon
-//                    view.setSelected(false);
-////                    avatar.setVisibility(View.GONE);
-//                    MyList.isSelected(user, p, false);
-//
-//                }
-//                else {
-//                    view.setSelected(true);
-////                    avatar.setVisibility(View.VISIBLE);
-//                    MyList.isSelected(user, p, true);
-//                    System.out.println(MyList.getTracker(user)[p]);
-//                }
         }
-
-
     }
 
     public void setMode(int mode) {
@@ -198,7 +149,6 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ReceiptH
     }
 
     public void setUser(String user) {this.user = user; }
-
 
     public ReceiptAdapter(List<Order> listData, Context c, MyList application) {
         inflater = LayoutInflater.from(c);

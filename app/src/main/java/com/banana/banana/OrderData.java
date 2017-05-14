@@ -27,7 +27,6 @@ public class OrderData {
     public static void delete(int p) {
 
         data.remove(p);
-        // Might need to add NotifyItemRemoved()
         MainReceipt.adapter.notifyItemRemoved(p);
 
         MyList.notifyTrackerOrderDeleted(p);

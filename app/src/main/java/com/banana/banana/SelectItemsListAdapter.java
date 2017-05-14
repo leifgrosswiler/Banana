@@ -72,22 +72,14 @@ public class SelectItemsListAdapter extends ArrayAdapter implements View.OnClick
             result=convertView;
         }
 
-//        Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
-//        result.startAnimation(animation);
-//        lastPosition = position;
-
         viewHolder.txtItem.setText(dataModel.getItem());
         viewHolder.txtPrice.setText(dataModel.getPrice());
         viewHolder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 final boolean isChecked = viewHolder.checkBox.isChecked();
-                // Do something here.
             }
         });
-
-//        viewHolder.info.setOnClickListener(this);
-//        viewHolder.info.setTag(position);
 
         return convertView;
     }

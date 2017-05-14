@@ -74,13 +74,12 @@ public class ExpandableListDataPump {
             List<String> userOrder = expandableListDetail.get(user);
             List<String> newUserOrder = new ArrayList<>(userOrder);
             System.out.println("order: " + userOrder);
-            //expandableListDetail.remove(user);
 
             String tip = "";
             String tax = "";
             double tipD = 0.0;
             double taxD = 0.0;
-//            // remove total entry
+            // remove total entry
             for (String s : userOrder) {
                 if (s.contains("Tip: $")) {
                     System.out.println("tip string + "+ s);

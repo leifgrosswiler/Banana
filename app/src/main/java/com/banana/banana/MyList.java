@@ -15,7 +15,6 @@ public class MyList extends Application {
 
     private HashMap<String, List<String> > split = new HashMap<>();
     private String currentUser = "Master";
-    private int dataLength;
     private HashMap<String,Integer> items = new HashMap<>();
 
     public HashMap<String, List<String>> getList() {
@@ -99,8 +98,6 @@ public class MyList extends Application {
     // **Tracker**
 
     private static HashMap<String, boolean[]> tracker = new HashMap<>();
-    //private static int length = OrderData.size();
-
 
     public static void addUser(String name, int length){
         boolean[] tmp = new boolean[length];

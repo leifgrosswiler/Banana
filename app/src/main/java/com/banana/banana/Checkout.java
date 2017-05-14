@@ -28,7 +28,6 @@ public class Checkout extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
 
         Intent intentReceive = getIntent();
-        //String tmp = (String) intentReceive.getStringExtra(EditRecepit.DATAMODELS_ID);
         dataModels = (ArrayList<OrderOld>) intentReceive.getSerializableExtra(DATAMODELS_ID);
 
         // LISTVIEW
