@@ -108,8 +108,8 @@ public class OpenCamera extends AppCompatActivity {
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        if (everything == null)
-            getContactNames();
+//        if (everything == null)
+//            getContactNames();
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -446,21 +446,10 @@ public class OpenCamera extends AppCompatActivity {
 
     @Override
     public void onResume() {
-
-        PackageManager pm = getPackageManager();
-        int hasPermCam = pm.checkPermission(
-                Manifest.permission.CAMERA,
-                this.getPackageName());
-        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[] {Manifest.permission.CAMERA},
-                    MY_PERMISSIONS_REQUEST_CAMERA);
-        } else {
-            super.onResume();
-            camera = Camera.open();
-            startPreview();
-            refreshCamera();
-        }
+        super.onResume();
+        camera = Camera.open();
+        startPreview();
+        refreshCamera();
     }
 
     @Override
@@ -476,28 +465,6 @@ public class OpenCamera extends AppCompatActivity {
         super.onPause();
     }
 
-    private Camera.Size getBestPreviewSize(int width, int height,
-                                           Camera.Parameters parameters) {
-        Camera.Size result=null;
-
-        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-            if (size.width<=width && size.height<=height) {
-                if (result==null) {
-                    result=size;
-                }
-                else {
-                    int resultArea=result.width*result.height;
-                    int newArea=size.width*size.height;
-
-                    if (newArea>resultArea) {
-                        result=size;
-                    }
-                }
-            }
-        }
-
-        return(result);
-    }
 
     private void initPreview(int width, int height) {
         if (camera!=null && previewHolder.getSurface()!=null) {
@@ -597,78 +564,4 @@ public class OpenCamera extends AppCompatActivity {
         }
     };
 
-    private void getContactNames() {
-
-        List<CoolList> all = new ArrayList<>();
-        Map<String, ArrayList<String>> tempAll = new HashMap<>();
-
-        String[] EMAIL_PROJECTION = new String[] {
-                ContactsContract.CommonDataKinds.Email.CONTACT_ID,
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Email.DATA
-        };
-
-        String[] PHONE_PROJECTION = new String[] {
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Phone.DATA
-        };
-
-        ContentResolver cr = getContentResolver();
-        Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, EMAIL_PROJECTION, null, null, null);
-        Cursor phoneCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
-
-        if (cursor != null && phoneCursor != null) {
-            try {
-                final int displayNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int emailIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
-                final int displayNameIndexNum = phoneCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int phoneIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA);
-
-                String displayName, address, displayNameNum, number;
-
-                while (cursor.moveToNext()) {
-                    ArrayList<String> curContact = new ArrayList<>();
-                    displayName = cursor.getString(displayNameIndex);
-                    address = cursor.getString(emailIndex);
-                    curContact.add(0, address);
-                    curContact.add(1, null);
-                    tempAll.put(displayName, curContact);
-                }
-
-                while (phoneCursor.moveToNext()) {
-                    displayNameNum = phoneCursor.getString(displayNameIndexNum);
-                    number = phoneCursor.getString(phoneIndex);
-                    ArrayList<String> curContact = tempAll.get(displayNameNum);
-
-                    if (curContact != null) {
-                        curContact.add(1, number);
-                        tempAll.put(displayNameNum, curContact);
-                    }
-                    else {
-                        curContact = new ArrayList<>();
-                        curContact.add(0, null);
-                        curContact.add(1, number);
-                        tempAll.put(displayNameNum, curContact);
-                    }
-                }
-
-            } finally {
-                cursor.close();
-                phoneCursor.close();
-            }
-        }
-
-        for(String key : tempAll.keySet()) {
-            CoolList curContact = new CoolList();
-            String curEmail = tempAll.get(key).get(0);
-            String curPhone = tempAll.get(key).get(1);
-            curContact.add(key);
-            curContact.add(curEmail); // email
-            curContact.add(curPhone); // number
-            all.add(curContact);
-        }
-
-        everything = all;
-    }
 }
