@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -336,8 +337,9 @@ public class OpenCamera extends AppCompatActivity {
             if (hasPerm != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Requires Camera Permission", Toast.LENGTH_SHORT).show();
             } else {
-                setContentView(R.layout.activity_open_camera);
-                setThingsUp();
+                camera = Camera.open();
+                startPreview();
+                refreshCamera();
             }
         }
     }
@@ -463,20 +465,77 @@ public class OpenCamera extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        camera = Camera.open();
-        startPreview();
-        refreshCamera();
+
+        // Request all important permissions for this screen before doing anything
+        pm = this.getPackageManager();
+        List<String> permRequests = new ArrayList<>();
+        String[] permList;
+        int pCount = 0;
+
+        int hasPermCam = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            pCount++;
+            permRequests.add(Manifest.permission.CAMERA);
+        }
+        int hasPermStore = pm.checkPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                this.getPackageName());
+        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+            pCount++;
+            permRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (pCount > 0) {
+            permList = new String[pCount];
+            ActivityCompat.requestPermissions(this,
+                    permRequests.toArray(permList),
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        }
+        else {
+            camera = Camera.open();
+            startPreview();
+            refreshCamera();
+        }
     }
 
     @Override
     public void onPause() {
-        if (inPreview) {
-            camera.stopPreview();
-        }
 
-        camera.release();
-        camera=null;
-        inPreview=false;
+        // Request all important permissions for this screen before doing anything
+        pm = this.getPackageManager();
+        List<String> permRequests = new ArrayList<>();
+        String[] permList;
+        int pCount = 0;
+
+        int hasPermCam = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                this.getPackageName());
+        if (hasPermCam != PackageManager.PERMISSION_GRANTED) {
+            pCount++;
+            permRequests.add(Manifest.permission.CAMERA);
+        }
+        int hasPermStore = pm.checkPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                this.getPackageName());
+        if (hasPermStore != PackageManager.PERMISSION_GRANTED) {
+            pCount++;
+            permRequests.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (pCount > 0) {
+            permList = new String[pCount];
+            ActivityCompat.requestPermissions(this,
+                    permRequests.toArray(permList),
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        }
+        else if (camera != null){
+            if (inPreview) {
+                camera.stopPreview();
+            }
+            camera.release();
+            camera = null;
+            inPreview = false;
+        }
 
         super.onPause();
     }

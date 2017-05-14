@@ -49,8 +49,10 @@ public class MainReceipt extends AppCompatActivity implements AdapterView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_receipt);
 
-        cropFile.delete();
-        photoFile.delete();
+        if (cropFile.exists() || photoFile.exists()) {
+            cropFile.delete();
+            photoFile.delete();
+        }
 
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
